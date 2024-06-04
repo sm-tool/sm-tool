@@ -1,0 +1,31 @@
+name: Backend CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: 'latest'
+          distribution: 'adopt'
+
+      - name: Validate, build and run tests
+        run: |
+          cd backend
+          mvn --batch-mode --update-snapshots verify
+
+      - name: Deploy
+        run: |
+          cd backend
+          # Deployment
