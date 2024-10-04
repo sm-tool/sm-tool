@@ -1,0 +1,69 @@
+spring:
+  application:
+    name: Smt
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/db
+    username: smt
+    password: '1234'
+  jpa:
+    show-sql: true
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: UTC
+          batch_size: 25
+        query:
+          fail_on_pagination_over_collection_fetch: true
+          in_clause_parameter_padding: true
+        order_updates: true
+        order_inserts: true
+        boot:
+          allow_jdbc_metadata_access: false
+
+server:
+  port: 8000
+
+logging:
+  level:
+    root: INFO
+    pl.smt: INFO
+    org.springframework.web.socket: DEBUG
+    org.springframework.web.socket.handler: DEBUG
+    org.springframework.messaging: DEBUG
+    org.springframework.boot.web.embedded.tomcat: DEBUG
+    org.springframework.boot.autoconfigure.web.websocket: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.boot: INFO
+    org.hibernate:
+      SQL: DEBUG
+      type:
+        descriptor:
+          sql:
+            BasicBinder: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+
+info:
+  application:
+    name: ${spring.application.name}
+    description: SMT Application
+    version: 0.1
+  java:
+    version: ${java.version}

@@ -1,0 +1,26 @@
+printWidth: 80
+singleQuote: true
+tabWidth: 2
+useTabs: false
+endOfLine: "crlf"
+
+plugins:
+  - "@prettier/plugin-xml"
+  - prettier-plugin-tailwindcss
+  - prettier-plugin-gherkin
+  - prettier-plugin-java
+  - prettier-plugin-packagejson
+  - prettier-plugin-classnames
+
+# js and ts rules:
+arrowParens: avoid
+
+# tailwind
+tailwindPreserveWhitespace: true
+
+# jsx and tsx rules:
+bracketSameLine: false
+bracketSpacing: true
+jsxSingleQuote: true
+
+

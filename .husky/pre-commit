@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Yeah,yeah deprecated - but i want my syntax highlighting
+
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+if command_exists bun; then
+  pm="bunx --no-install"
+elif command_exists pnpm; then
+  pm="pnpm exec"
+elif command_exists yarn; then
+  pm="yarn"
+elif command_exists npm; then
+  pm="npx"
+else
+  echo "Error: No supported package manager (bun, pnpm, yarn, npm) detected"
+  exit 1
+fi
+
+if ! $pm lint-staged; then
+  echo "Error: lint-staged failed. Make sure all required packages are installed."
+  exit 1
+fi
+
+if [ ! -f "./gradlew.bat" ]; then
+  echo "Error: gradlew.bat not found. Make sure Gradle is properly configured in your project."
+  exit 1
+fi
+
+if ! ./gradlew.bat checkstyleMain; then
+  echo "Error: Gradle checkstyleMain failed. Check your Gradle configuration and Checkstyle rules."
+  exit 1
+fi
+
+# Jak kogoś denerwuje to zakomentować, i tak wszystko będzie squashowane
+#commit_msg=$(cat "$1")
+#if ! echo "$commit_msg" | grep -qE "^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .{1,50}"; then
+#  echo "Error: Invalid commit message format. Please use the format: <type>(<scope>): <subject>"
+#  echo "Allowed types: feat, fix, docs, style, refactor, test, chore"
+#  exit 1
+#fi
+

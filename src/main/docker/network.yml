@@ -1,0 +1,51 @@
+# TODO*: Postawić TLS i zmienić hasła
+
+# docker-compose up --detach --scale postgresql-master=1 --scale postgresql-slave=3
+services:
+  postgresql-master:
+    image: 'bitnami/postgresql:latest'
+    ports:
+      - '5432:5432'
+    container_name: postgresql_master
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - POSTGRESQL_REPLICATION_MODE=master
+      - POSTGRESQL_REPLICATION_USER=repl_smt
+      - POSTGRESQL_REPLICATION_PASSWORD=1234
+      - POSTGRESQL_USERNAME=smt
+      - POSTGRESQL_POSTGRES_PASSWORD=1234
+      - POSTGRESQL_PASSWORD=1234
+      - POSTGRESQL_DATABASE=db
+
+    volumes:
+      - 'postgresql_master_data:/bitnami/postgresql'
+      - '../database/scripts:/docker-entrypoint-initdb.d'
+
+  postgresql-slave:
+    image: 'bitnami/postgresql:latest'
+    ports:
+      - '5432'
+    depends_on:
+      - postgresql-master
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - POSTGRESQL_REPLICATION_MODE=slave
+      - POSTGRESQL_REPLICATION_USER=repl_smt
+      - POSTGRESQL_REPLICATION_PASSWORD=1234
+      - POSTGRESQL_MASTER_HOST=postgresql-master
+      - POSTGRESQL_PASSWORD=1234
+      - POSTGRESQL_MASTER_PORT_NUMBER=5432
+
+  backend:
+    build:
+      context: ../../..
+      dockerfile: Dockerfile
+    ports:
+      - '8000:8000'
+    depends_on:
+      - postgresql-master
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql-master:5432/db
+
+volumes:
+  postgresql_master_data:

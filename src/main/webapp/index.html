@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Scenario Modeling Tool</title>
+    <script>
+      const darkMode = JSON.parse(localStorage.getItem('darkMode')) || false;
+      document.documentElement.style.backgroundColor = darkMode
+        ? '#18181b'
+        : '#fafafa';
+    </script>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script>
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          document.documentElement.style.removeProperty('background-color');
+        }, 0);
+      });
+    </script>
+    <script src="./app.tsx" type="module"></script>
+  </body>
+</html>
