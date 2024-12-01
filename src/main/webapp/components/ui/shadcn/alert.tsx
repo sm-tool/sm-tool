@@ -3,13 +3,17 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@nextui-org/theme';
 
 const alertVariants = cva(
-  'relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7',
+  'relative w-full rounded-lg border px-4 py-3 text-sm [&>svg]:absolute 4 [&>svg]:text-foreground [&>svg~*]:pl-7',
   {
     variants: {
       variant: {
-        default: 'bg-background text-foreground',
-        danger:
-          'border-danger/50 text-danger dark:border-danger [&>svg]:text-danger',
+        default: 'bg-content2 border-content3 text-foreground',
+        danger: `bg-danger/10 border-danger/30 text-danger 
+                [&>svg]:text-danger`,
+        warning: `bg-warning/10 border-warning/30 text-warning 
+                 [&>svg]:text-warning`,
+        success: `bg-success/10 border-success/30 text-success 
+                 [&>svg]:text-success`,
       },
     },
     defaultVariants: {
@@ -49,10 +53,9 @@ const AlertDescription = React.forwardRef<
 >(({ className, ...properties }, reference) => (
   <div
     ref={reference}
-    className={cn('text-sm [&_p]:leading-relaxed', className)}
+    className={cn('text-sm [&_p]:leading-relaxed opacity-90', className)}
     {...properties}
   />
 ));
 AlertDescription.displayName = 'AlertDescription';
-
 export { Alert, AlertTitle, AlertDescription };

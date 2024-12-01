@@ -18,20 +18,31 @@ else
   exit 1
 fi
 
+export PACKAGE_MANAGER="$pm"
+
 if ! $pm lint-staged; then
   echo "Error: lint-staged failed. Make sure all required packages are installed."
   exit 1
 fi
 
-if [ ! -f "./gradlew.bat" ]; then
+if [[ "$OSTYPE" == "msys" ]]; then
+  gradle_cmd="./gradlew.bat"
+else
+  gradle_cmd="./gradlew"
+  chmod +x ./gradlew
+fi 
+
+if [ ! -f "$gradle_cmd" ]; then
   echo "Error: gradlew.bat not found. Make sure Gradle is properly configured in your project."
   exit 1
 fi
 
-if ! ./gradlew.bat checkstyleMain; then
+if ! "$gradle_cmd" checkstyleMain; then
   echo "Error: Gradle checkstyleMain failed. Check your Gradle configuration and Checkstyle rules."
   exit 1
 fi
+
+git add .
 
 # Jak kogoś denerwuje to zakomentować, i tak wszystko będzie squashowane
 #commit_msg=$(cat "$1")

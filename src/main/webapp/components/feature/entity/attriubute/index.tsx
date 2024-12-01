@@ -1,6 +1,6 @@
 import EntityWrapper from '@/components/feature/entity/!shared/entity-wrapper';
 import { Card } from '@/components/ui/shadcn/card.tsx';
-import { QdsAttribute } from '@/models/attribute/entity';
+import { QdsAttribute, qdsAttributeSchema } from '@/features/attribute/entity';
 
 export type AttributeProperties = {
   attribute: QdsAttribute;
@@ -8,7 +8,7 @@ export type AttributeProperties = {
 
 const EntityAttribute = ({ attribute }: AttributeProperties) => {
   return (
-    <EntityWrapper entity={attribute}>
+    <EntityWrapper entity={attribute} schema={qdsAttributeSchema}>
       <Card className='w-[20rem]'>
         <div className='flex flex-col items-center text-center -mt-4'>
           <span

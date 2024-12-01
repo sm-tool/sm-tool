@@ -4,7 +4,6 @@ import type { Preview, ReactRenderer } from '@storybook/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';
 import '../src/main/webapp/styles/global.css';
-import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
 import { STORYBOOK_MODES, STORYBOOK_SIZES } from './constants';
@@ -27,12 +26,10 @@ const preview: Preview = {
 
       return (
         <StrictMode>
-          <BrowserRouter>
-            <QueryClientProvider client={queryClient}>
-              <TooltipProvider>{<Story />}</TooltipProvider>
-              <Toaster />
-            </QueryClientProvider>
-          </BrowserRouter>
+          <QueryClientProvider client={queryClient}>
+            <TooltipProvider>{<Story />}</TooltipProvider>
+            <Toaster />
+          </QueryClientProvider>
         </StrictMode>
       );
     },

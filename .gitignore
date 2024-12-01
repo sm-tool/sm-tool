@@ -50,13 +50,20 @@ local.properties
 ######################
 # IntelliJ
 ######################
-.idea/
+.idea/*
 *.iml
 *.iws
 *.ipr
 *.ids
 *.orig
 out/
+
+######################
+# Konfiguracja ide na inteliji
+######################
+!.idea/checkstyle-idea.xml
+!.idea/prettier.xml
+!.idea/codeStyles
 
 ######################
 # Visual Studio Code
@@ -129,3 +136,4 @@ Desktop.ini
 !gradle/wrapper/gradle-wrapper.jar
 *storybook.log
 buildSrc
+/dist

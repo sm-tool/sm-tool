@@ -1,12 +1,12 @@
 /*
 // noinspection t
 
-import { QdsScenario } from '@/models/scenario/entity';
-import { QdsThread } from '@/models/thread/entity';
+import { QdsScenario } from '@/features/scenario/entity';
+import { QdsThread } from '@/features/thread/entity';
 import { faker } from '@faker-js/faker/locale/pl';
 import { create } from 'zustand';
 import { produce } from 'immer';
-import { useScenario } from '@/models/scenario/queries';
+import { useScenario } from '@/features/scenario/queries';
 
 interface ScenarioStore {
   scenarioStatus: DataStatus<QdsScenario>;

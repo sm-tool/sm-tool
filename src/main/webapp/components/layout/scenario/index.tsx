@@ -1,4 +1,3 @@
-import ResponsiveMenubar from '@/components/layout/scenario/menu-bar';
 import { Button } from '@/components/ui/shadcn/button';
 import {
   ResizableHandle,
@@ -13,10 +12,12 @@ import {
 } from 'lucide-react';
 import { ReactNode, RefObject, useCallback, useRef, useState } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
+import { cn } from '@nextui-org/theme';
+import getPixelRatio from '@/utils/helper/get-pixel-ratio.ts';
 
 interface PanelContentProperties {
   content: ReactNode;
-  collapseButton: {
+  collapseButton?: {
     icon: typeof ChevronLeft;
     position: string;
     onClick: () => void;
@@ -25,14 +26,19 @@ interface PanelContentProperties {
 
 const PanelContent = ({ content, collapseButton }: PanelContentProperties) => (
   <div className='relative h-full'>
-    <Button
-      variant='ghost'
-      className={`absolute z-10 ${collapseButton.position}`}
-      onClick={collapseButton.onClick}
-    >
-      <collapseButton.icon className='h-4 w-4' />
-    </Button>
-    <div className='flex h-full items-center justify-center p-6'>{content}</div>
+    {collapseButton && (
+      <Button
+        variant='ghost'
+        className={`absolute z-10 ${collapseButton.position}`}
+        onClick={collapseButton.onClick}
+      >
+        <collapseButton.icon className='h-4 w-4' />
+      </Button>
+    )}
+
+    <div className={cn('flex h-full items-center justify-center')}>
+      {content}
+    </div>
   </div>
 );
 
@@ -73,7 +79,6 @@ const ScenarioLayout = ({
 
   return (
     <section className='flex h-screen flex-col'>
-      <ResponsiveMenubar />
       <ResizablePanelGroup
         direction='horizontal'
         className='rounded-lg'
@@ -83,21 +88,16 @@ const ScenarioLayout = ({
           ref={leftPanelReference}
           defaultSize={20}
           collapsible={true}
-          collapsedSize={0}
-          minSize={5}
+          collapsedSize={1.9 * getPixelRatio()}
+          data-collapsed={leftPanelCollapsed}
+          className='group'
+          minSize={10}
           onCollapse={() => setLeftPanelCollapsed(true)}
           onExpand={() => setLeftPanelCollapsed(false)}
         >
-          <PanelContent
-            content={leftContent}
-            collapseButton={{
-              icon: ChevronLeft,
-              position: 'right-2 top-2',
-              onClick: () => togglePanel(leftPanelReference),
-            }}
-          />
+          <PanelContent content={leftContent} />
         </ResizablePanel>
-        <ResizableHandle withHandle />
+        <ResizableHandle withHandle className='border-r border-default-200' />
         <ResizablePanel defaultSize={60}>
           <ResizablePanelGroup direction='vertical' autoSaveId='2'>
             <ResizablePanel defaultSize={75} className='relative h-full'>
@@ -130,7 +130,10 @@ const ScenarioLayout = ({
               )}
               {children}
             </ResizablePanel>
-            <ResizableHandle withHandle />
+            <ResizableHandle
+              withHandle
+              className='border-t border-default-200'
+            />
             <ResizablePanel
               ref={bottomPanelReference}
               defaultSize={25}
@@ -151,7 +154,7 @@ const ScenarioLayout = ({
             </ResizablePanel>
           </ResizablePanelGroup>
         </ResizablePanel>
-        <ResizableHandle withHandle />
+        <ResizableHandle withHandle className='border-l border-default-200' />
         <ResizablePanel
           ref={rightPanelReference}
           defaultSize={20}

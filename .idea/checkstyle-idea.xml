@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project version="4">
+  <component name="CheckStyle-IDEA" serialisationVersion="2">
+    <checkstyleVersion>10.18.2</checkstyleVersion>
+    <scanScope>JavaOnly</scanScope>
+    <copyLibs>true</copyLibs>
+    <option name="thirdPartyClasspath">
+      <option
+        value="C:\Users\pc\Desktop\sm-tool\src\main\resources\checkstyle\checkstyle-addons-7.0.1-all.jar"
+      />
+    </option>
+    <option name="activeLocationIds">
+      <option value="c67eda7a-e190-46ce-8b1d-99faa9ff75da" />
+    </option>
+    <option name="locations">
+      <list>
+        <ConfigurationLocation
+          id="bundled-sun-checks"
+          type="BUNDLED"
+          scope="All"
+          description="Sun Checks"
+        >(bundled)</ConfigurationLocation>
+        <ConfigurationLocation
+          id="bundled-google-checks"
+          type="BUNDLED"
+          scope="All"
+          description="Google Checks"
+        >(bundled)</ConfigurationLocation>
+        <ConfigurationLocation
+          id="c67eda7a-e190-46ce-8b1d-99faa9ff75da"
+          type="LOCAL_FILE"
+          scope="All"
+          description="sm"
+        >
+          $PROJECT_DIR$/checkstyle.xml
+          <option name="properties">
+            <map>
+              <entry
+                key="org.checkstyle.sun.suppressionfilter.config"
+                value="checkstyle-suppressions.xml"
+              />
+              <entry
+                key="org.checkstyle.sun.suppressionxpathfilter.config"
+                value="checkstyle-xpath-suppressions.xml"
+              />
+            </map>
+          </option>
+        </ConfigurationLocation>
+      </list>
+    </option>
+  </component>
+</project>

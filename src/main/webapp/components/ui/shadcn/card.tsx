@@ -1,7 +1,5 @@
 import { cn } from '@nextui-org/theme';
-import * as React from 'react';
-
-import { dialogTitleStaticClasses } from './dialog';
+import React from 'react';
 
 const Card = React.forwardRef<
   HTMLDivElement,
@@ -10,8 +8,8 @@ const Card = React.forwardRef<
   <div
     ref={reference}
     className={cn(
-      `relative rounded-xl transition border bg-background shadow-sm backdrop-blur-md
-      backdrop-brightness-110 hover:shadow-xl hover:shadow-default-400/20`,
+      `rounded-lg border border-content3 bg-content1 text-foreground shadow-sm
+      transition-colors duration-200`,
       className,
     )}
     {...properties}
@@ -25,24 +23,25 @@ const CardHeader = React.forwardRef<
 >(({ className, ...properties }, reference) => (
   <div
     ref={reference}
-    className={cn('flex flex-col space-y-1.5 p-7', className)}
+    className={cn('flex flex-col space-y-1.5 p-6', className)}
     {...properties}
   />
 ));
 CardHeader.displayName = 'CardHeader';
 
 const CardTitle = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...properties }, reference) => {
-  return (
-    <h3
-      ref={reference}
-      className={cn(dialogTitleStaticClasses, className)}
-      {...properties}
-    />
-  );
-});
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...properties }, reference) => (
+  <div
+    ref={reference}
+    className={cn(
+      'text-lg font-semibold leading-none tracking-tight text-foreground',
+      className,
+    )}
+    {...properties}
+  />
+));
 CardTitle.displayName = 'CardTitle';
 
 const CardDescription = React.forwardRef<
@@ -51,7 +50,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...properties }, reference) => (
   <p
     ref={reference}
-    className={cn('text-sm text-default-600', className)}
+    className={cn('text-sm text-muted-foreground', className)}
     {...properties}
   />
 ));
@@ -61,7 +60,7 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...properties }, reference) => (
-  <div ref={reference} className={cn('p-7 pt-0', className)} {...properties} />
+  <div ref={reference} className={cn('p-6 pt-0', className)} {...properties} />
 ));
 CardContent.displayName = 'CardContent';
 
@@ -71,7 +70,7 @@ const CardFooter = React.forwardRef<
 >(({ className, ...properties }, reference) => (
   <div
     ref={reference}
-    className={cn('flex items-center p-7 pt-0', className)}
+    className={cn('flex items-center p-6 pt-0', className)}
     {...properties}
   />
 ));
@@ -79,9 +78,9 @@ CardFooter.displayName = 'CardFooter';
 
 export {
   Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
+  CardFooter,
   CardTitle,
+  CardDescription,
+  CardContent,
 };

@@ -1,6 +1,6 @@
 package api.database.configuration;
 
-import api.database.interceptors.HeaderInterceptor;
+import api.database.interceptor.HeaderInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;

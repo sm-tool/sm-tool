@@ -3,7 +3,6 @@
 import * as React from 'react';
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group';
 import { cn } from '@nextui-org/theme';
-import { CheckIcon } from 'lucide-react';
 
 const RadioGroup = React.forwardRef<
   React.ElementRef<typeof RadioGroupPrimitive.Root>,
@@ -27,16 +26,20 @@ const RadioGroupItem = React.forwardRef<
     <RadioGroupPrimitive.Item
       ref={reference}
       className={cn(
-        `focus-visible:ring-ring aspect-square h-4 w-4 rounded-full border border-primary
-        text-primary shadow focus:outline-none focus-visible:ring-1
-        disabled:cursor-not-allowed disabled:opacity-50`,
+        `aspect-square h-4 w-4 rounded-full border border-content3 bg-content2
+        text-foreground shadow-sm transition-all duration-200 hover:border-content4
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-content4
+        focus-visible:ring-offset-2 focus-visible:ring-offset-content1
+        disabled:cursor-not-allowed disabled:opacity-50
+        data-[state=checked]:border-primary data-[state=checked]:bg-primary`,
         className,
       )}
       {...properties}
     >
-      <RadioGroupPrimitive.Indicator className='flex items-center justify-center'>
-        <CheckIcon className='h-3.5 w-3.5 fill-primary' />
-      </RadioGroupPrimitive.Indicator>
+      <RadioGroupPrimitive.Indicator
+        className="flex items-center justify-center after:block after:h-2 after:w-2
+          after:rounded-full after:bg-background after:content-['']"
+      />
     </RadioGroupPrimitive.Item>
   );
 });

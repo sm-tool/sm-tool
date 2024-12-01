@@ -1,11 +1,12 @@
 import eslint from '@eslint/js';
 import tseslint from '@typescript-eslint/eslint-plugin';
 import tseslintParser from '@typescript-eslint/parser';
-import react from 'eslint-plugin-react';
-import unicorn from 'eslint-plugin-unicorn';
-import prettier from 'eslint-plugin-prettier';
 import eslintComment from 'eslint-plugin-eslint-comments';
 import a11y from 'eslint-plugin-jsx-a11y';
+import react from 'eslint-plugin-react';
+import unicorn from 'eslint-plugin-unicorn';
+import reactRefresh from 'eslint-plugin-react-refresh';
+// import hooks from 'eslint-plugin-react-hooks';
 
 export default [
   eslint.configs.recommended,
@@ -30,9 +31,10 @@ export default [
       '@typescript-eslint': tseslint,
       react,
       unicorn,
-      prettier,
       a11y,
+      // 'react-hooks': hooks,
       'eslint-comments': eslintComment,
+      reactRefresh,
     },
     settings: {
       'import/resolver': {
@@ -48,9 +50,9 @@ export default [
     rules: {
       ...tseslint.configs.recommended.rules,
       ...tseslint.configs['strict-type-checked'].rules,
-      ...prettier.configs.recommended.rules,
       ...react.configs.recommended.rules,
       ...unicorn.configs.recommended.rules,
+      // ...hooks.configs.recommended.rules,
       'eslint-comments/require-description': ['error', { ignore: [] }],
       'no-unused-vars': 'off',
       'no-var': 0,
@@ -59,6 +61,7 @@ export default [
       '@typescript-eslint/no-non-null-assertion': 'off',
       'unicorn/no-array-reduce': 'off',
       'react/react-in-jsx-scope': 'off',
+      'no-redeclare': 'off',
     },
   },
   {
@@ -73,6 +76,7 @@ export default [
       'unicorn/no-empty-file': 'off',
       'unicorn/no-nested-ternary': 'off',
       'react/prop-types': 'off',
+      '@typescript-eslint/only-throw-error': 'off',
     },
   },
   {
@@ -93,6 +97,8 @@ export default [
       'postcss.config.js',
       'src/main/webapp/components/ui/shadcn/auto-form',
       'src/main/webapp/i18n/',
+      'src/main/webapp/lib/routing/routeTree.gen.ts',
+      'vite.config.ts',
     ],
   },
 ];

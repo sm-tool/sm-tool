@@ -1,14 +1,13 @@
-import { QdsAssociation } from '@/models/associacion/entity';
-import { QdsAttribute } from '@/models/attribute/entity';
-import { QdsObject } from '@/models/object/entity';
+import { z } from 'zod';
 import { create } from 'zustand';
 
-// TODO uzupełnić
-export type QdsSelectables =
-  | QdsObject
-  | QdsAssociation
-  | QdsAttribute
-  | undefined;
+export const qdsSelectablesSchema = z
+  .object({
+    id: z.number(),
+  })
+  .and(z.record(z.string(), z.unknown()))
+  .optional();
+export type QdsSelectables = z.infer<typeof qdsSelectablesSchema>;
 
 interface InterfaceStore {
   scenarioId: number | undefined;

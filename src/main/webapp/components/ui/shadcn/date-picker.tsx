@@ -2,14 +2,10 @@
 
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/shadcn/popover';
-import { Button } from '@/components/ui/shadcn/button';
+import { Popover, PopoverContent, PopoverTrigger } from './popover';
+import { Button } from './button';
 import { cn } from '@nextui-org/theme';
-import { Calendar } from '@/components/ui/shadcn/calendar';
+import { Calendar } from './calendar';
 import { forwardRef } from 'react';
 
 const DatePicker = forwardRef<

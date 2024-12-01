@@ -23,9 +23,9 @@ const DialogOverlay = forwardRef<
   <DialogPrimitive.Overlay
     ref={reference}
     className={cn(
-      `fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in
-      data-[state=closed]:animate-out data-[state=closed]:fade-out-0
-      data-[state=open]:fade-in-0`,
+      `fixed inset-0 z-50 bg-foreground/20 backdrop-blur-sm
+      data-[state=open]:animate-in data-[state=closed]:animate-out
+      data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0`,
       className,
     )}
     {...properties}
@@ -33,11 +33,32 @@ const DialogOverlay = forwardRef<
 ));
 DialogOverlay.displayName = 'DialogOverlay';
 
-export const dialogContentStaticClasses =
-  'grid gap-4 border bg-background text-card-foreground p-7 shadow-lg rounded-3xl';
+export const dialogContentStaticClasses = cn(
+  `grid gap-4 
+  border border-content3
+  bg-content1
+  text-foreground 
+  p-7 
+  shadow-lg 
+  rounded-lg`,
+);
 
-export const dialogPrimitiveCloseStaticClasses =
-  'absolute right-4 top-4 rounded-2xl opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-default-200 data-[state=open]:text-default-600';
+export const dialogPrimitiveCloseStaticClasses = cn(
+  `absolute right-4 top-4 
+  rounded-md 
+  opacity-70 
+  ring-offset-content1
+  transition-all
+  duration-200
+  hover:opacity-100 
+  hover:bg-content2
+  focus:outline-none 
+  focus:ring-2 
+  focus:ring-content4 
+  focus:ring-offset-2 
+  disabled:pointer-events-none 
+  text-foreground`,
+);
 
 const DialogContent = forwardRef<
   ElementRef<typeof DialogPrimitive.Content>,
@@ -69,6 +90,7 @@ const DialogContent = forwardRef<
     </DialogPrimitive.Content>
   </DialogPortal>
 ));
+
 DialogContent.displayName = 'DialogContent';
 
 export const dialogHeaderStaticClasses =

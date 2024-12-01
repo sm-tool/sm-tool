@@ -1,18 +1,22 @@
 spring:
+  sql.init:
+    data-locations: classpath:/db/scripts/data.sql
+    mode: always
   application:
     name: Smt
   threads:
     virtual:
       enabled: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/db
-    username: smt
-    password: '1234'
+    url: jdbc:postgresql://${POSTGRES_HOST:-postgresql-master}:${POSTGRES_MASTER_PORT:-5432}/${POSTGRES_DB_NAME:-db}
+    username: ${POSTGRES_USER:-smt}
+    password: ${POSTGRES_PASSWORD:-1234}
   jpa:
+    defer-datasource-initialization: true
     show-sql: true
     open-in-view: false
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -26,9 +30,20 @@ spring:
         order_inserts: true
         boot:
           allow_jdbc_metadata_access: false
+        hbm2ddl.import_files: /db/scripts/indexes.sql
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # HACK: Don't try to add "-" in front of default values SOMEHOW (docker of spring, does not load value with it)
+          issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_HTTP_PORT:8180}/realms/${REALM_NAME:smt-realm}
+          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_HTTP_PORT:8180}/realms/${REALM_NAME:smt-realm}/protocol/openid-connect/certs
+  config:
+    activate:
+      on-profile: dev
 
 server:
-  port: 8000
+  port: ${BACKEND_PORT:-8000}
 
 logging:
   level:
@@ -64,6 +79,24 @@ info:
   application:
     name: ${spring.application.name}
     description: SMT Application
-    version: 0.1
+    version: ${APP_VERSION}
   java:
     version: ${java.version}
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: ${SWAGGER_PATH:-/swagger-ui.html}
+    tags-sorter: alpha
+    operations-sorter: method
+    filter: true
+  show-actuator: true
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+
+cors:
+  allowed-origins: http://localhost:9000
+  allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+  allowed-headers: Authorization,Content-Type,Access-Control-Allow-Origin,scenarioid
+  allow-credentials: true

@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "objectTemplateId": 1,
+    "name": "name1",
+    "type": "INT"
+  },
+  {
+    "id": 2,
+    "objectTemplateId": 1,
+    "name": "name2",
+    "type": "STRING"
+  }
+]

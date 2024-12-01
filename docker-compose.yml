@@ -1,0 +1,79 @@
+services:
+  postgresql-master:
+    image: 'docker.io/bitnami/postgresql:latest'
+    ports:
+      - '${POSTGRES_MASTER_PORT:-5432}:${POSTGRES_MASTER_PORT:-5432}'
+    container_name: postgresql_master
+    environment:
+      - ALLOW_EMPTY_PASSWORD=${ALLOW_EMPTY_PASSWORD:-yes}
+      - POSTGRESQL_REPLICATION_MODE=master
+      - POSTGRESQL_REPLICATION_USER=${POSTGRES_REPLICATION_USER:-repl_smt}
+      - POSTGRESQL_REPLICATION_PASSWORD=${POSTGRES_REPLICATION_PASSWORD:-1234}
+      - POSTGRESQL_USERNAME=${POSTGRES_USER:-smt}
+      - POSTGRESQL_POSTGRES_PASSWORD=${POSTGRES_ADMIN_PASSWORD:-1234}
+      - POSTGRESQL_PASSWORD=${POSTGRES_PASSWORD:-1234}
+      - POSTGRESQL_DATABASE=${POSTGRES_DB_NAME:-db}
+
+    volumes:
+      - 'postgresql_master_data:/bitnami/postgresql'
+
+  postgresql-slave:
+    image: 'docker.io/bitnami/postgresql:latest'
+    ports:
+      - '${POSTGRES_MASTER_PORT:-5432}'
+    depends_on:
+      - postgresql-master
+    environment:
+      - ALLOW_EMPTY_PASSWORD=${ALLOW_EMPTY_PASSWORD:-yes}
+      - POSTGRESQL_REPLICATION_MODE=slave
+      - POSTGRESQL_REPLICATION_USER=${POSTGRES_REPLICATION_USER:-repl_smt}
+      - POSTGRESQL_REPLICATION_PASSWORD=${POSTGRES_REPLICATION_PASSWORD:-1234}
+      - POSTGRESQL_MASTER_HOST=postgresql-master
+      - POSTGRESQL_PASSWORD=${POSTGRES_PASSWORD:-1234}
+      - POSTGRESQL_MASTER_PORT_NUMBER=${POSTGRES_MASTER_PORT:-5432}
+
+  keycloak:
+    env_file: '.env'
+    image: 'docker.io/bitnami/keycloak:latest'
+    environment:
+      - KEYCLOAK_ADMIN_USER=${KEYCLOAK_ADMIN_USER:-admin}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      - KEYCLOAK_DATABASE_HOST=${POSTGRES_HOST:-postgresql-master}
+      - KEYCLOAK_DATABASE_PORT=${POSTGRES_MASTER_PORT:-5432}
+      - KEYCLOAK_DATABASE_NAME=${POSTGRES_DB_NAME:-db}
+      - KEYCLOAK_DATABASE_USER=${POSTGRES_USER:-smt}
+      - KEYCLOAK_DATABASE_PASSWORD=${POSTGRES_PASSWORD:-1234}
+      - KEYCLOAK_DATABASE_SCHEMA=${KEYCLOAK_DATABASE_SCHEMA:-public}
+      - KEYCLOAK_HTTP_PORT=${KEYCLOAK_HTTP_PORT:-8180}
+      - KEYCLOAK_EXTRA_ARGS=--import-realm
+    volumes:
+      - './src/main/resources/realm/realm.json:/opt/bitnami/keycloak/data/import/realm.json'
+      - './src/main/resources/realm/keycloak-theme-for-kc-22-to-25.jar:/opt/bitnami/keycloak/providers/keyclock-theme.jar'
+    ports:
+      - '${KEYCLOAK_HTTP_PORT:-8180}:${KEYCLOAK_HTTP_PORT:-8180}'
+    depends_on:
+      - postgresql-master
+
+  backend:
+    image: backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '${BACKEND_PORT:-8000}:${BACKEND_PORT:-8000}'
+    depends_on:
+      - postgresql-master
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-dev}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_HOST:-postgresql-master}:${POSTGRES_MASTER_PORT:-5432}/${POSTGRES_DB_NAME:-db}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-smt}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-1234}
+      - KEYCLOAK_HOST=${KEYCLOAK_HOST:-localhost}
+      - KEYCLOAK_HTTP_PORT=${KEYCLOAK_HTTP_PORT:-8180}
+      - REALM_NAME=${REALM_NAME:-smt-realm}
+      - CLIENT_ID=${CLIENT_ID:-smt-client}
+      - CLIENT_SECRET=${CLIENT_SECRET:-secret}
+      - SERVER_PORT=${BACKEND_PORT:-8000}
+
+volumes:
+  postgresql_master_data:

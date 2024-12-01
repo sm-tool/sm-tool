@@ -1,0 +1,101 @@
+{
+  "info": {
+    "name": "Backend API Tests",
+    "_postman_id": "unique-id",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.request.headers.add({",
+          "    key: 'Access-Control-Allow-Origin',",
+          "    value: 'http://localhost:9000'",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Scenarios",
+      "item": [
+        {
+          "name": "Get All Scenarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "scenarioId",
+                "value": "{{scenarioId}}"
+              },
+              {
+                "key": "Access-Control-Allow-Origin",
+                "value": "http://localhost:9000"
+              },
+              {
+                "key": "Access-Control-Allow-Methods",
+                "value": "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+              },
+              {
+                "key": "Access-Control-Allow-Headers",
+                "value": "Authorization,Content-Type,scenarioid"
+              },
+              {
+                "key": "Access-Control-Allow-Credentials",
+                "value": "true"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/scenario/list",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "scenarios"]
+            }
+          }
+        },
+        {
+          "name": "OPTIONS Scenarios",
+          "request": {
+            "method": "OPTIONS",
+            "header": [
+              {
+                "key": "Access-Control-Request-Method",
+                "value": "GET"
+              },
+              {
+                "key": "Access-Control-Request-Headers",
+                "value": "access-control-allow-origin,authorization,scenarioid"
+              },
+              {
+                "key": "Origin",
+                "value": "http://localhost:9000"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/scenario/list",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "scenarios"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

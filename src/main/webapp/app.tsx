@@ -1,45 +1,35 @@
-import { Toaster } from '@/components/ui/shadcn/toaster.tsx';
-import { TooltipProvider } from '@/components/ui/shadcn/tooltip';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { ReactNode, StrictMode, useEffect } from 'react';
+import { NotificationProvider } from '@/providers/notification-provider.tsx';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, useRoutes } from 'react-router-dom';
-import useDarkMode from 'use-dark-mode';
 import '@/styles/global.css';
+import { RouterProvider } from '@tanstack/react-router';
+import AuthProvider from '@/lib/auth/providers/auth-provider.tsx';
+import { core } from '@/lib/core';
+import { ErrorBoundary } from '@/utils/errors/boundary.tsx';
+import { StrictMode } from 'react';
 
-import routes from '~react-pages';
-
-const App = () => {
-  return useRoutes(routes);
-};
-
-const Layout = ({ children }: { children: ReactNode }) => {
-  const darkMode = useDarkMode(true);
-
-  useEffect(() => {
-    document.body.classList.toggle('dark', darkMode.value);
-  }, [darkMode]);
-
+const Layout = () => {
   return (
     <StrictMode>
-      <BrowserRouter>
-        <QueryClientProvider client={new QueryClient()}>
-          <main className={'h-screen bg-background text-foreground'}>
-            <TooltipProvider>{children}</TooltipProvider>
-            <ReactQueryDevtools initialIsOpen={false} />
-            <Toaster />
-          </main>
-        </QueryClientProvider>
-      </BrowserRouter>
+      <NotificationProvider
+        toasterProps={{
+          className: 'top-16',
+          position: 'top-center',
+          richColors: true,
+        }}
+      >
+        <ErrorBoundary>
+          <AuthProvider authService={core.authClient}>
+            <QueryClientProvider client={core.queryClient}>
+              <RouterProvider router={core.router} />
+            </QueryClientProvider>
+          </AuthProvider>
+        </ErrorBoundary>
+      </NotificationProvider>
     </StrictMode>
   );
 };
 
 const app = createRoot(document.querySelector('#root')!);
 
-app.render(
-  <Layout>
-    <App />
-  </Layout>,
-);
+app.render(<Layout />);

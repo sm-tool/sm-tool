@@ -19,7 +19,18 @@ const genericQuery = async <T>({
   }
 
   try {
-    const response = await window.fetch(`${endpoint}${id ? `/${id}` : ''}`);
+    const headers = new Headers({
+      'Content-Type': 'application/json',
+      scenarioId: scenarioId.toString(),
+    });
+
+    const response = await globalThis.fetch(
+      `${endpoint}${id ? `/${id}` : ''}`,
+      {
+        headers: headers,
+        method: 'GET',
+      },
+    );
     if (!response.ok) {
       throw new Error(`Network response was not ok: ${response.status}`);
     }

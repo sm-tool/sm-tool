@@ -2,11 +2,14 @@ import { z } from 'zod';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
+type DataType = { id: number } & Record<string, unknown>;
+
 interface FormState {
   id: string;
   schema: z.ZodObject<z.ZodRawShape>;
-  data: unknown;
+  data: DataType;
   isSubmitting: boolean;
+  // Pomyśl, czy nie dodać isDisabled na state dirty
 }
 
 interface FormStore {
@@ -14,8 +17,9 @@ interface FormStore {
   activeFormId: string | undefined;
   setActiveForm: (id: string) => void;
   addForm: (form: FormState) => void;
-  updateForm: (id: string, data: unknown) => void;
-  createEditForm: (schema: z.ZodObject<z.ZodRawShape>, data: unknown) => void;
+  updateForm: (id: string, data: DataType) => void;
+  // postForm: (id: string, data: DataType) => void;
+  createEditForm: (schema: z.ZodObject<z.ZodRawShape>, data: DataType) => void;
 }
 
 const useFormStore = create<FormStore>()(
@@ -39,7 +43,7 @@ const useFormStore = create<FormStore>()(
       }),
     createEditForm: (schema, data) =>
       set(state => {
-        const newFormId = `Edit-${(data as { id: string }).id}`;
+        const newFormId = `edit of ${data.id}`;
         state.forms[newFormId] = {
           id: newFormId,
           schema: schema,
@@ -48,6 +52,16 @@ const useFormStore = create<FormStore>()(
         };
         state.activeFormId = newFormId;
       }),
+    // postForm: async (id, data) =>
+    //   set(state => {
+    //     state.forms[id].isSubmitting = true;
+    //     const queryClient = useQueryClient();
+    //     const mutation = useMutation({
+    //       mutationFn: async (formData: DataType) => {
+    //         const response = await axios.post('/');
+    //       },
+    //     });
+    //   }),
   })),
 );
 

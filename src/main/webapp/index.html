@@ -1,14 +1,42 @@
 <!doctype html>
-<html lang="pl">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="../../../public/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="../../../public/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#ffc300" />
     <title>Scenario Modeling Tool</title>
     <script>
-      const darkMode = JSON.parse(localStorage.getItem('darkMode')) || false;
-      document.documentElement.style.backgroundColor = darkMode
-        ? '#18181b'
-        : '#fafafa';
+      const getSystemTheme = () =>
+        window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light';
+
+      const storedTheme = localStorage.getItem('theme');
+      const theme = storedTheme || 'system';
+
+      const isDark =
+        theme === 'system' ? getSystemTheme() === 'dark' : theme === 'dark';
+
+      document.documentElement.style.backgroundColor = isDark
+        ? '#1e293b'
+        : '#f1f5f9';
+
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      }
     </script>
   </head>
   <body>

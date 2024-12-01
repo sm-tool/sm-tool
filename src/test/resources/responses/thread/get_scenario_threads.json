@@ -1,0 +1,14 @@
+[
+  {
+    "id": 0,
+    "title": "GLOBAL",
+    "description": "GLOBAL_THREAD",
+    "objectIds": []
+  },
+  {
+    "id": 2,
+    "title": "NEW_THREAD_TITLE",
+    "description": "NEW_THREAD_DESCRIPTION",
+    "objectIds": [1, 2]
+  }
+]

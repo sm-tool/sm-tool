@@ -4,24 +4,36 @@ import { cva, VariantProps } from 'class-variance-authority';
 import { ButtonHTMLAttributes, forwardRef } from 'react';
 
 const buttonVariants = cva(
-  'shadow-md shadow-foreground/[0.025] inline-flex items-center justify-center whitespace-nowrap rounded-2xl text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  `inline-flex items-center justify-center
+   whitespace-nowrap rounded-md text-sm 
+   font-medium ring-offset-background 
+   transition-colors duration-200
+   focus-visible:outline-none 
+   focus-visible:ring-2 
+   focus-visible:ring-content4
+   focus-visible:ring-offset-2 
+   disabled:pointer-events-none 
+   disabled:opacity-50`,
   {
     variants: {
       variant: {
-        default: 'bg-foreground text-background hover:bg-foreground/80',
-        primary: 'bg-primary-600 text-background hover:bg-primary-700',
-        secondary: 'bg-secondary-600 text-background hover:bg-secondary-700',
-        outline:
-          'border bg-background hover:bg-default-200 hover:text-foreground',
-        highlight:
-          'bg-default-200 text-secondary-foreground hover:bg-default-200/80 !shadow-none',
-        ghost: 'hover:bg-default-200 hover:text-foreground !shadow-none',
+        default: 'bg-foreground text-background hover:bg-foreground/90',
+        primary: 'bg-primary text-background hover:bg-primary/90',
+        secondary: 'bg-secondary text-foreground hover:bg-secondary/90',
+        outline: `border border-content3 
+                 bg-background 
+                 text-foreground 
+                 hover:bg-content2`,
+        ghost: `text-foreground 
+               hover:bg-content2`,
+        destructive: 'bg-danger text-background hover:bg-danger/90',
+        success: 'bg-success text-background hover:bg-success/90',
         link: 'text-foreground underline-offset-4 hover:underline !shadow-none',
       },
       size: {
         default: 'h-10 px-4 py-2',
-        sm: 'h-9 rounded-2xl px-3',
-        lg: 'h-11 rounded-2xl px-8',
+        sm: 'h-9 rounded-md px-3',
+        lg: 'h-11 rounded-md px-8',
         icon: 'h-10 w-10',
       },
     },
@@ -50,6 +62,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProperties>(
     );
   },
 );
+
 Button.displayName = 'Button';
 
 export { Button, buttonVariants };

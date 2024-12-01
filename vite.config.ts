@@ -1,65 +1,63 @@
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import path from 'path';
-import Pages from 'vite-plugin-pages';
-import checker from 'vite-plugin-checker';
+import { defineConfig, loadEnv } from 'vite';
+import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
 
-// https://github.com/hannoeru/vite-plugin-pages <- syntax
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
 
-export default defineConfig({
-  plugins: [
-    react({
-      devTarget: 'esnext',
-    }),
-    checker({
-      typescript: true,
-      overlay: true,
-    }),
-    Pages({
-      dirs: path.resolve(__dirname, 'src/main/webapp/app/'),
-    }),
-  ],
-  resolve: {
-    alias: [
-      {
-        find: '@',
-        replacement: path.resolve(__dirname, 'src/main/webapp'),
-      },
+  const keycloakUrl = `http://${env.KEYCLOAK_HOST || 'localhost'}:${env.KEYCLOAK_HTTP_PORT || '8180'}`;
+
+  return {
+    plugins: [
+      react({
+        devTarget: 'es2022',
+        jsxImportSource: 'react',
+      }),
+      // checker({
+      //   typescript: true,
+      //   overlay: {
+      //     badgeStyle: 'margin-left: 60px;',
+      //   },
+      // }),
+      TanStackRouterVite({
+        routeFileIgnorePrefix: '~',
+        routesDirectory: './src/main/webapp/app',
+        generatedRouteTree: './src/main/webapp/lib/routing/routeTree.gen.ts',
+      }),
     ],
-  },
-  root: path.resolve(__dirname, 'src/main/webapp'),
-  server: {
-    port: 9000,
-    open: '/index.html',
-    hmr: { overlay: true },
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8000',
-        changeOrigin: true,
-        configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
-            console.log('proxy error', err);
-          });
-          proxy.on('proxyReq', (_proxyReq, req, _res) => {
-            console.log('Sending Request to the Target:', req.method, req.url);
-          });
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
-            console.log(
-              'Received Response from the Target:',
-              proxyRes.statusCode,
-              req.url,
-            );
-          });
+    resolve: {
+      alias: [
+        {
+          find: '@',
+          replacement: path.resolve(__dirname, 'src/main/webapp'),
         },
+        {
+          find: '@public',
+          replacement: path.resolve(__dirname, 'public'),
+        },
+      ],
+    },
+    root: path.resolve(__dirname, 'src/main/webapp'),
+    publicDir: path.resolve(__dirname, 'public'),
+    server: {
+      port: 9000,
+      hmr: { overlay: true },
+    },
+    define: {
+      global: ['window'],
+      'process.env': {
+        APP_URL: `${env.APP_PROTOCOL}${env.APP_BASE_DOMAIN}:${env.FRONTEND_PORT}`,
+        KEYCLOAK_URL: keycloakUrl,
+        KEYCLOAK_REALM: env.REALM_NAME,
+        KEYCLOAK_CLIENT_ID: env.CLIENT_ID,
+        KEYCLOAK_TOKEN_INTERVAL: env.TOKEN_INTERVAL,
       },
     },
-  },
-  define: {
-    global: ['window'],
-    'process.env': {},
-  },
-  build: {
-    outDir: '../../dist',
-    sourcemap: true,
-  },
+    build: {
+      outDir: '../../../dist',
+      sourcemap: true,
+      rollupOptions: {},
+    },
+  };
 });

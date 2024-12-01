@@ -1,0 +1,53 @@
+{
+  "content": [
+    {
+      "id": 3,
+      "description": "Association A-C",
+      "firstObjectTypeId": 1,
+      "secondObjectTypeId": 3
+    },
+    {
+      "id": 2,
+      "description": "Association B-C",
+      "firstObjectTypeId": 2,
+      "secondObjectTypeId": 3
+    },
+    {
+      "id": 5,
+      "description": "Association C-C",
+      "firstObjectTypeId": 3,
+      "secondObjectTypeId": 3
+    },
+    {
+      "id": 6,
+      "description": "Association D-C",
+      "firstObjectTypeId": 4,
+      "secondObjectTypeId": 3
+    }
+  ],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 20,
+    "sort": {
+      "empty": false,
+      "sorted": true,
+      "unsorted": false
+    },
+    "offset": 0,
+    "paged": true,
+    "unpaged": false
+  },
+  "last": true,
+  "totalPages": 1,
+  "totalElements": 4,
+  "first": true,
+  "size": 20,
+  "number": 0,
+  "sort": {
+    "empty": false,
+    "sorted": true,
+    "unsorted": false
+  },
+  "numberOfElements": 4,
+  "empty": false
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "scenarioId": 1,
+    "startTime": 100,
+    "endTime": 200,
+    "title": "Phase 1",
+    "description": "Description of phase 1"
+  },
+  {
+    "id": 2,
+    "scenarioId": 1,
+    "startTime": 200,
+    "endTime": 300,
+    "title": "Phase 2",
+    "description": "Description of phase 2"
+  },
+  {
+    "id": 3,
+    "scenarioId": 1,
+    "startTime": 300,
+    "endTime": 400,
+    "title": "Phase 3",
+    "description": "Description of phase 3"
+  }
+]

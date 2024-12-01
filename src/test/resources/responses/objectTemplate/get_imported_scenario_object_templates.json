@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "title": "title1",
+    "description": "description1",
+    "color": "color1",
+    "objectTypeId": null
+  },
+  {
+    "id": 2,
+    "title": "title2",
+    "description": "description2",
+    "color": "color2",
+    "objectTypeId": null
+  }
+]

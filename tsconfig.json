@@ -6,12 +6,13 @@
     "useDefineForClassFields": true,
     "skipLibCheck": true,
 
-    "moduleResolution": "Node",
+    "moduleResolution": "Bundler",
     "noEmit": true,
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
     "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
+    "jsxImportSource": "react",
 
     "allowJs": false,
     "strict": true,

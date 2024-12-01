@@ -1,0 +1,41 @@
+{
+  "content": [
+    {
+      "id": 2,
+      "description": "Association B-C",
+      "firstObjectTypeId": 2,
+      "secondObjectTypeId": 3
+    },
+    {
+      "id": 6,
+      "description": "Association D-C",
+      "firstObjectTypeId": 4,
+      "secondObjectTypeId": 3
+    }
+  ],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 20,
+    "sort": {
+      "empty": false,
+      "unsorted": false,
+      "sorted": true
+    },
+    "offset": 0,
+    "unpaged": false,
+    "paged": true
+  },
+  "last": true,
+  "totalPages": 1,
+  "totalElements": 2,
+  "first": true,
+  "size": 20,
+  "number": 0,
+  "sort": {
+    "empty": false,
+    "unsorted": false,
+    "sorted": true
+  },
+  "numberOfElements": 2,
+  "empty": false
+}

@@ -11,7 +11,10 @@ const Table = forwardRef<HTMLTableElement, HTMLAttributes<HTMLTableElement>>(
     <div className='relative w-full overflow-auto'>
       <table
         ref={reference}
-        className={cn('w-full caption-bottom text-sm', className)}
+        className={cn(
+          'w-full caption-bottom text-sm text-foreground',
+          className,
+        )}
         {...properties}
       />
     </div>
@@ -25,7 +28,7 @@ const TableHeader = forwardRef<
 >(({ className, ...properties }, reference) => (
   <thead
     ref={reference}
-    className={cn('[&_tr]:border-b', className)}
+    className={cn('[&_tr]:border-b [&_tr]:border-content4', className)}
     {...properties}
   />
 ));
@@ -37,7 +40,10 @@ const TableBody = forwardRef<
 >(({ className, ...properties }, reference) => (
   <tbody
     ref={reference}
-    className={cn('[&_tr:last-child]:border-0', className)}
+    className={cn(
+      '[&_tr:last-child]:border-0 [&_tr]:border-b [&_tr]:border-content4',
+      className,
+    )}
     {...properties}
   />
 ));
@@ -50,7 +56,7 @@ const TableFooter = forwardRef<
   <tfoot
     ref={reference}
     className={cn(
-      'border-t bg-neutral-200/50 font-medium [&>tr]:last:border-b-0',
+      'border-t border-content4 bg-content1 font-medium [&>tr]:last:border-b-0',
       className,
     )}
     {...properties}
@@ -65,8 +71,8 @@ const TableRow = forwardRef<
   <tr
     ref={reference}
     className={cn(
-      `border-b transition-colors hover:bg-neutral-200/50
-      data-[state=selected]:bg-neutral-200`,
+      `border-b border-content4 transition-colors duration-200 hover:bg-content2/50
+      data-[state=selected]:bg-content1`,
       className,
     )}
     {...properties}
@@ -81,8 +87,8 @@ const TableHead = forwardRef<
   <th
     ref={reference}
     className={cn(
-      `h-12 px-4 text-left align-middle font-medium text-neutral-600
-      [&:has([role=checkbox])]:pr-0`,
+      `h-12 px-4 text-left align-middle font-medium text-foreground transition-colors
+      duration-200 [&:has([role=checkbox])]:pr-0`,
       className,
     )}
     {...properties}
@@ -96,7 +102,10 @@ const TableCell = forwardRef<
 >(({ className, ...properties }, reference) => (
   <td
     ref={reference}
-    className={cn('p-4 align-middle [&:has([role=checkbox])]:pr-0', className)}
+    className={cn(
+      'p-4 align-middle text-foreground [&:has([role=checkbox])]:pr-0',
+      className,
+    )}
     {...properties}
   />
 ));
@@ -108,10 +117,11 @@ const TableCaption = forwardRef<
 >(({ className, ...properties }, reference) => (
   <caption
     ref={reference}
-    className={cn('mt-4 text-sm text-neutral-600', className)}
+    className={cn('mt-4 text-sm text-content4', className)}
     {...properties}
   />
 ));
+
 TableCaption.displayName = 'TableCaption';
 
 export {

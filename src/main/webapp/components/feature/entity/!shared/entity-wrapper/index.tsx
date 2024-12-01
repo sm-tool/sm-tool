@@ -1,30 +1,36 @@
-import { useToast } from '@/components/ui/shadcn/use-toast.ts';
+import { todoToast } from '@/components/ui/shadcn/toaster.tsx';
+import useFormStore from '@/stores/form';
 import useInterfaceStore, { QdsSelectables } from '@/stores/interface';
 import { cn } from '@nextui-org/theme';
 import { Pencil, Trash2 } from 'lucide-react';
+import { z } from 'zod';
 
 interface EntityWrapperProperties {
   entity: QdsSelectables;
+  schema: z.ZodObject<z.ZodRawShape>;
   children: React.ReactNode;
   tooltipClassName?: string;
 }
 
 const EntityWrapper = ({
   entity,
+  schema,
   children,
   tooltipClassName,
 }: EntityWrapperProperties) => {
   const { setSelectedElement } = useInterfaceStore();
-  const { todoToast } = useToast();
+  const { createEditForm } = useFormStore();
 
   return (
     <div
       className='group/wrapper relative min-w-[16rem] w-fit mt-12 cursor-pointer'
-      onClick={() => setSelectedElement(entity)}
+      onClick={() => {
+        setSelectedElement(entity);
+      }}
     >
       <div
         className={cn(
-          `absolute -top-[40px] right-3 transition-all animate-in slide-in-from-bottom
+          `absolute -top-[40px] left-3 transition-all animate-in slide-in-from-bottom
           hidden group-hover/wrapper:flex`,
           tooltipClassName,
         )}
@@ -35,9 +41,8 @@ const EntityWrapper = ({
             className:
               'bg-blue-200/60 border-blue-700/20 text-blue-700 rounded-tl-xl',
             onClick: () => {
-              todoToast({
-                description: 'TODO dodaj przenoszenie do forma',
-              });
+              createEditForm(schema, entity!);
+              todoToast('Edytowanie do forma, czyli formy');
             },
           },
           {
@@ -45,9 +50,7 @@ const EntityWrapper = ({
             className:
               'bg-red-200/60 border-red-700/20 text-red-700 rounded-tr-xl',
             onClick: () => {
-              todoToast({
-                description: 'TODO dodaj modala do delete',
-              });
+              todoToast('usuwanie z promptami');
             },
           },
         ].map((button, index) => (

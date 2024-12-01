@@ -1,37 +1,34 @@
-import { QdsObjectTemplate } from '@/models/object/entity';
+import { QdsObjectTemplate } from '@/features/object/entity';
 import { cn } from '@nextui-org/theme';
 
-const typeStyles = {
-  default: `bg-content2`,
-  actor: `bg-red-200 border-red-700/20`,
-  building: `bg-amber-200 border-amber-700/20`,
-  vehicle: `bg-blue-200 border-amber-700/20`,
-  resource: `bg-green-200 border-green-700/20`,
-  place: `bg-purple-200 border-purple-700/20`,
-};
-
-type ObjectTemplateType = keyof typeof typeStyles;
-
 export interface ObjectTemplateProperties {
-  template: QdsObjectTemplate;
+  templates: QdsObjectTemplate[];
   className?: string;
 }
 
-const ObjectTemplate = ({ template, className }: ObjectTemplateProperties) => {
-  const templateType = (template.title as ObjectTemplateType) || 'default';
-  const typeStyle = typeStyles[templateType];
-
+const ObjectTemplate = ({ templates, className }: ObjectTemplateProperties) => {
   return (
     <div
-      className={cn(
-        typeStyle,
-        `inline-block max-w-[8rem] border-1 z-10 rounded-xl overflow-hidden
-        group-hover/wrapper:overflow-visible break-words transition-all max-h-[2rem]
-        group-hover/wrapper:max-h-[1000px] px-4`,
-        className,
-      )}
+      className='grid-cols-3 grid-rows-1 gap-3 max-h-[1.5rem] group-hover/wrapper:max-h-[1000px]
+        text-sm text-center animate-in fade-in grid group-hover/wrapper:grid
+        group-hover/wrapper:grid-rows-none transition-all
+        [&:has(>:nth-child(1):last-child)]:grid-cols-1
+        [&:has(>:nth-child(2):last-child)]:grid-cols-2'
     >
-      <p>{template.title}</p>
+      {templates.map((template, index) => (
+        <p
+          key={index}
+          className={cn(
+            `max-w-[6rem] border-1 z-10 rounded-xl overflow-hidden min-h-[1.5rem]
+            group-hover/wrapper:overflow-visible break-words hyphens-auto
+            group-hover/wrapper:max-h-[1000px] px-2 border-default-300/60 bg-content2`,
+            className,
+            index > 2 ? 'hidden group-hover/wrapper:block' : '',
+          )}
+        >
+          {template.title}
+        </p>
+      ))}
     </div>
   );
 };
