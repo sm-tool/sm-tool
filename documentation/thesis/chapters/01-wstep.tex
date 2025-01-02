@@ -1,36 +1,77 @@
 
 \chapter{Wstęp}
 
-Wstęp do pracy powinien zawierać następujące elementy:
-\begin{itemize}
-    \item krótkie uzasadnienie podjęcia tematu;
-    \item cel pracy (patrz niżej);
-    \item zakres (przedmiotowy, podmiotowy, czasowy) wyjaśniający, w jakim rozmiarze praca będzie realizowana;
-    \item ewentualne hipotezy, które autor zamierza sprawdzić lub udowodnić;
-    \item krótką charakterystykę źródeł, zwłaszcza literaturowych;
-    \item układ pracy (patrz niżej), czyli zwięzłą charakterystykę zawartości poszczególnych rozdziałów;
-    \item ewentualne uwagi dotyczące realizacji tematu pracy np.~trudności, które pojawiły się w trakcie
-    realizacji poszczególnych zadań, uwagi dotyczące wykorzystywanego sprzętu, współpraca z firmami zewnętrznymi.
-\end{itemize}
+\section{Motywacja}
+Celem projektu jest opracowanie systemu umożliwiającego tworzenie scenariuszy ćwiczeń sytuacji kryzysowych zgodnie z Trial Guidance Methodology (TGM).
 
-\noindent
-\textbf{Wstęp do pracy musi się kończyć dwoma następującymi akapitami:}
-\begin{quote}
-    Celem pracy jest opracowanie / wykonanie analizy / zaprojektowanie / ...........
-\end{quote}
-oraz:
-\begin{quote}
-    Struktura pracy jest następująca. W rozdziale 2 przedstawiono przegląd literatury na temat ........
-    Rozdział 3 jest poświęcony ....... (kilka zdań).
-    Rozdział 4 zawiera ..... (kilka zdań) ............ itd.
-    Rozdział X stanowi podsumowanie pracy.
-\end{quote}
+\section{Cel i zakres pracy}
+Organizacje zajmujące się ćwiczeniami oraz reagowaniem na kryzysowe sytuacje systematycznie przeprowadzają symulacje oraz testy procedur postępowania, tak aby cyklicznie ulepszać systemy bezpieczeństwa oraz trenować radzenie sobie w sytuacjach niekontrolowanych. Takie działania wymagają aktywnej postawy wielu osób m.in.: służb mundurowych, personelu medycznego, pracowników infrastruktury transportowej oraz użytkowników testowanej aplikacji.
+Biorąc pod uwagę złożoność, koszty oraz zasoby takich działań, kluczowe jest ich dokładne ich rozplanowanie z uwzględnieniem obligatoryjnych praktyk takich jak TGM (Trial Guidance Methodology) czy CWA 18009:2023.
+Brakuje jednak elastycznego narzędzia wspierającego proces planowania takich eksperymentów, zwłaszcza w
+aspekcie projektowania scenariuszy sytuacji.
 
-W przypadku prac inżynierskich zespołowych lub magisterskich 2-osobowych, po tych dwóch w/w akapitach
-musi w pracy znaleźć się akapit, w którym będzie opisany udział w pracy poszczególnych członków zespołu. Na przykład:
+W związku z tym, potrzebne jest kompleksowe narzędzie umożliwiające tworzenie takich scenariuszy, które będą zawierały infromacje na temat sekwencji działań, poszczególnych akcji, wątków, obiektów oraz atrybutów. W rezultacie rozwiązanie będzie wspierać każdego uczestnika procesu od twórcy scenariusza, po poszczególnych aktorów, którzy odgrywają role w scenariuszu. Wymogiem jest stworzenie wizualizacji tego rozwiązania, która będzie czytelna i będzie pozwalać na współpracę wielu twórców modelu w trakcie jego projektowania i umożliwiać spojrzenie
+na scenariusz z różnych punktów widzenia np. organizatora i koordynatora ćwiczeń, aktorów
+odgrywających zaplanowane role, obserwatorów i ekspertów oceniających przebieg ćwiczenia.
+Narzędzie powinno być zgodne z Trial Guidance Methodology (TGM), opisaną w książce \emph{Trial Guidance Methodology Handbook} \cite{tgmhandbook}. 
 
-\begin{quote}
-    Jan Kowalski w ramach niniejszej pracy wykonał projekt tego i tego, opracował ......
-    Grzegorz Brzęczyszczykiewicz wykonał ......, itd.
-\end{quote}
+\subsection{Metodologia}
+System powinien umożliwiać tworzenie i zarządzanie m.in. scenariuszami, obiektami, wątkami oraz akcjami. Na etapie planowania oraz analizy
+zdecydowaliśmy się na skorzystanie z diagramów ERD, schematów bazy danych i diagramów kontekstu. Umożliwiło to nam dokładną analizę problemu oraz dokładne rozplanowanie pracy.
+System zaprojektowaliśmy tak, żeby używał wzorca Repository Pattern, który zapewnia elastyczność, logiczność, łatwe testowanie, ale także decoupling. W celu wizualizacji architektury wykonaliśmy
+m.in. diagramy klas oraz diagramy przepływu danych. Podczas planowania bazy danych uwzględniliśmy zasady dobrej jej orgazniacji. W celu testowania aplikacji napisaliśmy testy jednostkowe, integracyjne oraz funkcjonalne.
+Podczas rezalizacji projektu pracowaliśmy w metodyce Scrum. Każdy sprint trwał 2 tygodnie oraz kończył się podsumowaniem sprintu oraz przedstawieniem postępów klientowi. Pracą zarządzaliśmy używając Github Issues, w którym rozpisywaliśmy zadania oraz podczas planowania spritów przydzielaliśmy je do poszczególnych osób.
+Dokumentacja techniczna projektu została stworzona przy użyciu Swaggera.
 
+\section{Struktura pracy}
+Praca składa się z następujących sekcji:
+\begin{description}
+    \item[Wstęp] -- wprowadzenie, podstawowe założenia, podział pracy
+    \item[Wymagania] -- wymagania biznesowe, przypadki użycia, wymagania pozafunkcjonalne
+    \item[Architektura] -- decyzje architektoniczne, wykorzystane technologie, markitektura 4+1
+    \item[Implementacja] -- szczegółowy opis implementacji rest api, backendu, frontendu oraz testów
+    \item[Zapewnienie jakości] - Definition of Done, Scrum, Code review, testy
+    \item[Doświadczenia] - doświadczenia developerów podczas pracy z technologiami, w zespole oraz kontakcie z klientem.
+    \item[Możliwy przyszły rozwój aplikacji] - możliwe rozwiązania, które można wdrożyć w przyszłości
+    \item[Zakończenie] - podsumowanie pracy
+\end{description}
+
+\section{Podział pracy}
+Projekt został zrealizowany w ramach współpracy w programie Software Development Studio Politechniki Poznańskiej. Dzięki temu mieliśmy okazję pracować ze studentami
+specjalizacji Software Engineering. Byli oni naszymi project managerami, a w dodatku odpowiadali za organizację sprintów i pracy. Naszym klientem była firma ITTI, z którą
+wspólnie omówiliśmy szczegóły i wymagania projektu podczas pierwszego spotaknia w kwietniu 2024 roku. Następnie na zakończenie każdego sprintu odbywało się spotkanie w formie zdalnej
+z przedstawicielami firmy, na których pokazywaliśmy postępy prac, konsultowaliśmy poprawki oraz aktualizowaliśmy wymagania klienta. Główną formą komunikacji z przedstawicielami firmy
+była poczta elektroniczna.
+
+W ramach pracy nad projektem \textbf{Kacper Kuras} odpowiadał za projektowanie, modelowanie bazy danych i jej konfigurację. Uwzględniało
+to tworzenie skomplikowanych zapytań Query w warstwie repository oraz plików Entity, które definiowały strukturę bazy danych w Javie. Tworzył rówież część logiki aplikacji, która zapewniała wydajną oraz spójną pracę bazy danych i serwera.
+
+Natomiast \textbf{Bartosz Adamczewski} skupił swoją uwagę na tworzeniu testów, które obejmowały testy jednostkowe oraz integracyjne w celu zapewnienia jakości produktu.
+Do jego zadań należała również implementacja websocketów, które umożliwiły dwukierunkowe sesje komunikacyjne między klientem a serwerem. Bartosz odpowiadał za opracowanie części endpointów.
+
+\textbf{Kacper Woźniak} odpowiadał za tworzenie i konfigurację endpointów oraz tworzenie logiki biznesowej aplikacji. Wspierał również pisanie testów, w celu szybszej weryfikacji popraności poszczególnych modułów.
+Do obowiązaków Kacpra należała również implementacja i konfiguracja mechanizmu CORS.
+
+\textbf{Jakub Wieczorek} był odpowiedzialny za projektowanie oraz implementację warsty wizualnej aplikacji. Swoją uwagę skupił między innymi na konfiguracji komunikacji z serwerem, wydajność aplikacji przeglądarkowej oraz
+był odpowiedzialny za stylizację i zarządzanie elementami takimi jak wizualizacja scenariusza na osi czasu przy użyciu skomplikowanych bibliotek frontendowych.
+
+W ramach pracy wspólnej jako zespół zaprojektowaliśmy i omawialiśmy na spotkaniach główne zalożenia pracy oraz wymagania klienta. Całość pracy realizowaliśmy zgodnie z podejściem zwinnym (Agile), dzięki któremu mieliśmy możliwość iteracyjnego wdrażania
+kolejnych etapów implementacji oraz systematyczne analizowanie wymagań i ich ewentalnych poprawek.
+
+Procentowy podział pracy przedstawia się następująco:
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Imię i nazwisko} & \textbf{Zakres prac} & \textbf{Udział procentowy}\\
+        \hline
+        Bartosz Adamczewski & Backend, Testy & 25\%\\
+        Kacper Kuras & Baza danych, Backend & 25\%\\
+        Jakub Wieczorek & Frontend, DevOps & 25\%\\
+        Kacper Woźniak & Backend & 25\%\\
+        \hline
+    \end{tabular}
+    \caption{Zakres prac oraz udział procentowy członków zespołu w projekcie.}
+    \label{tab:udzial_zespolu}
+\end{table}

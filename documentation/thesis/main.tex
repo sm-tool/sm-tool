@@ -1,4 +1,3 @@
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Bachelor's & Master's Thesis Template        %%
 %% Copyleft by Dawid Weiss & Marta Szachniuk    %%
@@ -11,74 +10,75 @@
 
 \documentclass[polish,bachelor,a4paper,oneside]{ppfcmthesis}
 
-
 \usepackage[utf8]{inputenc}
 \usepackage[OT4]{fontenc}
+\usepackage{longtable}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{float} 
+\usepackage{hyperref}
+\usepackage{listings}
 
 %--------------------------------------
 % Strona tytułowa
 %--------------------------------------
 
-% Autorzy pracy, jeśli jest ich więcej niż jeden
-% wstaw między nimi separator \and
 \author{%
-   Pierwszy autor pracy \album{nr-indeksu} \and
-   Drugi autor pracy \album{nr-indeksu}}
+    Bartosz Adamczewski  \album{151764} \and
+    Kacper Kuras \album{151783} \and
+    Jakub Wieczorek \album{151888} \and
+    Kacper Woźniak \album{151118} \and
+}
 \authortitle{}                                % Do not change.
 
-\title{Temat pracy dyplomowej}
+\title{System do modelowania scenariuszy ćwiczeń radzenia sobie z sytuacjami kryzysowymi}
 
 % Your supervisor comes here.
-\ppsupervisor{prof.~dr hab.~inż.~Imię Nazwisko}
+\ppsupervisor{dr inż. Sylwia Kopczyńska}
 
 % Year of final submission (not graduation!)
-\ppyear{2020}
+\ppyear{2025}
 
 
 \begin{document}
 
 % Front matter starts here
-\frontmatter\pagestyle{empty}%
-\maketitle\cleardoublepage%
+    \frontmatter\pagestyle{empty}%
+    \maketitle\cleardoublepage%
 
 
 %--------------------------------------
 % Spis treści
 %--------------------------------------
 
-\pagenumbering{Roman}\pagestyle{ppfcmthesis}%
-\tableofcontents*
-\cleardoublepage % Zaczynamy od nieparzystej strony
+    \pagenumbering{Roman}\pagestyle{ppfcmthesis}%
+    \tableofcontents*
+    \cleardoublepage % Zaczynamy od nieparzystej strony
 
 %--------------------------------------
 % Rozdziały
 %--------------------------------------
 
 %Najwygodniej jeśli każdy rozdział znajduje się w oddzielnym pliku
-\mainmatter%
-\input{chapters/01-wstep}
-\input{chapters/02-teoria}
-\input{chapters/03-praca-wlasna}
-\input{chapters/04-zakonczenie}
+    \mainmatter%
+    \input{chapters/01-wstep}
+    \input{chapters/02-wymagania}
+    \input{chapters/03-architektura}
+    \input{chapters/04-implementacja}
+    \input{chapters/05-zapewnienie-jakości}
+    \input{chapters/06-doświadczenia}
+    \input{chapters/07-mozliwy-rozwoj}
+    \input{chapters/08-zakończenie}
 
 %--------------------------------------
 % Literatura
 %--------------------------------------
 
-\bibliographystyle{plain}{\raggedright\sloppy\small\bibliography{main}}
-
-%--------------------------------------
-% Dodatki
-%--------------------------------------
-
-\cleardoublepage\appendix%
-\newpage
-\input{chapters/zalacznik}
+    \input{chapters/09-literatura}
 
 %--------------------------------------
 % Informacja o prawach autorskich
 %--------------------------------------
 
-\ppcolophon
+    \ppcolophon
 
 \end{document}
