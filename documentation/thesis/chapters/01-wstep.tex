@@ -13,7 +13,23 @@ aspekcie projektowania scenariuszy sytuacji.
 W związku z tym, potrzebne jest kompleksowe narzędzie umożliwiające tworzenie takich scenariuszy, które będą zawierały infromacje na temat sekwencji działań, poszczególnych akcji, wątków, obiektów oraz atrybutów. W rezultacie rozwiązanie będzie wspierać każdego uczestnika procesu od twórcy scenariusza, po poszczególnych aktorów, którzy odgrywają role w scenariuszu. Wymogiem jest stworzenie wizualizacji tego rozwiązania, która będzie czytelna i będzie pozwalać na współpracę wielu twórców modelu w trakcie jego projektowania i umożliwiać spojrzenie
 na scenariusz z różnych punktów widzenia np. organizatora i koordynatora ćwiczeń, aktorów
 odgrywających zaplanowane role, obserwatorów i ekspertów oceniających przebieg ćwiczenia.
-Narzędzie powinno być zgodne z Trial Guidance Methodology (TGM), opisaną w książce \emph{Trial Guidance Methodology Handbook} \cite{tgmhandbook}. 
+Narzędzie powinno być zgodne z Trial Guidance Methodology (TGM), opisaną w książce \emph{Trial Guidance Methodology Handbook} \cite{tgmhandbook}.
+
+W celu zaplanowania scenariusza powinniśmy uzyskać dwie informacje. Pierwszą z nich jest cel, który chcemy osiągnąć, natomiast drugą są okoliczności, które są odpowiedzialne za wyznaczenie granicy działania.
+W planowaniu scenariusza sytuacji kryzysowych możemy wyróżnić pewien cel, polegający na identyfikacji luk w systemie zarządzania kryzysowego. Możemy je wyznaczyć przy pomocy osób biorących udział w tego typu działaniach, na przykład przeprowadzić z nimi wywiad.
+Jednak trzeba mieć na uwadze, że każdy może mieć doczynienia z innym typem luk. Na przykład osoby dowodzące akcją strażaków będa zwracały uwagę na luki w zarządzaniu zdarzenaimi. Natomiast policjanci drogówki skupią swoją uwagę na wskazaniu problemów w patrolowaniu ulic.
+Tak więc każda z luk jest zależna od kilku aspektów takich jak: roli oraz obowiązków osoby, a także otoczenia w jakim ta osoba pracuje. Połączenie tej charakterystyki można nazwać kontekstem scenariusza.
+
+Osoba planująca scenariusz musi w jakiś sposób zidentyfikować wyżej opisane luki w systemie. W tym celu zaleca się skorzystanie z pewnych sposobów, które to umożliwiają. Są to między innymi:
+\begin{itemize}
+\item Badanie źródeł wtórnych,
+\item Przeprowadzenie wywiadów grupowych,
+\item Podejście, które jest połączeniem badania źródeł wtórnych oraz wywiadów grupowych,
+\item Warsztaty.
+\end{itemize}
+
+Po zidentyfikowaniu luk możemy przejść do określenia kontekstu scenariusza. Pomocny w tym może być szablon znajdujący się w Trial Guidance Tool. Dzięki niemu możemy wyznaczć najważniejsze aspekty, na podstawie konkretnej sytuacji, w której dana luka występuje. Sytuacja i scenariusz różnią się między innymi tym, że ten drugi jest pewnym momentem w czasie, w którym znajduje się luka. Dlatego właśnie wskazane jest przeanalizowanie warunków, osób, otoczenia w tym punkcie czasu
+i na podstawie wniosków opracować to co jest wymagane w danym scenariuszu i to co jest opcjonalne. Następnym krokiem jest przygotowanie stanu początkowego, który jest mapą aktualnych procesów. W celu jego przygotowania można skorzystać z BPMN, czyli Business Process Modeling and Notation.
 
 \subsection{Metodologia}
 System powinien umożliwiać tworzenie i zarządzanie m.in. scenariuszami, obiektami, wątkami oraz akcjami. Na etapie planowania oraz analizy
@@ -26,14 +42,14 @@ Dokumentacja techniczna projektu została stworzona przy użyciu Swaggera.
 \section{Struktura pracy}
 Praca składa się z następujących sekcji:
 \begin{description}
-    \item[Wstęp] -- wprowadzenie, podstawowe założenia, podział pracy
-    \item[Wymagania] -- wymagania biznesowe, przypadki użycia, wymagania pozafunkcjonalne
-    \item[Architektura] -- decyzje architektoniczne, wykorzystane technologie, markitektura 4+1
-    \item[Implementacja] -- szczegółowy opis implementacji rest api, backendu, frontendu oraz testów
-    \item[Zapewnienie jakości] - Definition of Done, Scrum, Code review, testy
+    \item[Wstęp] -- wprowadzenie, podstawowe założenia, podział pracy.
+    \item[Wymagania] -- wymagania biznesowe, przypadki użycia, wymagania pozafunkcjonalne.
+    \item[Architektura] -- decyzje architektoniczne, wykorzystane technologie, markitektura 4+1.
+    \item[Implementacja] -- szczegółowy opis implementacji rest api, backendu, frontendu oraz testów.
+    \item[Zapewnienie jakości] - Definition of Done, Scrum, Czysty kod, Code review, testy.
     \item[Doświadczenia] - doświadczenia developerów podczas pracy z technologiami, w zespole oraz kontakcie z klientem.
-    \item[Możliwy przyszły rozwój aplikacji] - możliwe rozwiązania, które można wdrożyć w przyszłości
-    \item[Zakończenie] - podsumowanie pracy
+    \item[Możliwy przyszły rozwój aplikacji] - możliwe rozwiązania, które można wdrożyć w przyszłości.
+    \item[Zakończenie] - podsumowanie pracy.
 \end{description}
 
 \section{Podział pracy}
@@ -44,7 +60,7 @@ z przedstawicielami firmy, na których pokazywaliśmy postępy prac, konsultowal
 była poczta elektroniczna.
 
 W ramach pracy nad projektem \textbf{Kacper Kuras} odpowiadał za projektowanie, modelowanie bazy danych i jej konfigurację. Uwzględniało
-to tworzenie skomplikowanych zapytań Query w warstwie repository oraz plików Entity, które definiowały strukturę bazy danych w Javie. Tworzył rówież część logiki aplikacji, która zapewniała wydajną oraz spójną pracę bazy danych i serwera.
+to tworzenie skomplikowanych zapytań w warstwie repository oraz plików Entity, które definiowały strukturę bazy danych w Javie. Tworzył rówież część logiki aplikacji, która zapewniała wydajną oraz spójną pracę bazy danych i serwera.
 
 Natomiast \textbf{Bartosz Adamczewski} skupił swoją uwagę na tworzeniu testów, które obejmowały testy jednostkowe oraz integracyjne w celu zapewnienia jakości produktu.
 Do jego zadań należała również implementacja websocketów, które umożliwiły dwukierunkowe sesje komunikacyjne między klientem a serwerem. Bartosz odpowiadał za opracowanie części endpointów.
@@ -56,7 +72,7 @@ Do obowiązaków Kacpra należała również implementacja i konfiguracja mechan
 był odpowiedzialny za stylizację i zarządzanie elementami takimi jak wizualizacja scenariusza na osi czasu przy użyciu skomplikowanych bibliotek frontendowych.
 
 W ramach pracy wspólnej jako zespół zaprojektowaliśmy i omawialiśmy na spotkaniach główne zalożenia pracy oraz wymagania klienta. Całość pracy realizowaliśmy zgodnie z podejściem zwinnym (Agile), dzięki któremu mieliśmy możliwość iteracyjnego wdrażania
-kolejnych etapów implementacji oraz systematyczne analizowanie wymagań i ich ewentalnych poprawek.
+kolejnych etapów implementacji oraz systematyczne analizowanie wymagań i ich ewentalnych poprawek. Wstęp i wymagania zostały opracowane przy pomocy materiałów przygotowanych przez inż. Adama Kopca oraz inż. Julię Mularczyk z Software Development Studio.
 
 Procentowy podział pracy przedstawia się następująco:
 

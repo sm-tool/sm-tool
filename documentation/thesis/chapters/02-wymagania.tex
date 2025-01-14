@@ -10,58 +10,116 @@
 \section{Aktorzy}
 
 \subsection{Twórca scenariusza}
-Twórca scenariusza to osoba, która jest odpowiedzialna za tworzenie scenariuszy i ich modyfikowanie oraz dostosowywanie. Ma on możliwość
-definiowania wątków, obiektów, typów obiektów, szablonów, asocjacji, a także faz scenariusza w zależności od potrzeb i wymagań. Twórca scenariuszy może również
-nadawać uprawnienia edycji lub podglądu innym użytkownikom.
+Twórca scenariusza to osoba, która jest odpowiedzialna za tworzenie scenariuszy i ich modyfikowanie oraz dostosowywanie. 
+Ma on możliwość definiowania wątków, obiektów, typów obiektów, szablonów, asocjacji, a także faz scenariusza w zależności 
+od potrzeb i wymagań. Twórca scenariuszy może również nadawać uprawnienia edycji lub podglądu innym użytkownikom.
 
 \subsection{Uczestnik wydarzeń}
-Uczestnik wydarzeń to osoba biorąca udział w ćwiczeniach. Otrzymuje on dostęp do przeglądania lub modyfikacji scenariusza, w zależności od nadanych uprawnień.
-Dzięki temu podziałowi system jest odporny na wszelkie próby naruszenia integralności danych.
+Uczestnik wydarzeń to osoba biorąca udział w ćwiczeniach. Otrzymuje on dostęp do przeglądania lub modyfikacji scenariusza, 
+w zależności od nadanych uprawnień. Dzięki temu podziałowi system jest odporny na wszelkie próby naruszenia integralności danych.
 
 \section{Obiekty biznesowe}
 
-\subsection{Organizacja scenariusza}
-Scenariusz składa się m.in. z wątków oraz akcji. Każdy wątek jest pewną sekwencją zdarzeń, która może łączyć się z innymi wątkami operacją JOIN, lub dzielić się na wiele wątków operacją FORK.
-Kolejnymi składowymi są akcje, które są pojedynczymi punktami w czasie. Dzięki nim użytkownik może zmieniać atrybuty obiektów lub ich asocjacji.
+\subsection{Scenariusz}
+Scenariusz reprezentuje złożoną strukturę organizacyjną służącą do modelowania i symulacji sekwencji wydarzeń zachodzących 
+w określonych ramach czasowych. Jest to centralny element systemu, który integruje i zarządza wieloma powiązanymi komponentami: 
+wydarzeniami, wątkami, fazami i obiektami. Sam bezpośrednio zawiera metadane opisujące jego kontekst. 
+Za jego pomocą zaimplementowany jest system uprawnień kontrolujący dostęp użytkowników.
 
-\subsection{Obiekty}
-Obiekt jest podstawową jednostką w scenariuszu. Każdy obiekt posiada zestaw atrybutów, które są możliwe do modyfikacji w czasie trwania scenariusza podczas trwania akcji.
-Transfer obiektów pomiędzy wątkami jest możliwy tylko dla operacji JOIN lub FORK dla akcji. Obiekty mogą być globalne lub lokalne.
+\subsection{Faza scenariusza}
+Faza scenariusza reprezentuje logiczny, wydzielony przedział czasowy w ramach całego scenariusza. 
+Pozwala na podział scenariusza na mniejsze, znaczące etapy, ułatwiając organizację i wizualizację wydarzeń.
 
-\subsection{Typy}
-Typy dzielimy na typy obiektów oraz typy asocjacji. Każdy z nich określa podstawowe cechy charakterystyczne obiektów lub asocjacji na podstawie przypisanego typu.
-Typ obiektu określa dostępność globalną między wątkami, kolor, tytuł, a także rodzica w celu zachowania hierarchii. Natomiast typ asocjacji odpowiada za przypisanie odpowiednich typów obiektów do asocjacji oraz weryfikuje poprawność oraz hierarchiczność każdej asocjacji.
+\subsection{Typ}
 
-\subsection{Szablony}
-W systemie możemy wyszczególnić szablon obiektów oraz szablon atrybutów. są one fundamentem, na którym zbudowane są obiekty naszej aplikacji.
-Każdy obiekt może być tworzony na podstawie podstawowych wartości zdefiniowanych w szablonie, co niweluje konieczność ręcznego wprowadzania danych obiektu, przy każdym jego dodawaniu.
+Typy służą do kategoryzacji i definiowania zasad zachowania elementów w systemie. Stanowią podstawę do zachowania spójności 
+i prawidłowych relacji między elementami w systemie. Wyróżniamy dwa podstawowe rodzaje:
+\begin{itemize}
+    \item Typ Obiektu - jest to definicja kategorii obiektu występującego w scenariuszu. 
+    Określa jego podstawowe cechy i zachowania, w tym konieczność globalnego dostępu do obiektu, 
+    możliwość przypisania do niego użytkownika czy przynależność do szerszej kategorii (występuje hierarchia).
+    \item Typ Asocjacji - Definiuje dozwolony rodzaj relacji między obiektami w systemie. 
+    Określa typy obiektów które mogą wchodzić ze sobą w interakcje.
+\end{itemize}
 
-\subsection{Asocjacje}
-Asocjacja jest relacją pomiędzy dwoma obiektami, która jest tworzona i modyfikowana tylko w kontekście wydarzeń. Asocjacje mogą mieć różne typy określające pewne reguły oraz relacje m.in. INSERT lub DELETE.
-Każda z asocjacji musi być zgodna z regułami wynikającymi z typów asocjacji.
+\subsection{Szablon}
 
-\subsection{Atrybuty}
-Atrybuty są cechami opisującymi dany obiekt. Mogą one być modyfikowane wyłącznie akcji.
+Szablony definiują wzorce dla obiektów i ich atrybutów, umożliwiając standaryzację i automatyzację procesu tworzenia nowych 
+elementów w scenariuszach.
 
-\subsection{Wątki}
-Wątki są kluczową składową scenariusza, która reprezentuje sekwencję akcji. Każda akcja reprezentuje dane wydarzenie w scenariuszu takie jak zmiana atrybutów lub asocjacji. Dzielą się one na typy:
-\begin{enumerate}
-\item {START} - rozpoczyna wątek oraz umożliwia dodanie lokalnych obiektów,
-\item {END} - kończy wątek,
-\item {NORMAL} - jest to standardowa akcja w wątku,
-\item {GLOBAL} - określa akcję w wątku globalnym, której zmiany mają priorytet nad typem NORMAL,
-\item {JOIN\_IN/JOIN\_OUT} - akcja oznaczająca łączenie wątków,
-\item {FORK\_IN/FORK\_OUT} - akcja oznaczająca podział wątku,
-\item {IDLE} - akcja pusta, nieposiadająca zmian.
-\end{enumerate}
-Wątki mogą się łączyć w jedną ścieżkę operacją JOIN lub dzielić operacją FORK. Tylko podczas
-trwania tych operacji obiekty mogą być przenoszone pomiędzy wątki. Obiekty globalne są natomiast dostępne w każdym z wątków.
+\begin{itemize}
+    \item Szablon Obiektu - Stanowi wzorzec definiujący strukturę i domyślne właściwości dla grupy podobnych obiektów. 
+    Określa zarówno typ obiektu, do którego jest przypisany jak i wymagane atrybuty.
+    \item Szablon Atrybutu - Definiuje pojedynczą cechę, którą mogą posiadać obiekty danego szablonu.
+    Szablony pozwalają na szybkie i spójne tworzenie nowych elementów w systemie, zapewniając standardowy zestaw właściwości 
+    i wartości początkowych.
+\end{itemize}
+
+\subsection{Obiekt}
+
+Obiekt stanowi podstawową jednostkę w scenariuszu, reprezentującą konkretny element posiadający zdefiniowane atrybuty i 
+mogący wchodzić w relacje z innymi obiektami. System rozróżnia obiekty globalne tworzone w wątku globalnym i dostępne w każdym 
+innym oraz obiekty lokalne przypisane do konkretnych wątków i niedostępne w danym czasie w żadnym innym. 
+Jedynym sposobem ich przekazania dalej są operacje rozgałęzień na wątkach.
+Każdy obiekt tworzony jest na podstawie szablonu określającego jego strukturę.
+
+\subsection{Asocjacja}
+
+Asocjacje reprezentują relacje między obiektami w scenariuszu. Mogą być tworzone i usuwane w ramach wydarzeń.
+
+\subsection{Atrybut}
+
+Atrybuty definiują właściwości obiektów, które mogą zmieniać się w czasie trwania scenariusza. Każdy atrybut jest tworzony 
+na podstawie szablonu obiektu określającego jego cechy domyślnie przyjmuje wartość zdefiniowaną w szablonie.
+
+\subsection{Wątek}
+
+Wątek reprezentuje sekwencję wydarzeń w scenariuszu, pozwalając na modelowanie równoległych ciągów wydarzeń. 
+Trwają określoną liczbę akcji. W systemie występują dwa rodzaje wątków:
+\begin{itemize}
+    \item Wątek Globalny:
+    \begin{itemize}
+        \item Jest jeden na scenariusz,
+        \item Zawiera wydarzenia globalne wpływające na wszystkie pozostałe wątki,
+        \item Przechowuje obiekty globalne dostępne w całym scenariuszu.
+    \end{itemize}
+    \item Wątki Lokalne:
+    \begin{itemize}
+        \item Reprezentują niezależne sekwencje wydarzeń,
+        \item Zawierają własne, lokalne obiekty,
+        \item Mogą być łączone lub rozdzielane za pomocą rozgałęzień.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Rozgałęzienie}
+
+Wątki mogą na siebie oddziaływać poprzez operacje:
+\begin{itemize}
+    \item FORK - podział jednego wątku na wiele, wraz z dystrybucją obiektów - definiowaną przez użytkownika.
+    \item JOIN - łączenie wielu wątków w jeden, wraz z przekazaniem ich obiektów.
+\end{itemize}
+
+\subsection{Wydarzenie}
+
+Wydarzenie trwa zawsze jedną akcję. Opisuje zachodzące w określonym momencie scenariusza zmiany (także te wpływające na organizację 
+wątków). System rozróżnia następujące typy wydarzeń:
+\begin{itemize}
+    \item START/END - kontrolują rozpoczęcie i zakończenie wątku.
+    \item NORMAL - standardowe wydarzenia w wątku lokalnym.
+    \item GLOBAL - wydarzenia w wątku globalnym (najwyższy priorytet).
+    \item FORK\_IN/FORK\_OUT - obsługują proces podziału wątku.
+    \item JOIN\_IN/JOIN\_OUT - obsługują proces łączenia wątków.
+    \item IDLE - wydarzenia puste, brak zmian w wątku.
+\end{itemize}
+
+Tylko wydarzenia IDLE, NORMAL oraz GLOBAL są bezpośrednio tworzone przez użytkownika. 
+W wydarzeniach NORMAL oraz GLOBAL następują modyfikacje atrybutów obiektów oraz zarządzanie asocjacjami między nimi.
 
 \newpage
 \section{Diagram przypadków użycia}
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.8\textwidth]{resources/local/use-case-diagram.png}
+    \includegraphics[width=0.5\textwidth]{resources/local/use-case-diagram-2.png}
     \caption{Diagram przypadków użycia}
     \label{fig:use_case_diagram}
 \end{figure}
@@ -89,17 +147,15 @@ trwania tych operacji obiekty mogą być przenoszone pomiędzy wątki. Obiekty g
     \hline
     UC3.1 & Utwórz szablon obiektu & Użytkownik tworzy szablon obiektu dostępny we wszystkich scenariuszach. \\
     \hline
-    UC3.3 & Utwórz obiekt & Użytkownik tworzy konkretny obiekt przypisany do scenariusza. \\
+    UC3.2 & Utwórz obiekt & Użytkownik tworzy konkretny obiekt przypisany do scenariusza. \\
     \hline
-    UC3.4 & Utwórz szablon atrybutu & Użytkownik tworzy szablon atrybutu przyporządkowany do danego szablonu obiektu. \\
+    UC3.3 & Utwórz szablon atrybutu & Użytkownik tworzy szablon atrybutu przyporządkowany do danego szablonu obiektu. \\
     \hline
-    UC3.5 & Utwórz atrybut & Użytkownik tworzy atrybut dla konkretnego obiektu. \\
+    UC3.4 & Utwórz typ obiektu & Użytkownik tworzy typ obiektu dostępny we wszystkich scenariuszach. \\
     \hline
-    UC3.2 & Utwórz typ obiektu & Użytkownik tworzy typ obiektu dostępny we wszystkich scenariuszach. \\
+    UC3.5 & Utwórz typ asocjacji & Użytkownik tworzy typ asocjacji dostępny we wszystkich scenariuszach. \\
     \hline
-    UC3.6 & Utwórz typ asocjacji & Użytkownik tworzy typ asocjacji dostępny we wszystkich scenariuszach. \\
-    \hline
-    UC3.7 & Utwórz asocjację & Użytkownik tworzy asocjację pomiędzy dwoma obiektami z danego scenariusza. \\
+    UC3.6 & Utwórz asocjację & Użytkownik tworzy asocjację pomiędzy dwoma obiektami z danego scenariusza. \\
     \hline
     UC4.1 & Utwórz wątek & Użytkownik tworzy nowy wątek poprzez rozdzielenie wątku istniejącego lub dodanie nowego osobnego wątku. \\
     \hline
@@ -109,7 +165,9 @@ trwania tych operacji obiekty mogą być przenoszone pomiędzy wątki. Obiekty g
     \hline
     UC5.2 & Edycja elementów statycznych oraz zdarzeń & Użytkownik modyfikuje istniejące elementy statyczne (np. obiekty, atrybuty) wraz z właściwościami zdarzeń i wątków. \\
     \hline
-    UC.6 & Usuń scenariusz & Użytkownik usuwa scenariusz po jego wybraniu z listy. System pyta o potwierdzenie i usuwa scenariusz wraz z danymi prywatnymi dla scenariusza na stałe. \\
+    UC.6.1 & Usuń scenariusz & Użytkownik usuwa scenariusz po jego wybraniu z listy. System pyta o potwierdzenie i usuwa scenariusz wraz z danymi prywatnymi dla scenariusza na stałe. \\
+    \hline
+    UC.6.2 & Usuń element statyczny & Użytkownik posiada opcję usunięcia: typu asocjacji oraz obiektu, szablonu obiektu oraz atrybutu, konkretnego obiektu, wątku, rozgałęzienia i fazy.    \\
     \hline
     UC.7 & Edycja konfiguracji & Użytkownik edytuje konfigurację. System wykorzystuje zdefiniowane właściwości przy tworzeniu nowego scenariusza. \\
     \hline
@@ -152,7 +210,7 @@ Wymagania pozafunkcjonalne są zgodne ze standardem ISO 25010, zdefiniowanym w k
     \hline
     NFR7 & Użyteczność & Aplikacja powinna zapewniać rozpoznawalność zastosowania. & Umożliwiło to zastosowanie czytelnego układu oraz zgodności z UX. \\
     \hline
-    NFR8 & Użyteczność & System powinien zawierać czytelny i intuicyjny interfejs. & Realizacja przy użyciu frameworka React. \\
+    NFR8 & Użyteczność & System powinien zawierać czytelny i intuicyjny interfejs. & Realizacja przy użyciu frameworka React oraz komponentów w standardzie WCAG 2.1. \\
     \hline
     NFR9 & Użyteczność & System powinien odpowiednio stosować semantykę HTML. & Wykorzystanie odpowiednich znaczników HTML oraz frameworków, które wspierają A11y. \\
     \hline

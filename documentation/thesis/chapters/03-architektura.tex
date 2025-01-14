@@ -66,8 +66,8 @@ Moduł przeznaczony do wizualizacji scenariusza.
 
 \textbf{Główne funkcje:}
 \begin{itemize}
-    \item Ukazanie faz oraz wątków scenariusza w czasie
-    \item Ukazanie zmian obiektów w poszczególnych momentach
+    \item Ukazanie faz oraz wątków scenariusza w czasie.
+    \item Ukazanie zmian obiektów w poszczególnych momentach.
 \end{itemize}
 
 \textbf{Kluczowe elementy:}
@@ -77,9 +77,9 @@ Moduł przeznaczony do wizualizacji scenariusza.
         \hline
         \textbf{Element} & \textbf{Opis} \\
         \hline
-        Oś czasu & Ukazuje relacje pomiędzy wątkami oraz fazy scenariusza \\
+        Oś czasu & Ukazuje relacje pomiędzy wątkami oraz fazy scenariusza. \\
         \hline
-        Widok szczegółowy wydarzenia & Ukazuje zmiany asocjacji oraz atrybutów obiektów \\
+        Widok szczegółowy wydarzenia & Ukazuje zmiany asocjacji oraz atrybutów obiektów. \\
         \hline
     \end{tabular}
 \end{table}
@@ -178,6 +178,168 @@ W naszym projekcie wykorzystaliśmy następujące technologie:
     \item[Intellij IDEA] Jest to środowisko programistyczne stworzone w celu tworzenia aplikacji w języku Java. Wybrane przez nas głównie ze względu na wszechstronność.
 \end{description}
 
+\section{Logika biznesowa}
+
+\subsection{Dodawanie scenariusza}
+
+\subsubsection{Cel operacji}
+Utworzenie nowego scenariusza, który służy jako główny kontener organizujący wydarzenia, wątki i obiekty w określonych ramach czasowych.
+
+\subsubsection{Operacja}
+Proces dodawania scenariusza obejmuje:
+\begin{enumerate}
+    \item \textbf{Konfigurację podstawową}
+    \begin{itemize}
+        \item Określenie ram czasowych (data początku i końca).
+        \item Zdefiniowanie jednostki czasu dla wydarzeń.
+        \item Ustalenie metadanych (tytuł, opis, kontekst, cel).
+    \end{itemize}
+    \item \textbf{Inicjalizację struktury}
+    \begin{itemize}
+        \item Utworzenie wątku globalnego do zarządzania głównymi wydarzeniami.
+        \item Przygotowanie dostępnych typów obiektów w scenariuszu.
+    \end{itemize}
+    \item \textbf{Konfigurację uprawnień}
+    \begin{itemize}
+        \item Przypisanie twórcy jako właściciela scenariusza.
+        \item Nadanie pełnych uprawnień administracyjnych.
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Ograniczenia biznesowe}
+\begin{itemize}
+    \item Ramy czasowe muszą być logicznie spójne (data końcowa później niż początkowa).
+    \item Każdy scenariusz musi mieć dokładnie jednego właściciela.
+    \item Scenariusz musi posiadać wątek globalny do synchronizacji wydarzeń.
+\end{itemize}
+
+\subsubsection{Rezultat}
+Utworzony scenariusz wraz z możliwymi do wykorzystania podstawowymi typami i zdefiniowanym wątkiem globalnym.
+
+\subsection{Usuwanie scenariusza}
+
+\subsubsection{Cel}
+Usunięcie scenariusza wraz z zawartymi w nim wydarzeniami, wątkami i obiektami.
+
+\subsubsection{Operacja}
+Proces usuwania scenariusza obejmuje:
+\begin{enumerate}
+    \item \textbf{Usuwanie obiektów}
+    \begin{itemize}
+        \item Wraz z nimi usuwane są wszelkie ich zmiany.
+    \end{itemize}
+    \item \textbf{Usuwanie wątków}
+    \begin{itemize}
+        \item Usuwanie rozgałęzień.
+        \item Usuwanie wydarzeń.
+    \end{itemize}
+    \item \textbf{Usuwanie samego scenariusza}
+    \begin{itemize}
+        \item Wraz z nim pozostałych powiązań.
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Ograniczenia biznesowe}
+Usuwający musi być autorem scenariusza.
+
+\subsubsection{Rezultat}
+Usunięty scenariusz wraz z wszystkimi śladami jego obecności.
+
+\subsection{Aktualizacja metadanych scenariusza}
+
+\subsubsection{Cel}
+Zmiana kontekstu scenariusza.
+
+\subsubsection{Operacja}
+Proces zmiany kontekstu scenariusza obejmuje wprowadzenie i zapisanie zmienionych informacji.
+
+\subsubsection{Ograniczenia biznesowe}
+Wprowadzone dane muszą istnieć (nie można wprowadzić wartości \texttt{null}).
+
+\subsubsection{Rezultat}
+Zmienione metadane scenariusza.
+
+\subsection{Dodawanie wątku}
+
+\subsubsection{Cel}
+Dodanie nowego wątku w scenariuszu.
+
+\subsubsection{Operacja}
+Wątek może być dodany na dwa różne sposoby (nie uwzględniając wątku globalnego wstawianego automatycznie wraz z tworzeniem scenariusza). Istnieją trzy podstawowe sposoby dodania wątku - jeden bezpośredni i dwa pośrednie. 
+Sposób bezpośredni obejmuje zwykłe wstawienie wątku w określonym czasie, natomiast pośrednie wstawienie rozgałęzień.
+\begin{itemize}
+    \item W przypadku "zwykłego" wątku obiekty możliwe są do dodania ręcznie.
+    \item W przypadku łączenia wątków (\texttt{JOIN}) wszystkie obiekty z wątków wchodzących przekazywane są do nowego wątku.
+    \item W przypadku podziału wątku należy zdefiniować, które obiekty mają być przekazane do którego potomka.
+\end{itemize}
+
+\paragraph{Bezpośredni} Proces wstawienia takiego wątku obejmuje:
+\begin{enumerate}
+    \item \textbf{Konfigurację podstawową}
+    \begin{itemize}
+        \item Zdefiniowanie podstawowych danych oraz czasu powstania wątku (konkretna akcja).
+    \end{itemize}
+    \item \textbf{Inicjalizację odpowiednich struktur}
+    \begin{itemize}
+        \item Dodanie wątku skutkuje wstawieniem wydarzeń \texttt{START} na jego początek oraz \texttt{END} na bezpośrednio kolejną akcję.
+    \end{itemize}
+\end{enumerate}
+
+\paragraph{Pośredni}
+Dodanie rozgałęzienia \texttt{JOIN} skutkuje utworzeniem jednego nowego wątku z połączenia innych, a \texttt{FORK} stworzeniem wielu wątków z jednego.
+
+\subsubsection{Ograniczenia biznesowe}
+W przypadku dodawania wątku bezpośrednio brak, dla rozgałęzień opisany oddzielnie.
+
+\subsubsection{Rezultat}
+Utworzenie nowego wątku.
+
+\subsection{Zmiana informacji wątku}
+
+\subsubsection{Cel}
+Zmiana informacji określonych w wątku.
+
+\subsubsection{Operacja}
+Operacja obejmuje wprowadzenie zmienionych danych i ich zapisanie.
+
+\subsubsection{Ograniczenia biznesowe}
+Nie można wstawić pustych danych.
+
+\subsubsection{Rezultat}
+Zmiana danych wątku.
+
+\subsection{Usuwanie wątku}
+
+\subsubsection{Cel}
+Usunięcie danego wątku.
+
+\subsubsection{Operacja}
+Ze względu na możliwe powiązania z innymi wątkami jest to operacja dość niebezpieczna, gdyż usuwa także wszystkie wątki bezpośrednio wynikające z usuwanego. 
+\begin{enumerate}
+    \item \textbf{Analizę wątków}
+    \begin{itemize}
+        \item Znajdowane są wszystkie wątki bezpośrednio wynikające z danego wątku za pomocą rozgałęzień.
+        \item \texttt{FORK} w całości zależy od konkretnego wątku.
+        \item \texttt{JOIN} tylko jeżeli wszystkie wątki wchodzące do niego zależą od jednego wątku.
+        \item W przypadku pozostawienia jednego wątku wchodzącego do łączenia nie jest ono potrzebne i w dalszej części będzie usunięte.
+    \end{itemize}
+    \item \textbf{Usunięcie danych wątków}
+    \begin{itemize}
+        \item Usuwany jest dany wątek i wszystkie z niego wynikające.
+        \item Usuwane są niepotrzebne rozgałęzienia.
+    \end{itemize}
+    \item \textbf{Usunięcie łączeń jeden-do-jednego}
+    \begin{itemize}
+        \item Wszystkie znalezione rozgałęzienia są usuwane.
+        \item Wydarzenia wątku wychodzącego są przenoszone do wątku wchodzącego, który jest odpowiednio wydłużany.
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Ograniczenia biznesowe}
+Brak.
+
+\subsubsection{Rezultat}
+Usunięcie wątku wraz z wszystkimi innymi, które były od niego zależne.
 
 \newpage
 \section{Schemat bazy danych}
@@ -190,11 +352,11 @@ W naszym projekcie wykorzystaliśmy następujące technologie:
 
 Legenda kolorów:
 \begin{itemize}
-    \item Żółte - encje globalne współdzielone pomiędzy scenariuszami
-    \item Zielone - encje realizujące relacje wiele do wielu
-    \item Białe - główne encje, które są wyłączne dla każdego scenariusza
-    \item Czerwone - encje pomocnicze
-    \item Niebieski - encje definiujące uprawnienia
+    \item Żółte - encje globalne współdzielone pomiędzy scenariuszami.
+    \item Zielone - encje realizujące relacje wiele do wielu.
+    \item Białe - główne encje, które są wyłączne dla każdego scenariusza.
+    \item Czerwone - encje pomocnicze.
+    \item Niebieski - encje definiujące uprawnienia.
 \end{itemize}
 
 \section{Opis encji}
@@ -281,11 +443,11 @@ Legenda kolorów:
                 \hline
                 \texttt{color} & Kolor zapisany heksadecymalnie, który zostanie użyty podczas wizualizacji fazy. \\
                 \hline
-                \texttt{start\_date} & czas rozpoczęcia fazy scenariusza, wyrażony za pomocą wewnętrznej dla scenariusz jednostki czasu. \\
+                \texttt{start\_date} & Czas rozpoczęcia fazy scenariusza, wyrażony za pomocą wewnętrznej dla scenariusz jednostki czasu. \\
                 \hline
-                \texttt{end\_date} & czas zakończenia fazy scenariusza, wyrażony za pomocą wewnętrznej dla scenariusz jednostki czasu. \\
+                \texttt{end\_date} & Czas zakończenia fazy scenariusza, wyrażony za pomocą wewnętrznej dla scenariusz jednostki czasu. \\
                 \hline
-                \texttt{scenario\_id} & klucz obcy scenariusza, do którego należy faza scenariusza. \\
+                \texttt{scenario\_id} & Klucz obcy scenariusza, do którego należy faza scenariusza. \\
                 \hline
             \end{tabular}
             \caption{Atrybuty encji \texttt{fazy scenariusza}}
@@ -318,9 +480,9 @@ Legenda kolorów:
         \hline
         \texttt{email} & Adres e-mail użytkownika. \\
         \hline
-        \texttt{first\_name} & Imię użytkownika \\
+        \texttt{first\_name} & Imię użytkownika. \\
         \hline
-        \texttt{last\_name} & Nazwisko użytkownika \\
+        \texttt{last\_name} & Nazwisko użytkownika. \\
         \hline
         \texttt{role} & Rola użytkownika:
         \begin{itemize}
@@ -354,14 +516,14 @@ Legenda kolorów:
         \hline
         \texttt{role} & Typ uprawnienia:
         \begin{itemize}
-            \item \texttt{AUTHOR} - pełne uprawnienia, włącznie z zarządzaniem dostępem.
-            \item \texttt{EDIT} - możliwość modyfikacji scenariusza
-            \item \texttt{VIEW} - podgląd scenariusza
+            \item \texttt{AUTHOR} - Pełne uprawnienia, włącznie z zarządzaniem dostępem.
+            \item \texttt{EDIT} - Możliwość modyfikacji scenariusza.
+            \item \texttt{VIEW} - Podgląd scenariusza.
         \end{itemize} \\
         \hline
-        \texttt{scenario\_id} & klucz obcy scenariusza, do którego odnosi się permisja \\
+        \texttt{scenario\_id} & Klucz obcy scenariusza, do którego odnosi się permisja. \\
         \hline
-        \texttt{user\_id} & klucz obcy użytkownika, do którego odnosi się permisja \\
+        \texttt{user\_id} & Klucz obcy użytkownika, do którego odnosi się permisja. \\
         \hline
     \end{tabular}
     \caption{Atrybuty encji \texttt{permisji}}
@@ -388,13 +550,13 @@ Legenda kolorów:
         \hline
         \texttt{id} & Unikalny identyfikator konfiguracji. \\
         \hline
-        \texttt{name} & Nazwa ustawień, unikalna dla scenariusza oraz użytkownika \\
+        \texttt{name} & Nazwa ustawień, unikalna dla scenariusza oraz użytkownika. \\
         \hline
         \texttt{conf} & Dane konfiguracji przechowywane w formacie JSON. \\
         \hline
-        \texttt{scenario\_id} & klucz obcy scenariusza, do którego odnosi się konfiguracja \\
+        \texttt{scenario\_id} & Klucz obcy scenariusza, do którego odnosi się konfiguracja. \\
         \hline
-        \texttt{user\_id} & klucz obcy użytkownika, do którego odnosi się konfiguracja \\
+        \texttt{user\_id} & Klucz obcy użytkownika, do którego odnosi się konfiguracja. \\
         \hline
     \end{tabular}
     \caption{Atrybuty encji \texttt{konfiguracji}}
@@ -429,24 +591,24 @@ Legenda kolorów:
         \hline
         \texttt{color} & Kolor zapisany heksadecymalnie, który zostanie użyty podczas wizualizacji obiektu. \\
         \hline
-        \texttt{is\_only\_global} & Wartość logiczna stwierdziająca czy obiekt może być tylko w wątku globalnym \\
+        \texttt{is\_only\_global} & Wartość logiczna stwierdziająca czy obiekt może być tylko w wątku globalnym. \\
         \hline
-        \texttt{has\_children} & Wartość logiczna stwierdziająca czy obiekt posiada potomne typy \\
+        \texttt{has\_children} & Wartość logiczna stwierdziająca czy obiekt posiada potomne typy. \\
         \hline
-        \texttt{is\_base\_type} & Wartość logiczna stwierdziająca czy jest typem podstawowym, tworzonym przy tworzeniu scenariusza \\
+        \texttt{is\_base\_type} & Wartość logiczna stwierdziająca czy jest typem podstawowym, tworzonym przy tworzeniu scenariusza. \\
         \hline
-        \texttt{can\_be\_user} & Wartość logiczna stwierdziająca czy obiekt może być przydzielony do użytkownika \\
+        \texttt{can\_be\_user} & Wartość logiczna stwierdziająca czy obiekt może być przydzielony do użytkownika. \\
         \hline
-        \texttt{parent\_id} & klucz obcy typu nadrzędnego, za pomocą którego tworzy się hierarchia \\
+        \texttt{parent\_id} & Klucz obcy typu nadrzędnego, za pomocą którego tworzy się hierarchia. \\
         \hline
     \end{tabular}
     \caption{Atrybuty encji \texttt{typu obiektu}}
 \end{table}
 
-Dodatkowe informacje
+Dodatkowe informacje:
 \begin{itemize}
-    \item Nie można usunąć typu używanego przez obiekty lub szablony
-    \item Usunięcie typu jest możliwe tylko gdy nie ma typów potomnych
+    \item Nie można usunąć typu używanego przez obiekty lub szablony.
+    \item Usunięcie typu jest możliwe tylko gdy nie ma typów potomnych.
 \end{itemize}
 
 \begin{figure}[H]
@@ -472,18 +634,18 @@ Dodatkowe informacje
         \hline
         \texttt{description} & Opis asocjacji \\
         \hline
-        \texttt{firstObjectTypeId} & Identyfikator pierwszego dozwolonego typu obiektu \\
+        \texttt{firstObjectTypeId} & Identyfikator pierwszego dozwolonego typu obiektu. \\
         \hline
-        \texttt{secondObjectTypeId} & Identyfikator drugiego dozwolonego typu obiektu \\
+        \texttt{secondObjectTypeId} & Identyfikator drugiego dozwolonego typu obiektu. \\
         \hline
     \end{tabular}
     \caption{Atrybuty encji \texttt{typu asocjacji}}
 \end{table}
 
-Dodatkowe informacje
+Dodatkowe informacje:
 \begin{itemize}
-    \item Nie można usunąć używanego typu asocjacji
-    \item Typ obiektu posiada relacje wiele do wielu z encją scenariusza
+    \item Nie można usunąć używanego typu asocjacji.
+    \item Typ obiektu posiada relacje wiele do wielu z encją scenariusza.
 \end{itemize}
 
 \subsection{Encje szablonowe}
@@ -515,16 +677,16 @@ Dodatkowe informacje
         \hline
         \texttt{color} & Kolor zapisany heksadecymalnie, który zostanie użyty podczas wizualizacji obiektu. \\
         \hline
-        \texttt{object\_type\_id} & klucz obcy typu obiektu, do którego można przypisać szablon \\
+        \texttt{object\_type\_id} & Klucz obcy typu obiektu, do którego można przypisać szablon. \\
         \hline
     \end{tabular}
     \caption{Atrybuty encji \texttt{szablonu obiektu}}
 \end{table}
 
-Dodatkowe informacje
+Dodatkowe informacje:
 \begin{itemize}
-    \item Nie można usunąć szablonu używanego przez obiekt
-    \item Szablon obiektu posiada relacje wiele do wielu z encją scenariusza
+    \item Nie można usunąć szablonu używanego przez obiekt.
+    \item Szablon obiektu posiada relacje wiele do wielu z encją scenariusza.
 \end{itemize}
 
 \begin{figure}[H]
@@ -532,7 +694,7 @@ Dodatkowe informacje
     \begin{minipage}{0.8\textwidth}
         \begin{framed}
             \noindent\textbf{\large Nazwa techniczna:} \texttt{qds\_attribute\_template} \\
-            \textbf{\large Nazwa robocza:} Szablon atrybutu obiektu \\
+            \textbf{\large Nazwa robocza:} Szablon atrybutu obiektu. \\
             \textbf{\large Opis:} Reprezentuje szablon obiektu określający jego strukturę atrybutów.
             Definiuje jakie atrybuty i jakiego typu musi posiadać obiekt stworzony na podstawie tego szablonu.
         \end{framed}
@@ -550,27 +712,27 @@ Dodatkowe informacje
         \hline
         \texttt{name} & Unikalna nazwa atrybutu. \\
         \hline
-        \texttt{default\_value} & Wartość domyślna atrybutu \\
+        \texttt{default\_value} & Wartość domyślna atrybutu. \\
         \hline
-        \texttt{unit} & Jednostka wartości atrybutu \\
+        \texttt{unit} & Jednostka wartości atrybutu. \\
         \hline
         \texttt{role} & Typ wartości atrybutu:
         \begin{itemize}
-            \item \texttt{INT} - liczba całkowita
-            \item \texttt{STRING} - łańcuch znaków
-            \item \texttt{DATE} - data lub czas
-            \item \texttt{BOOL} - wartość logiczna
+            \item \texttt{INT} - liczba całkowita.
+            \item \texttt{STRING} - łańcuch znaków.
+            \item \texttt{DATE} - data lub czas.
+            \item \texttt{BOOL} - wartość logiczna.
         \end{itemize} \\
         \hline
-        \texttt{object\_template\_id} & Klucz obcy szablonu obiektu, do którego przydzielony jest atrybut \\
+        \texttt{object\_template\_id} & Klucz obcy szablonu obiektu, do którego przydzielony jest atrybut. \\
         \hline
     \end{tabular}
     \caption{Atrybuty encji \texttt{szablonu atrybutu obiektu}}
 \end{table}
 
-Dodatkowe informacje
+Dodatkowe informacje:
 \begin{itemize}
-    \item Usuwany kaskadowo wraz z szablonem obiektu
+    \item Usuwany kaskadowo wraz z szablonem obiektu.
 \end{itemize}
 
 \subsection{Encje dotyczące konkretnego obiektu}
@@ -599,19 +761,19 @@ Dodatkowe informacje
         \hline
         \texttt{name} & Unikalna nazwa obiektu. \\
         \hline
-        \texttt{object\_type\_id} & Klucz obcy typu obiektu \\
+        \texttt{object\_type\_id} & Klucz obcy typu obiektu. \\
         \hline
-        \texttt{template\_id} & Klucz obcy szablonu obiektu \\
+        \texttt{template\_id} & Klucz obcy szablonu obiektu. \\
         \hline
-        \texttt{scenario\_id} & Klucz obcy scenariusza obiektu \\
+        \texttt{scenario\_id} & Klucz obcy scenariusza obiektu. \\
         \hline
     \end{tabular}
     \caption{Atrybuty encji \texttt{obiektu}}
 \end{table}
 
-Dodatkowe informacje
+Dodatkowe informacje:
 \begin{itemize}
-    \item Obiekt można przypisać do użytkownika systemu
+    \item Obiekt można przypisać do użytkownika systemu.
 \end{itemize}
 
 \begin{figure}[H]
@@ -635,20 +797,20 @@ Dodatkowe informacje
         \hline
         \texttt{id} & Unikalny identyfikator asocjacji. \\
         \hline
-        \texttt{association\_type\_id} & Klucz obcy typu asocjacji \\
+        \texttt{association\_type\_id} & Klucz obcy typu asocjacji. \\
         \hline
-        \texttt{object1\_id} & Klucz obcy pierwszego obiektu \\
+        \texttt{object1\_id} & Klucz obcy pierwszego obiektu. \\
         \hline
-        \texttt{object2\_id} & Klucz obcy drugiego obiektu \\
+        \texttt{object2\_id} & Klucz obcy drugiego obiektu. \\
         \hline
     \end{tabular}
     \caption{Atrybuty encji \texttt{asocjacji}}
 \end{table}
 
-Dodatkowe informacje
+Dodatkowe informacje:
 \begin{itemize}
-    \item Kombinacja (typ asocjacji, obiekt1, obiekt2) musi być unikalna
-    \item Usuwana automatycznie gdy usuwany jest którykolwiek z obiektów
+    \item Kombinacja (typ asocjacji, obiekt1, obiekt2) musi być unikalna.
+    \item Usuwana automatycznie gdy usuwany jest którykolwiek z obiektów.
 \end{itemize}
 
 \begin{figure}[H]
@@ -657,7 +819,7 @@ Dodatkowe informacje
         \begin{framed}
             \noindent\textbf{\large Nazwa techniczna:} \texttt{qds\_attribute} \\
             \textbf{\large Nazwa robocza:} Atrybut \\
-            \textbf{\large Opis:} Reprezentuje atrybut obiektu w systemie wraz z jego wartością początkową
+            \textbf{\large Opis:} Reprezentuje atrybut obiektu w systemie wraz z jego wartością początkową.
         \end{framed}
     \end{minipage}
 \end{figure}
@@ -671,20 +833,20 @@ Dodatkowe informacje
         \hline
         \texttt{id} & Unikalny identyfikator atrybutu. \\
         \hline
-        \texttt{initial\_value} & Wartość początkowa atrybutu \\
+        \texttt{initial\_value} & Wartość początkowa atrybutu. \\
         \hline
-        \texttt{object\_id} & Klucz obcy obiektu, którego dotyczy atrybut \\
+        \texttt{object\_id} & Klucz obcy obiektu, którego dotyczy atrybut. \\
         \hline
-        \texttt{attribute\_template\_id} & Klucz obcy szablonu atrybutu \\
+        \texttt{attribute\_template\_id} & Klucz obcy szablonu atrybutu. \\
         \hline
     \end{tabular}
     \caption{Atrybuty encji \texttt{atrybutu obiektu}}
 \end{table}
 
-Dodatkowe informacje
+Dodatkowe informacje:
 \begin{itemize}
-    \item Każdy obiekt posiada dokładnie wszystkie atrybuty zdefiniowane przez typ obiektu
-    \item Usuwany kaskadowo z obiektem
+    \item Każdy obiekt posiada dokładnie wszystkie atrybuty zdefiniowane przez typ obiektu.
+    \item Usuwany kaskadowo z obiektem.
 \end{itemize}
 
 \subsection{Encje wizualizujące upływ czasu}
@@ -695,7 +857,7 @@ Dodatkowe informacje
         \begin{framed}
             \noindent\textbf{\large Nazwa techniczna:} \texttt{qds\_thread} \\
             \textbf{\large Nazwa robocza:} Wątek \\
-            \textbf{\large Opis:} Reprezentuje wątek w scenariuszu - sekwencję wydarzeń w czasie
+            \textbf{\large Opis:} Reprezentuje wątek w scenariuszu - sekwencję wydarzeń w czasie.
         \end{framed}
     \end{minipage}
 \end{figure}
@@ -709,13 +871,13 @@ Dodatkowe informacje
         \hline
         \texttt{id} & Unikalny identyfikator wątku. \\
         \hline
-        \texttt{title} & Tytuł wątku \\
+        \texttt{title} & Tytuł wątku. \\
         \hline
-        \texttt{description} & Opis wątku \\
+        \texttt{description} & Opis wątku. \\
         \hline
-        \texttt{is\_global} & Wartość logiczna stwierdziająca czy wątek jest globalny, czy lokalny \\
+        \texttt{is\_global} & Wartość logiczna stwierdziająca czy wątek jest globalny, czy lokalny. \\
         \hline
-        \texttt{scenario\_id} & Klucz obcy scenariusza \\
+        \texttt{scenario\_id} & Klucz obcy scenariusza. \\
         \hline
     \end{tabular}
     \caption{Atrybuty encji \texttt{wątku}}
@@ -743,28 +905,28 @@ Dodatkowe informacje
         \hline
         \texttt{id} & Unikalny identyfikator wydarzenia. \\
         \hline
-        \texttt{title} & Tytuł wydarzenia \\
+        \texttt{title} & Tytuł wydarzenia. \\
         \hline
-        \texttt{description} & Opis wydarzenia \\
+        \texttt{description} & Opis wydarzenia. \\
         \hline
         \texttt{event\_time} & czas wydarzenia, wyrażony za pomocą wewnętrznej dla scenariusz jednostki czasu. \\
         \hline
-        \texttt{event\_type} & Typ wydarzenia
+        \texttt{event\_type} & Typ wydarzenia.
         \begin{itemize}
-            \item \texttt{GLOBAL} - Wydarzenie w wątku globalnym, nadpisuje zmiany z innych wątków
-            \item \texttt{NORMAL} - Standardowe wydarzenie w wątku
-            \item \texttt{START} - Początek wątku
-            \item \texttt{END} - Koniec wątku
-            \item \texttt{IDLE} - Wydarzenie puste
-            \item \texttt{JOIN\_OUT} - Początek wątku powstałego z połączenia
-            \item \texttt{JOIN\_IN} - Koniec wątku wchodzącego do połączenia
-            \item \texttt{FORK\_OUT} - Początek wątku powstałego z podziału
-            \item \texttt{FORK\_IN} - Wydarzenie w wątku przed podziałem
+            \item \texttt{GLOBAL} - Wydarzenie w wątku globalnym, nadpisuje zmiany z innych wątków.
+            \item \texttt{NORMAL} - Standardowe wydarzenie w wątku.
+            \item \texttt{START} - Początek wątku.
+            \item \texttt{END} - Koniec wątku.
+            \item \texttt{IDLE} - Wydarzenie puste.
+            \item \texttt{JOIN\_OUT} - Początek wątku powstałego z połączenia.
+            \item \texttt{JOIN\_IN} - Koniec wątku wchodzącego do połączenia.
+            \item \texttt{FORK\_OUT} - Początek wątku powstałego z podziału.
+            \item \texttt{FORK\_IN} - Wydarzenie w wątku przed podziałem.
         \end{itemize} \\
         \hline
-        \texttt{thread\_id} & Klucz obcy wątku, w ramach którego ma miejsce wydarzenie \\
+        \texttt{thread\_id} & Klucz obcy wątku, w ramach którego ma miejsce wydarzenie. \\
         \hline
-        \texttt{branching\_id} & Identyfikator powiązanego rozgałęzienia (tylko dla FORK/JOIN) \\
+        \texttt{branching\_id} & Identyfikator powiązanego rozgałęzienia (tylko dla FORK/JOIN). \\
         \hline
     \end{tabular}
     \caption{Atrybuty encji \texttt{wydarzenia}}
@@ -792,20 +954,20 @@ Dodatkowe informacje
         \hline
         \texttt{id} & Unikalny identyfikator zmiany atrybutu. \\
         \hline
-        \texttt{value} & Nowa wartość atrybutu \\
+        \texttt{value} & Nowa wartość atrybutu. \\
         \hline
-        \texttt{attribute\_id} & Klucz obcy atrybutu obiektu, którego wartość ulega zmianie \\
+        \texttt{attribute\_id} & Klucz obcy atrybutu obiektu, którego wartość ulega zmianie. \\
         \hline
-        \texttt{event\_id} & Klucz obcy wydarzenia, w ramach którego odbywa się zmiana atrybutu \\
+        \texttt{event\_id} & Klucz obcy wydarzenia, w ramach którego odbywa się zmiana atrybutu. \\
         \hline
     \end{tabular}
     \caption{Atrybuty encji \texttt{zmiany atrybutu obiektu}}
 \end{table}
 
-Dodatkowe informacje
+Dodatkowe informacje:
 \begin{itemize}
-    \item Każda zmiana musi być unikalna dla pary (wydarzenie, atrybut)
-    \item Zmiany są usuwane kaskadowo wraz z wydarzeniem lub modyfikowanym atrybutem
+    \item Każda zmiana musi być unikalna dla pary (wydarzenie, atrybut).
+    \item Zmiany są usuwane kaskadowo wraz z wydarzeniem lub modyfikowanym atrybutem.
 \end{itemize}
 
 \begin{figure}[H]
@@ -832,22 +994,22 @@ Dodatkowe informacje
         \hline
         \texttt{association\_operation} & Rodzaj operacji
         \begin{itemize}
-            \item \texttt{INSERT} - Dodanie nowej asocjacji między obiektami
-            \item \texttt{DELETE} - Usunięcie istniejącej asocjacji między obiektami
+            \item \texttt{INSERT} - Dodanie nowej asocjacji między obiektami.
+            \item \texttt{DELETE} - Usunięcie istniejącej asocjacji między obiektami.
         \end{itemize} \\
         \hline
-        \texttt{association\_id} & Klucz obcy atrybutu obiektu, którego wartość ulega zmianie \\
+        \texttt{association\_id} & Klucz obcy atrybutu obiektu, którego wartość ulega zmianie. \\
         \hline
-        \texttt{event\_id} & Klucz obcy wydarzenia, w ramach którego odbywa się zmiana atrybutu \\
+        \texttt{event\_id} & Klucz obcy wydarzenia, w ramach którego odbywa się zmiana atrybutu. \\
         \hline
     \end{tabular}
     \caption{Atrybuty encji \texttt{zmiany asocjacji obiektu}}
 \end{table}
 
-Dodatkowe informacje
+Dodatkowe informacje:
 \begin{itemize}
-    \item Każda zmiana musi być unikalna dla pary (wydarzenie, asocjacja)
-    \item Zmiany są usuwane kaskadowo wraz z wydarzeniem lub modyfikowaną asocjacją
+    \item Każda zmiana musi być unikalna dla pary (wydarzenie, asocjacja).
+    \item Zmiany są usuwane kaskadowo wraz z wydarzeniem lub modyfikowaną asocjacją.
 \end{itemize}
 
 \section{Indeksy}

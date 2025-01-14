@@ -8,19 +8,12 @@ możliwości użytkownika, jakość tworzonych scenariuszy oraz łatwość wspó
 Wizualizacja danych z różnych punktów widzenia:
 \begin{itemize}
     \item Koordynator - wizualizacja całościowej realizacji scenariusza na poziomie faz i wątków. Dobrym sposobem wizualizacji tej
-    perspektywy jest wykres Gantta
-    \item Aktor - wizualizacja wątków i obiektów istotnych dla konkretnego aktora
+    perspektywy jest wykres Gantta.
+    \item Aktor - wizualizacja wątków i obiektów istotnych dla konkretnego aktora.
     \item Obserwator w konkretnej lokalizacji - wizualizacja wątków i obiektów istotnych dla całego scenariusza oraz konkretnej fizycznej lokalizacji.
 \end{itemize}
 
 Ułatwiłoby to użytkownikom systemu zrozumienie ich roli, oraz ograniczyło zakres scenariusza do informacji im potrzebnych.
-
-\section{Zarządzanie wielodostępem}
-
-Przydatny byłby mechanizm proponowania zmian dla właściciela scenariusza. Użytkownik z wyłącznym prawem do odczytu mógłby proponować 
-zmiany właścicielowi scenariusza. Dodatkowo, dobrze współgrałby z tym mechanizm perspektywy. Podzielono by scenariusz na części, 
-za które odpowiedzialni by byli różni użytkownicy. Prawa odczytu i zmiany dotyczyłyby części scenariusza, a nie tak jak aktualnie 
-całości.
 
 \section{Zdarzenia alternatywne}
 
@@ -29,11 +22,26 @@ może wpłynąć na asocjacje oraz atrybuty obiektów tylko w jeden wybrany spos
 zapoczątkowaniu kilku nowych alternatywnych ścieżek fabuły. 
 \noindent Jako przykład można wskazać dwie sytuacje:
 \begin{itemize}
-    \item uczniowie ewakuowali się na dach
-    \item uczniowie ewakuowali się do piwnicy 
+    \item Uczniowie ewakuowali się na dach.
+    \item Uczniowie ewakuowali się do piwnicy.
 \end{itemize}
 \noindent Po takim zdarzeniu tworzyłyby się nowe alternatywne wątki. Różni się to od aktualnej implementacji wątków, 
 ponieważ obecnie umożliwiają one ukazanie równoległych, a nie alternatywnych, zdarzeń.
+
+\section{Moduł ewaluacji ćwiczeń}
+
+Moduł ewaluacji umożliwiłby realizację kolejnego etapu ćwiczeń, czyli analizę i ocenę odbytych ćwiczeń. Opierałby się na 
+wykorzystaniu perspektywy obserwatora, który mógłby prowadzić ocenę na poziomie wykonania poszczególnych akcji. 
+Wynikiem tych działań byłby całościowy raport oceniający skuteczność przeprowadzonych ćwiczeń,
+wskazujący miejsca do poprawy oraz wyciągnięte wnioski.
+
+
+\section{Zarządzanie wielodostępem}
+
+Przydatny byłby mechanizm proponowania zmian dla właściciela scenariusza. Użytkownik z wyłącznym prawem do odczytu mógłby proponować 
+zmiany właścicielowi scenariusza. Dodatkowo, dobrze współgrałby z tym mechanizm perspektywy. Podzielono by scenariusz na części, 
+za które odpowiedzialni by byli różni użytkownicy. Prawa odczytu i zmiany dotyczyłyby części scenariusza, a nie tak jak aktualnie 
+całości.
 
 \section{Eksport scenariusza}
 
