@@ -1,7 +1,7 @@
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
+  const date = parseISO(dateString);
   return format(date, 'HH:mm d MMM yy');
 };
 

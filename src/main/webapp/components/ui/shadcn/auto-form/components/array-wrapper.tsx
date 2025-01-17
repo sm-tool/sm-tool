@@ -10,7 +10,7 @@ export const ArrayWrapper: React.FC<ArrayWrapperProps> = ({
 }) => {
   return (
     <div className='space-y-4'>
-      <h3 className='text-lg font-medium'>{label}</h3>
+      <h3 className='text-lg font-medium truncate'>{label}</h3>
       {children}
       <Button onClick={onAddItem} variant='outline' size='sm' type='button'>
         <PlusIcon className='h-4 w-4' />

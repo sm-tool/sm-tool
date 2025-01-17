@@ -14,6 +14,8 @@ const alertVariants = cva(
                  [&>svg]:text-warning`,
         success: `bg-success/10 border-success/30 text-success 
                  [&>svg]:text-success`,
+        information:
+          'bg-secondary-400/10 border-secondary-200 text-secondary-600 [&>svg]:text-secondary',
       },
     },
     defaultVariants: {

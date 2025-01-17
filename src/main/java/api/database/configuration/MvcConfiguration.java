@@ -1,6 +1,7 @@
 package api.database.configuration;
 
-import api.database.interceptor.HeaderInterceptor;
+import api.database.interceptor.PermissionInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -10,12 +11,16 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class MvcConfiguration implements WebMvcConfigurer {
 
-  public MvcConfiguration() {
+  private final PermissionInterceptor permissionInterceptor;
+
+  @Autowired
+  public MvcConfiguration(PermissionInterceptor permissionInterceptor) {
     super();
+    this.permissionInterceptor = permissionInterceptor;
   }
 
   @Override
-  public void addInterceptors(final InterceptorRegistry registry) {
-    registry.addInterceptor(new HeaderInterceptor()); //+ pozostałe
+  public void addInterceptors(InterceptorRegistry registry) {
+    registry.addInterceptor(permissionInterceptor);
   }
 }

@@ -174,7 +174,7 @@ const MultiLevelDependencyLoader: React.FC = () => {
             y1={getLevelY(level)}
             x2='600'
             y2={getLevelY(level)}
-            stroke='#f3f4f6'
+            stroke='#475569'
             strokeWidth='2'
           />
         ))}

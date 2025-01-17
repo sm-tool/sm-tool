@@ -13,16 +13,40 @@ import { createFileRoute } from '@tanstack/react-router';
 // Import Routes
 
 import { Route as rootRoute } from './../../app/__root';
-import { Route as R500Import } from './../../app/500';
-import { Route as R404Import } from './../../app/404';
-import { Route as ScenarioIndexImport } from './../../app/scenario/index';
+import { Route as IndexImport } from './../../app/index';
+import { Route as HomeIndexImport } from './../../app/home/index';
 import { Route as HomeLayoutImport } from './../../app/home/_layout';
-import { Route as HomeLayoutIndexImport } from './../../app/home/_layout/index';
+import { Route as ScenarioScenarioIdIndexImport } from './../../app/scenario/$scenarioId/index';
+import { Route as Errors500IndexImport } from './../../app/errors/500/index';
+import { Route as Errors404IndexImport } from './../../app/errors/404/index';
+import { Route as Errors403IndexImport } from './../../app/errors/403/index';
+import { Route as ScenarioScenarioIdLayoutImport } from './../../app/scenario/$scenarioId/_layout';
+import { Route as HomeLayoutScenariosIndexImport } from './../../app/home/_layout/scenarios/index';
+import { Route as HomeLayoutCatalogLayoutImport } from './../../app/home/_layout/catalog/_layout';
+import { Route as ScenarioScenarioIdLayoutThreadsIndexImport } from './../../app/scenario/$scenarioId/_layout/threads/index';
+import { Route as ScenarioScenarioIdLayoutEventsLayoutImport } from './../../app/scenario/$scenarioId/_layout/events/_layout';
+import { Route as ScenarioScenarioIdLayoutEventsLayoutIndexImport } from './../../app/scenario/$scenarioId/_layout/events/_layout/index';
+import { Route as HomeLayoutCatalogLayoutTypesIndexImport } from './../../app/home/_layout/catalog/_layout/types/index';
+import { Route as HomeLayoutCatalogLayoutTemplatesIndexImport } from './../../app/home/_layout/catalog/_layout/templates/index';
+import { Route as HomeLayoutCatalogLayoutAssociationsIndexImport } from './../../app/home/_layout/catalog/_layout/associations/index';
+import { Route as HomeLayoutCatalogLayoutTypesObjectIdImport } from './../../app/home/_layout/catalog/_layout/types/$objectId';
+import { Route as HomeLayoutCatalogLayoutTemplatesTemplateIdImport } from './../../app/home/_layout/catalog/_layout/templates/$templateId';
+import { Route as HomeLayoutCatalogLayoutAssociationsAssociationIdImport } from './../../app/home/_layout/catalog/_layout/associations/$associationId';
+import { Route as ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutImport } from './../../app/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout';
+import { Route as ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutIndexImport } from './../../app/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/index';
+import { Route as ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutEventIdIndexImport } from './../../app/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/$eventId/index';
 
 // Create Virtual Routes
 
 const HomeImport = createFileRoute('/home')();
-const ScenarioPanelLazyImport = createFileRoute('/scenario/$panel')();
+const ScenarioScenarioIdImport = createFileRoute('/scenario/$scenarioId')();
+const HomeLayoutCatalogImport = createFileRoute('/home/_layout/catalog')();
+const ScenarioScenarioIdLayoutEventsImport = createFileRoute(
+  '/scenario/$scenarioId/_layout/events',
+)();
+const ScenarioScenarioIdLayoutEventsLayoutThreadIdImport = createFileRoute(
+  '/scenario/$scenarioId/_layout/events/_layout/$threadId',
+)();
 
 // Create/Update Routes
 
@@ -32,59 +56,182 @@ const HomeRoute = HomeImport.update({
   getParentRoute: () => rootRoute,
 } as any);
 
-const R500Route = R500Import.update({
-  id: '/500',
-  path: '/500',
+const IndexRoute = IndexImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRoute,
 } as any);
 
-const R404Route = R404Import.update({
-  id: '/404',
-  path: '/404',
+const ScenarioScenarioIdRoute = ScenarioScenarioIdImport.update({
+  id: '/scenario/$scenarioId',
+  path: '/scenario/$scenarioId',
   getParentRoute: () => rootRoute,
 } as any);
 
-const ScenarioIndexRoute = ScenarioIndexImport.update({
-  id: '/scenario/',
-  path: '/scenario/',
-  getParentRoute: () => rootRoute,
+const HomeIndexRoute = HomeIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => HomeRoute,
 } as any);
-
-const ScenarioPanelLazyRoute = ScenarioPanelLazyImport.update({
-  id: '/scenario/$panel',
-  path: '/scenario/$panel',
-  getParentRoute: () => rootRoute,
-} as any).lazy(() =>
-  import('./../../app/scenario/$panel.lazy').then(d => d.Route),
-);
 
 const HomeLayoutRoute = HomeLayoutImport.update({
   id: '/_layout',
   getParentRoute: () => HomeRoute,
 } as any);
 
-const HomeLayoutIndexRoute = HomeLayoutIndexImport.update({
-  id: '/',
-  path: '/',
+const HomeLayoutCatalogRoute = HomeLayoutCatalogImport.update({
+  id: '/catalog',
+  path: '/catalog',
   getParentRoute: () => HomeLayoutRoute,
 } as any);
+
+const ScenarioScenarioIdIndexRoute = ScenarioScenarioIdIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ScenarioScenarioIdRoute,
+} as any);
+
+const Errors500IndexRoute = Errors500IndexImport.update({
+  id: '/errors/500/',
+  path: '/errors/500/',
+  getParentRoute: () => rootRoute,
+} as any);
+
+const Errors404IndexRoute = Errors404IndexImport.update({
+  id: '/errors/404/',
+  path: '/errors/404/',
+  getParentRoute: () => rootRoute,
+} as any);
+
+const Errors403IndexRoute = Errors403IndexImport.update({
+  id: '/errors/403/',
+  path: '/errors/403/',
+  getParentRoute: () => rootRoute,
+} as any);
+
+const ScenarioScenarioIdLayoutRoute = ScenarioScenarioIdLayoutImport.update({
+  id: '/_layout',
+  getParentRoute: () => ScenarioScenarioIdRoute,
+} as any);
+
+const ScenarioScenarioIdLayoutEventsRoute =
+  ScenarioScenarioIdLayoutEventsImport.update({
+    id: '/events',
+    path: '/events',
+    getParentRoute: () => ScenarioScenarioIdLayoutRoute,
+  } as any);
+
+const HomeLayoutScenariosIndexRoute = HomeLayoutScenariosIndexImport.update({
+  id: '/scenarios/',
+  path: '/scenarios/',
+  getParentRoute: () => HomeLayoutRoute,
+} as any);
+
+const HomeLayoutCatalogLayoutRoute = HomeLayoutCatalogLayoutImport.update({
+  id: '/_layout',
+  getParentRoute: () => HomeLayoutCatalogRoute,
+} as any);
+
+const ScenarioScenarioIdLayoutThreadsIndexRoute =
+  ScenarioScenarioIdLayoutThreadsIndexImport.update({
+    id: '/threads/',
+    path: '/threads/',
+    getParentRoute: () => ScenarioScenarioIdLayoutRoute,
+  } as any);
+
+const ScenarioScenarioIdLayoutEventsLayoutRoute =
+  ScenarioScenarioIdLayoutEventsLayoutImport.update({
+    id: '/_layout',
+    getParentRoute: () => ScenarioScenarioIdLayoutEventsRoute,
+  } as any);
+
+const ScenarioScenarioIdLayoutEventsLayoutThreadIdRoute =
+  ScenarioScenarioIdLayoutEventsLayoutThreadIdImport.update({
+    id: '/$threadId',
+    path: '/$threadId',
+    getParentRoute: () => ScenarioScenarioIdLayoutEventsLayoutRoute,
+  } as any);
+
+const ScenarioScenarioIdLayoutEventsLayoutIndexRoute =
+  ScenarioScenarioIdLayoutEventsLayoutIndexImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => ScenarioScenarioIdLayoutEventsLayoutRoute,
+  } as any);
+
+const HomeLayoutCatalogLayoutTypesIndexRoute =
+  HomeLayoutCatalogLayoutTypesIndexImport.update({
+    id: '/types/',
+    path: '/types/',
+    getParentRoute: () => HomeLayoutCatalogLayoutRoute,
+  } as any);
+
+const HomeLayoutCatalogLayoutTemplatesIndexRoute =
+  HomeLayoutCatalogLayoutTemplatesIndexImport.update({
+    id: '/templates/',
+    path: '/templates/',
+    getParentRoute: () => HomeLayoutCatalogLayoutRoute,
+  } as any);
+
+const HomeLayoutCatalogLayoutAssociationsIndexRoute =
+  HomeLayoutCatalogLayoutAssociationsIndexImport.update({
+    id: '/associations/',
+    path: '/associations/',
+    getParentRoute: () => HomeLayoutCatalogLayoutRoute,
+  } as any);
+
+const HomeLayoutCatalogLayoutTypesObjectIdRoute =
+  HomeLayoutCatalogLayoutTypesObjectIdImport.update({
+    id: '/types/$objectId',
+    path: '/types/$objectId',
+    getParentRoute: () => HomeLayoutCatalogLayoutRoute,
+  } as any);
+
+const HomeLayoutCatalogLayoutTemplatesTemplateIdRoute =
+  HomeLayoutCatalogLayoutTemplatesTemplateIdImport.update({
+    id: '/templates/$templateId',
+    path: '/templates/$templateId',
+    getParentRoute: () => HomeLayoutCatalogLayoutRoute,
+  } as any);
+
+const HomeLayoutCatalogLayoutAssociationsAssociationIdRoute =
+  HomeLayoutCatalogLayoutAssociationsAssociationIdImport.update({
+    id: '/associations/$associationId',
+    path: '/associations/$associationId',
+    getParentRoute: () => HomeLayoutCatalogLayoutRoute,
+  } as any);
+
+const ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutRoute =
+  ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutImport.update({
+    id: '/_layout',
+    getParentRoute: () => ScenarioScenarioIdLayoutEventsLayoutThreadIdRoute,
+  } as any);
+
+const ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutIndexRoute =
+  ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutIndexImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () =>
+      ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutRoute,
+  } as any);
+
+const ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutEventIdIndexRoute =
+  ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutEventIdIndexImport.update({
+    id: '/$eventId/',
+    path: '/$eventId/',
+    getParentRoute: () =>
+      ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutRoute,
+  } as any);
 
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/404': {
-      id: '/404';
-      path: '/404';
-      fullPath: '/404';
-      preLoaderRoute: typeof R404Import;
-      parentRoute: typeof rootRoute;
-    };
-    '/500': {
-      id: '/500';
-      path: '/500';
-      fullPath: '/500';
-      preLoaderRoute: typeof R500Import;
+    '/': {
+      id: '/';
+      path: '/';
+      fullPath: '/';
+      preLoaderRoute: typeof IndexImport;
       parentRoute: typeof rootRoute;
     };
     '/home': {
@@ -101,38 +248,228 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeLayoutImport;
       parentRoute: typeof HomeRoute;
     };
-    '/scenario/$panel': {
-      id: '/scenario/$panel';
-      path: '/scenario/$panel';
-      fullPath: '/scenario/$panel';
-      preLoaderRoute: typeof ScenarioPanelLazyImport;
-      parentRoute: typeof rootRoute;
-    };
-    '/scenario/': {
-      id: '/scenario/';
-      path: '/scenario';
-      fullPath: '/scenario';
-      preLoaderRoute: typeof ScenarioIndexImport;
-      parentRoute: typeof rootRoute;
-    };
-    '/home/_layout/': {
-      id: '/home/_layout/';
+    '/home/': {
+      id: '/home/';
       path: '/';
       fullPath: '/home/';
-      preLoaderRoute: typeof HomeLayoutIndexImport;
+      preLoaderRoute: typeof HomeIndexImport;
+      parentRoute: typeof HomeImport;
+    };
+    '/scenario/$scenarioId': {
+      id: '/scenario/$scenarioId';
+      path: '/scenario/$scenarioId';
+      fullPath: '/scenario/$scenarioId';
+      preLoaderRoute: typeof ScenarioScenarioIdImport;
+      parentRoute: typeof rootRoute;
+    };
+    '/scenario/$scenarioId/_layout': {
+      id: '/scenario/$scenarioId/_layout';
+      path: '/scenario/$scenarioId';
+      fullPath: '/scenario/$scenarioId';
+      preLoaderRoute: typeof ScenarioScenarioIdLayoutImport;
+      parentRoute: typeof ScenarioScenarioIdRoute;
+    };
+    '/errors/403/': {
+      id: '/errors/403/';
+      path: '/errors/403';
+      fullPath: '/errors/403';
+      preLoaderRoute: typeof Errors403IndexImport;
+      parentRoute: typeof rootRoute;
+    };
+    '/errors/404/': {
+      id: '/errors/404/';
+      path: '/errors/404';
+      fullPath: '/errors/404';
+      preLoaderRoute: typeof Errors404IndexImport;
+      parentRoute: typeof rootRoute;
+    };
+    '/errors/500/': {
+      id: '/errors/500/';
+      path: '/errors/500';
+      fullPath: '/errors/500';
+      preLoaderRoute: typeof Errors500IndexImport;
+      parentRoute: typeof rootRoute;
+    };
+    '/scenario/$scenarioId/': {
+      id: '/scenario/$scenarioId/';
+      path: '/';
+      fullPath: '/scenario/$scenarioId/';
+      preLoaderRoute: typeof ScenarioScenarioIdIndexImport;
+      parentRoute: typeof ScenarioScenarioIdImport;
+    };
+    '/home/_layout/catalog': {
+      id: '/home/_layout/catalog';
+      path: '/catalog';
+      fullPath: '/home/catalog';
+      preLoaderRoute: typeof HomeLayoutCatalogImport;
       parentRoute: typeof HomeLayoutImport;
+    };
+    '/home/_layout/catalog/_layout': {
+      id: '/home/_layout/catalog/_layout';
+      path: '/catalog';
+      fullPath: '/home/catalog';
+      preLoaderRoute: typeof HomeLayoutCatalogLayoutImport;
+      parentRoute: typeof HomeLayoutCatalogRoute;
+    };
+    '/home/_layout/scenarios/': {
+      id: '/home/_layout/scenarios/';
+      path: '/scenarios';
+      fullPath: '/home/scenarios';
+      preLoaderRoute: typeof HomeLayoutScenariosIndexImport;
+      parentRoute: typeof HomeLayoutImport;
+    };
+    '/scenario/$scenarioId/_layout/events': {
+      id: '/scenario/$scenarioId/_layout/events';
+      path: '/events';
+      fullPath: '/scenario/$scenarioId/events';
+      preLoaderRoute: typeof ScenarioScenarioIdLayoutEventsImport;
+      parentRoute: typeof ScenarioScenarioIdLayoutImport;
+    };
+    '/scenario/$scenarioId/_layout/events/_layout': {
+      id: '/scenario/$scenarioId/_layout/events/_layout';
+      path: '/events';
+      fullPath: '/scenario/$scenarioId/events';
+      preLoaderRoute: typeof ScenarioScenarioIdLayoutEventsLayoutImport;
+      parentRoute: typeof ScenarioScenarioIdLayoutEventsRoute;
+    };
+    '/scenario/$scenarioId/_layout/threads/': {
+      id: '/scenario/$scenarioId/_layout/threads/';
+      path: '/threads';
+      fullPath: '/scenario/$scenarioId/threads';
+      preLoaderRoute: typeof ScenarioScenarioIdLayoutThreadsIndexImport;
+      parentRoute: typeof ScenarioScenarioIdLayoutImport;
+    };
+    '/home/_layout/catalog/_layout/associations/$associationId': {
+      id: '/home/_layout/catalog/_layout/associations/$associationId';
+      path: '/associations/$associationId';
+      fullPath: '/home/catalog/associations/$associationId';
+      preLoaderRoute: typeof HomeLayoutCatalogLayoutAssociationsAssociationIdImport;
+      parentRoute: typeof HomeLayoutCatalogLayoutImport;
+    };
+    '/home/_layout/catalog/_layout/templates/$templateId': {
+      id: '/home/_layout/catalog/_layout/templates/$templateId';
+      path: '/templates/$templateId';
+      fullPath: '/home/catalog/templates/$templateId';
+      preLoaderRoute: typeof HomeLayoutCatalogLayoutTemplatesTemplateIdImport;
+      parentRoute: typeof HomeLayoutCatalogLayoutImport;
+    };
+    '/home/_layout/catalog/_layout/types/$objectId': {
+      id: '/home/_layout/catalog/_layout/types/$objectId';
+      path: '/types/$objectId';
+      fullPath: '/home/catalog/types/$objectId';
+      preLoaderRoute: typeof HomeLayoutCatalogLayoutTypesObjectIdImport;
+      parentRoute: typeof HomeLayoutCatalogLayoutImport;
+    };
+    '/home/_layout/catalog/_layout/associations/': {
+      id: '/home/_layout/catalog/_layout/associations/';
+      path: '/associations';
+      fullPath: '/home/catalog/associations';
+      preLoaderRoute: typeof HomeLayoutCatalogLayoutAssociationsIndexImport;
+      parentRoute: typeof HomeLayoutCatalogLayoutImport;
+    };
+    '/home/_layout/catalog/_layout/templates/': {
+      id: '/home/_layout/catalog/_layout/templates/';
+      path: '/templates';
+      fullPath: '/home/catalog/templates';
+      preLoaderRoute: typeof HomeLayoutCatalogLayoutTemplatesIndexImport;
+      parentRoute: typeof HomeLayoutCatalogLayoutImport;
+    };
+    '/home/_layout/catalog/_layout/types/': {
+      id: '/home/_layout/catalog/_layout/types/';
+      path: '/types';
+      fullPath: '/home/catalog/types';
+      preLoaderRoute: typeof HomeLayoutCatalogLayoutTypesIndexImport;
+      parentRoute: typeof HomeLayoutCatalogLayoutImport;
+    };
+    '/scenario/$scenarioId/_layout/events/_layout/': {
+      id: '/scenario/$scenarioId/_layout/events/_layout/';
+      path: '/';
+      fullPath: '/scenario/$scenarioId/events/';
+      preLoaderRoute: typeof ScenarioScenarioIdLayoutEventsLayoutIndexImport;
+      parentRoute: typeof ScenarioScenarioIdLayoutEventsLayoutImport;
+    };
+    '/scenario/$scenarioId/_layout/events/_layout/$threadId': {
+      id: '/scenario/$scenarioId/_layout/events/_layout/$threadId';
+      path: '/$threadId';
+      fullPath: '/scenario/$scenarioId/events/$threadId';
+      preLoaderRoute: typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdImport;
+      parentRoute: typeof ScenarioScenarioIdLayoutEventsLayoutImport;
+    };
+    '/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout': {
+      id: '/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout';
+      path: '/$threadId';
+      fullPath: '/scenario/$scenarioId/events/$threadId';
+      preLoaderRoute: typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutImport;
+      parentRoute: typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdRoute;
+    };
+    '/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/': {
+      id: '/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/';
+      path: '/';
+      fullPath: '/scenario/$scenarioId/events/$threadId/';
+      preLoaderRoute: typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutIndexImport;
+      parentRoute: typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutImport;
+    };
+    '/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/$eventId/': {
+      id: '/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/$eventId/';
+      path: '/$eventId';
+      fullPath: '/scenario/$scenarioId/events/$threadId/$eventId';
+      preLoaderRoute: typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutEventIdIndexImport;
+      parentRoute: typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutImport;
     };
   }
 }
 
 // Create and export the route tree
 
+interface HomeLayoutCatalogLayoutRouteChildren {
+  HomeLayoutCatalogLayoutAssociationsAssociationIdRoute: typeof HomeLayoutCatalogLayoutAssociationsAssociationIdRoute;
+  HomeLayoutCatalogLayoutTemplatesTemplateIdRoute: typeof HomeLayoutCatalogLayoutTemplatesTemplateIdRoute;
+  HomeLayoutCatalogLayoutTypesObjectIdRoute: typeof HomeLayoutCatalogLayoutTypesObjectIdRoute;
+  HomeLayoutCatalogLayoutAssociationsIndexRoute: typeof HomeLayoutCatalogLayoutAssociationsIndexRoute;
+  HomeLayoutCatalogLayoutTemplatesIndexRoute: typeof HomeLayoutCatalogLayoutTemplatesIndexRoute;
+  HomeLayoutCatalogLayoutTypesIndexRoute: typeof HomeLayoutCatalogLayoutTypesIndexRoute;
+}
+
+const HomeLayoutCatalogLayoutRouteChildren: HomeLayoutCatalogLayoutRouteChildren =
+  {
+    HomeLayoutCatalogLayoutAssociationsAssociationIdRoute:
+      HomeLayoutCatalogLayoutAssociationsAssociationIdRoute,
+    HomeLayoutCatalogLayoutTemplatesTemplateIdRoute:
+      HomeLayoutCatalogLayoutTemplatesTemplateIdRoute,
+    HomeLayoutCatalogLayoutTypesObjectIdRoute:
+      HomeLayoutCatalogLayoutTypesObjectIdRoute,
+    HomeLayoutCatalogLayoutAssociationsIndexRoute:
+      HomeLayoutCatalogLayoutAssociationsIndexRoute,
+    HomeLayoutCatalogLayoutTemplatesIndexRoute:
+      HomeLayoutCatalogLayoutTemplatesIndexRoute,
+    HomeLayoutCatalogLayoutTypesIndexRoute:
+      HomeLayoutCatalogLayoutTypesIndexRoute,
+  };
+
+const HomeLayoutCatalogLayoutRouteWithChildren =
+  HomeLayoutCatalogLayoutRoute._addFileChildren(
+    HomeLayoutCatalogLayoutRouteChildren,
+  );
+
+interface HomeLayoutCatalogRouteChildren {
+  HomeLayoutCatalogLayoutRoute: typeof HomeLayoutCatalogLayoutRouteWithChildren;
+}
+
+const HomeLayoutCatalogRouteChildren: HomeLayoutCatalogRouteChildren = {
+  HomeLayoutCatalogLayoutRoute: HomeLayoutCatalogLayoutRouteWithChildren,
+};
+
+const HomeLayoutCatalogRouteWithChildren =
+  HomeLayoutCatalogRoute._addFileChildren(HomeLayoutCatalogRouteChildren);
+
 interface HomeLayoutRouteChildren {
-  HomeLayoutIndexRoute: typeof HomeLayoutIndexRoute;
+  HomeLayoutCatalogRoute: typeof HomeLayoutCatalogRouteWithChildren;
+  HomeLayoutScenariosIndexRoute: typeof HomeLayoutScenariosIndexRoute;
 }
 
 const HomeLayoutRouteChildren: HomeLayoutRouteChildren = {
-  HomeLayoutIndexRoute: HomeLayoutIndexRoute,
+  HomeLayoutCatalogRoute: HomeLayoutCatalogRouteWithChildren,
+  HomeLayoutScenariosIndexRoute: HomeLayoutScenariosIndexRoute,
 };
 
 const HomeLayoutRouteWithChildren = HomeLayoutRoute._addFileChildren(
@@ -141,79 +478,283 @@ const HomeLayoutRouteWithChildren = HomeLayoutRoute._addFileChildren(
 
 interface HomeRouteChildren {
   HomeLayoutRoute: typeof HomeLayoutRouteWithChildren;
+  HomeIndexRoute: typeof HomeIndexRoute;
 }
 
 const HomeRouteChildren: HomeRouteChildren = {
   HomeLayoutRoute: HomeLayoutRouteWithChildren,
+  HomeIndexRoute: HomeIndexRoute,
 };
 
 const HomeRouteWithChildren = HomeRoute._addFileChildren(HomeRouteChildren);
 
+interface ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutRouteChildren {
+  ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutIndexRoute: typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutIndexRoute;
+  ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutEventIdIndexRoute: typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutEventIdIndexRoute;
+}
+
+const ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutRouteChildren: ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutRouteChildren =
+  {
+    ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutIndexRoute:
+      ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutIndexRoute,
+    ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutEventIdIndexRoute:
+      ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutEventIdIndexRoute,
+  };
+
+const ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutRouteWithChildren =
+  ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutRoute._addFileChildren(
+    ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutRouteChildren,
+  );
+
+interface ScenarioScenarioIdLayoutEventsLayoutThreadIdRouteChildren {
+  ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutRoute: typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutRouteWithChildren;
+}
+
+const ScenarioScenarioIdLayoutEventsLayoutThreadIdRouteChildren: ScenarioScenarioIdLayoutEventsLayoutThreadIdRouteChildren =
+  {
+    ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutRoute:
+      ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutRouteWithChildren,
+  };
+
+const ScenarioScenarioIdLayoutEventsLayoutThreadIdRouteWithChildren =
+  ScenarioScenarioIdLayoutEventsLayoutThreadIdRoute._addFileChildren(
+    ScenarioScenarioIdLayoutEventsLayoutThreadIdRouteChildren,
+  );
+
+interface ScenarioScenarioIdLayoutEventsLayoutRouteChildren {
+  ScenarioScenarioIdLayoutEventsLayoutIndexRoute: typeof ScenarioScenarioIdLayoutEventsLayoutIndexRoute;
+  ScenarioScenarioIdLayoutEventsLayoutThreadIdRoute: typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdRouteWithChildren;
+}
+
+const ScenarioScenarioIdLayoutEventsLayoutRouteChildren: ScenarioScenarioIdLayoutEventsLayoutRouteChildren =
+  {
+    ScenarioScenarioIdLayoutEventsLayoutIndexRoute:
+      ScenarioScenarioIdLayoutEventsLayoutIndexRoute,
+    ScenarioScenarioIdLayoutEventsLayoutThreadIdRoute:
+      ScenarioScenarioIdLayoutEventsLayoutThreadIdRouteWithChildren,
+  };
+
+const ScenarioScenarioIdLayoutEventsLayoutRouteWithChildren =
+  ScenarioScenarioIdLayoutEventsLayoutRoute._addFileChildren(
+    ScenarioScenarioIdLayoutEventsLayoutRouteChildren,
+  );
+
+interface ScenarioScenarioIdLayoutEventsRouteChildren {
+  ScenarioScenarioIdLayoutEventsLayoutRoute: typeof ScenarioScenarioIdLayoutEventsLayoutRouteWithChildren;
+}
+
+const ScenarioScenarioIdLayoutEventsRouteChildren: ScenarioScenarioIdLayoutEventsRouteChildren =
+  {
+    ScenarioScenarioIdLayoutEventsLayoutRoute:
+      ScenarioScenarioIdLayoutEventsLayoutRouteWithChildren,
+  };
+
+const ScenarioScenarioIdLayoutEventsRouteWithChildren =
+  ScenarioScenarioIdLayoutEventsRoute._addFileChildren(
+    ScenarioScenarioIdLayoutEventsRouteChildren,
+  );
+
+interface ScenarioScenarioIdLayoutRouteChildren {
+  ScenarioScenarioIdLayoutEventsRoute: typeof ScenarioScenarioIdLayoutEventsRouteWithChildren;
+  ScenarioScenarioIdLayoutThreadsIndexRoute: typeof ScenarioScenarioIdLayoutThreadsIndexRoute;
+}
+
+const ScenarioScenarioIdLayoutRouteChildren: ScenarioScenarioIdLayoutRouteChildren =
+  {
+    ScenarioScenarioIdLayoutEventsRoute:
+      ScenarioScenarioIdLayoutEventsRouteWithChildren,
+    ScenarioScenarioIdLayoutThreadsIndexRoute:
+      ScenarioScenarioIdLayoutThreadsIndexRoute,
+  };
+
+const ScenarioScenarioIdLayoutRouteWithChildren =
+  ScenarioScenarioIdLayoutRoute._addFileChildren(
+    ScenarioScenarioIdLayoutRouteChildren,
+  );
+
+interface ScenarioScenarioIdRouteChildren {
+  ScenarioScenarioIdLayoutRoute: typeof ScenarioScenarioIdLayoutRouteWithChildren;
+  ScenarioScenarioIdIndexRoute: typeof ScenarioScenarioIdIndexRoute;
+}
+
+const ScenarioScenarioIdRouteChildren: ScenarioScenarioIdRouteChildren = {
+  ScenarioScenarioIdLayoutRoute: ScenarioScenarioIdLayoutRouteWithChildren,
+  ScenarioScenarioIdIndexRoute: ScenarioScenarioIdIndexRoute,
+};
+
+const ScenarioScenarioIdRouteWithChildren =
+  ScenarioScenarioIdRoute._addFileChildren(ScenarioScenarioIdRouteChildren);
+
 export interface FileRoutesByFullPath {
-  '/404': typeof R404Route;
-  '/500': typeof R500Route;
+  '/': typeof IndexRoute;
   '/home': typeof HomeLayoutRouteWithChildren;
-  '/scenario/$panel': typeof ScenarioPanelLazyRoute;
-  '/scenario': typeof ScenarioIndexRoute;
-  '/home/': typeof HomeLayoutIndexRoute;
+  '/home/': typeof HomeIndexRoute;
+  '/scenario/$scenarioId': typeof ScenarioScenarioIdLayoutRouteWithChildren;
+  '/errors/403': typeof Errors403IndexRoute;
+  '/errors/404': typeof Errors404IndexRoute;
+  '/errors/500': typeof Errors500IndexRoute;
+  '/scenario/$scenarioId/': typeof ScenarioScenarioIdIndexRoute;
+  '/home/catalog': typeof HomeLayoutCatalogLayoutRouteWithChildren;
+  '/home/scenarios': typeof HomeLayoutScenariosIndexRoute;
+  '/scenario/$scenarioId/events': typeof ScenarioScenarioIdLayoutEventsLayoutRouteWithChildren;
+  '/scenario/$scenarioId/threads': typeof ScenarioScenarioIdLayoutThreadsIndexRoute;
+  '/home/catalog/associations/$associationId': typeof HomeLayoutCatalogLayoutAssociationsAssociationIdRoute;
+  '/home/catalog/templates/$templateId': typeof HomeLayoutCatalogLayoutTemplatesTemplateIdRoute;
+  '/home/catalog/types/$objectId': typeof HomeLayoutCatalogLayoutTypesObjectIdRoute;
+  '/home/catalog/associations': typeof HomeLayoutCatalogLayoutAssociationsIndexRoute;
+  '/home/catalog/templates': typeof HomeLayoutCatalogLayoutTemplatesIndexRoute;
+  '/home/catalog/types': typeof HomeLayoutCatalogLayoutTypesIndexRoute;
+  '/scenario/$scenarioId/events/': typeof ScenarioScenarioIdLayoutEventsLayoutIndexRoute;
+  '/scenario/$scenarioId/events/$threadId': typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutRouteWithChildren;
+  '/scenario/$scenarioId/events/$threadId/': typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutIndexRoute;
+  '/scenario/$scenarioId/events/$threadId/$eventId': typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutEventIdIndexRoute;
 }
 
 export interface FileRoutesByTo {
-  '/404': typeof R404Route;
-  '/500': typeof R500Route;
-  '/home': typeof HomeLayoutIndexRoute;
-  '/scenario/$panel': typeof ScenarioPanelLazyRoute;
-  '/scenario': typeof ScenarioIndexRoute;
+  '/': typeof IndexRoute;
+  '/home': typeof HomeIndexRoute;
+  '/scenario/$scenarioId': typeof ScenarioScenarioIdIndexRoute;
+  '/errors/403': typeof Errors403IndexRoute;
+  '/errors/404': typeof Errors404IndexRoute;
+  '/errors/500': typeof Errors500IndexRoute;
+  '/home/catalog': typeof HomeLayoutCatalogLayoutRouteWithChildren;
+  '/home/scenarios': typeof HomeLayoutScenariosIndexRoute;
+  '/scenario/$scenarioId/events': typeof ScenarioScenarioIdLayoutEventsLayoutIndexRoute;
+  '/scenario/$scenarioId/threads': typeof ScenarioScenarioIdLayoutThreadsIndexRoute;
+  '/home/catalog/associations/$associationId': typeof HomeLayoutCatalogLayoutAssociationsAssociationIdRoute;
+  '/home/catalog/templates/$templateId': typeof HomeLayoutCatalogLayoutTemplatesTemplateIdRoute;
+  '/home/catalog/types/$objectId': typeof HomeLayoutCatalogLayoutTypesObjectIdRoute;
+  '/home/catalog/associations': typeof HomeLayoutCatalogLayoutAssociationsIndexRoute;
+  '/home/catalog/templates': typeof HomeLayoutCatalogLayoutTemplatesIndexRoute;
+  '/home/catalog/types': typeof HomeLayoutCatalogLayoutTypesIndexRoute;
+  '/scenario/$scenarioId/events/$threadId': typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutIndexRoute;
+  '/scenario/$scenarioId/events/$threadId/$eventId': typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutEventIdIndexRoute;
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute;
-  '/404': typeof R404Route;
-  '/500': typeof R500Route;
+  '/': typeof IndexRoute;
   '/home': typeof HomeRouteWithChildren;
   '/home/_layout': typeof HomeLayoutRouteWithChildren;
-  '/scenario/$panel': typeof ScenarioPanelLazyRoute;
-  '/scenario/': typeof ScenarioIndexRoute;
-  '/home/_layout/': typeof HomeLayoutIndexRoute;
+  '/home/': typeof HomeIndexRoute;
+  '/scenario/$scenarioId': typeof ScenarioScenarioIdRouteWithChildren;
+  '/scenario/$scenarioId/_layout': typeof ScenarioScenarioIdLayoutRouteWithChildren;
+  '/errors/403/': typeof Errors403IndexRoute;
+  '/errors/404/': typeof Errors404IndexRoute;
+  '/errors/500/': typeof Errors500IndexRoute;
+  '/scenario/$scenarioId/': typeof ScenarioScenarioIdIndexRoute;
+  '/home/_layout/catalog': typeof HomeLayoutCatalogRouteWithChildren;
+  '/home/_layout/catalog/_layout': typeof HomeLayoutCatalogLayoutRouteWithChildren;
+  '/home/_layout/scenarios/': typeof HomeLayoutScenariosIndexRoute;
+  '/scenario/$scenarioId/_layout/events': typeof ScenarioScenarioIdLayoutEventsRouteWithChildren;
+  '/scenario/$scenarioId/_layout/events/_layout': typeof ScenarioScenarioIdLayoutEventsLayoutRouteWithChildren;
+  '/scenario/$scenarioId/_layout/threads/': typeof ScenarioScenarioIdLayoutThreadsIndexRoute;
+  '/home/_layout/catalog/_layout/associations/$associationId': typeof HomeLayoutCatalogLayoutAssociationsAssociationIdRoute;
+  '/home/_layout/catalog/_layout/templates/$templateId': typeof HomeLayoutCatalogLayoutTemplatesTemplateIdRoute;
+  '/home/_layout/catalog/_layout/types/$objectId': typeof HomeLayoutCatalogLayoutTypesObjectIdRoute;
+  '/home/_layout/catalog/_layout/associations/': typeof HomeLayoutCatalogLayoutAssociationsIndexRoute;
+  '/home/_layout/catalog/_layout/templates/': typeof HomeLayoutCatalogLayoutTemplatesIndexRoute;
+  '/home/_layout/catalog/_layout/types/': typeof HomeLayoutCatalogLayoutTypesIndexRoute;
+  '/scenario/$scenarioId/_layout/events/_layout/': typeof ScenarioScenarioIdLayoutEventsLayoutIndexRoute;
+  '/scenario/$scenarioId/_layout/events/_layout/$threadId': typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdRouteWithChildren;
+  '/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout': typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutRouteWithChildren;
+  '/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/': typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutIndexRoute;
+  '/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/$eventId/': typeof ScenarioScenarioIdLayoutEventsLayoutThreadIdLayoutEventIdIndexRoute;
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
-    | '/404'
-    | '/500'
+    | '/'
     | '/home'
-    | '/scenario/$panel'
-    | '/scenario'
-    | '/home/';
+    | '/home/'
+    | '/scenario/$scenarioId'
+    | '/errors/403'
+    | '/errors/404'
+    | '/errors/500'
+    | '/scenario/$scenarioId/'
+    | '/home/catalog'
+    | '/home/scenarios'
+    | '/scenario/$scenarioId/events'
+    | '/scenario/$scenarioId/threads'
+    | '/home/catalog/associations/$associationId'
+    | '/home/catalog/templates/$templateId'
+    | '/home/catalog/types/$objectId'
+    | '/home/catalog/associations'
+    | '/home/catalog/templates'
+    | '/home/catalog/types'
+    | '/scenario/$scenarioId/events/'
+    | '/scenario/$scenarioId/events/$threadId'
+    | '/scenario/$scenarioId/events/$threadId/'
+    | '/scenario/$scenarioId/events/$threadId/$eventId';
   fileRoutesByTo: FileRoutesByTo;
-  to: '/404' | '/500' | '/home' | '/scenario/$panel' | '/scenario';
+  to:
+    | '/'
+    | '/home'
+    | '/scenario/$scenarioId'
+    | '/errors/403'
+    | '/errors/404'
+    | '/errors/500'
+    | '/home/catalog'
+    | '/home/scenarios'
+    | '/scenario/$scenarioId/events'
+    | '/scenario/$scenarioId/threads'
+    | '/home/catalog/associations/$associationId'
+    | '/home/catalog/templates/$templateId'
+    | '/home/catalog/types/$objectId'
+    | '/home/catalog/associations'
+    | '/home/catalog/templates'
+    | '/home/catalog/types'
+    | '/scenario/$scenarioId/events/$threadId'
+    | '/scenario/$scenarioId/events/$threadId/$eventId';
   id:
     | '__root__'
-    | '/404'
-    | '/500'
+    | '/'
     | '/home'
     | '/home/_layout'
-    | '/scenario/$panel'
-    | '/scenario/'
-    | '/home/_layout/';
+    | '/home/'
+    | '/scenario/$scenarioId'
+    | '/scenario/$scenarioId/_layout'
+    | '/errors/403/'
+    | '/errors/404/'
+    | '/errors/500/'
+    | '/scenario/$scenarioId/'
+    | '/home/_layout/catalog'
+    | '/home/_layout/catalog/_layout'
+    | '/home/_layout/scenarios/'
+    | '/scenario/$scenarioId/_layout/events'
+    | '/scenario/$scenarioId/_layout/events/_layout'
+    | '/scenario/$scenarioId/_layout/threads/'
+    | '/home/_layout/catalog/_layout/associations/$associationId'
+    | '/home/_layout/catalog/_layout/templates/$templateId'
+    | '/home/_layout/catalog/_layout/types/$objectId'
+    | '/home/_layout/catalog/_layout/associations/'
+    | '/home/_layout/catalog/_layout/templates/'
+    | '/home/_layout/catalog/_layout/types/'
+    | '/scenario/$scenarioId/_layout/events/_layout/'
+    | '/scenario/$scenarioId/_layout/events/_layout/$threadId'
+    | '/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout'
+    | '/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/'
+    | '/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/$eventId/';
   fileRoutesById: FileRoutesById;
 }
 
 export interface RootRouteChildren {
-  R404Route: typeof R404Route;
-  R500Route: typeof R500Route;
+  IndexRoute: typeof IndexRoute;
   HomeRoute: typeof HomeRouteWithChildren;
-  ScenarioPanelLazyRoute: typeof ScenarioPanelLazyRoute;
-  ScenarioIndexRoute: typeof ScenarioIndexRoute;
+  ScenarioScenarioIdRoute: typeof ScenarioScenarioIdRouteWithChildren;
+  Errors403IndexRoute: typeof Errors403IndexRoute;
+  Errors404IndexRoute: typeof Errors404IndexRoute;
+  Errors500IndexRoute: typeof Errors500IndexRoute;
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  R404Route: R404Route,
-  R500Route: R500Route,
+  IndexRoute: IndexRoute,
   HomeRoute: HomeRouteWithChildren,
-  ScenarioPanelLazyRoute: ScenarioPanelLazyRoute,
-  ScenarioIndexRoute: ScenarioIndexRoute,
+  ScenarioScenarioIdRoute: ScenarioScenarioIdRouteWithChildren,
+  Errors403IndexRoute: Errors403IndexRoute,
+  Errors404IndexRoute: Errors404IndexRoute,
+  Errors500IndexRoute: Errors500IndexRoute,
 };
 
 export const routeTree = rootRoute
@@ -226,41 +767,156 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/404",
-        "/500",
+        "/",
         "/home",
-        "/scenario/$panel",
-        "/scenario/"
+        "/scenario/$scenarioId",
+        "/errors/403/",
+        "/errors/404/",
+        "/errors/500/"
       ]
     },
-    "/404": {
-      "filePath": "404.tsx"
-    },
-    "/500": {
-      "filePath": "500.tsx"
+    "/": {
+      "filePath": "index.tsx"
     },
     "/home": {
       "filePath": "home",
       "children": [
-        "/home/_layout"
+        "/home/_layout",
+        "/home/"
       ]
     },
     "/home/_layout": {
       "filePath": "home/_layout.tsx",
       "parent": "/home",
       "children": [
-        "/home/_layout/"
+        "/home/_layout/catalog",
+        "/home/_layout/scenarios/"
       ]
     },
-    "/scenario/$panel": {
-      "filePath": "scenario/$panel.lazy.tsx"
+    "/home/": {
+      "filePath": "home/index.tsx",
+      "parent": "/home"
     },
-    "/scenario/": {
-      "filePath": "scenario/index.tsx"
+    "/scenario/$scenarioId": {
+      "filePath": "scenario/$scenarioId",
+      "children": [
+        "/scenario/$scenarioId/_layout",
+        "/scenario/$scenarioId/"
+      ]
     },
-    "/home/_layout/": {
-      "filePath": "home/_layout/index.tsx",
+    "/scenario/$scenarioId/_layout": {
+      "filePath": "scenario/$scenarioId/_layout.tsx",
+      "parent": "/scenario/$scenarioId",
+      "children": [
+        "/scenario/$scenarioId/_layout/events",
+        "/scenario/$scenarioId/_layout/threads/"
+      ]
+    },
+    "/errors/403/": {
+      "filePath": "errors/403/index.tsx"
+    },
+    "/errors/404/": {
+      "filePath": "errors/404/index.tsx"
+    },
+    "/errors/500/": {
+      "filePath": "errors/500/index.tsx"
+    },
+    "/scenario/$scenarioId/": {
+      "filePath": "scenario/$scenarioId/index.tsx",
+      "parent": "/scenario/$scenarioId"
+    },
+    "/home/_layout/catalog": {
+      "filePath": "home/_layout/catalog",
+      "parent": "/home/_layout",
+      "children": [
+        "/home/_layout/catalog/_layout"
+      ]
+    },
+    "/home/_layout/catalog/_layout": {
+      "filePath": "home/_layout/catalog/_layout.tsx",
+      "parent": "/home/_layout/catalog",
+      "children": [
+        "/home/_layout/catalog/_layout/associations/$associationId",
+        "/home/_layout/catalog/_layout/templates/$templateId",
+        "/home/_layout/catalog/_layout/types/$objectId",
+        "/home/_layout/catalog/_layout/associations/",
+        "/home/_layout/catalog/_layout/templates/",
+        "/home/_layout/catalog/_layout/types/"
+      ]
+    },
+    "/home/_layout/scenarios/": {
+      "filePath": "home/_layout/scenarios/index.tsx",
       "parent": "/home/_layout"
+    },
+    "/scenario/$scenarioId/_layout/events": {
+      "filePath": "scenario/$scenarioId/_layout/events",
+      "parent": "/scenario/$scenarioId/_layout",
+      "children": [
+        "/scenario/$scenarioId/_layout/events/_layout"
+      ]
+    },
+    "/scenario/$scenarioId/_layout/events/_layout": {
+      "filePath": "scenario/$scenarioId/_layout/events/_layout.tsx",
+      "parent": "/scenario/$scenarioId/_layout/events",
+      "children": [
+        "/scenario/$scenarioId/_layout/events/_layout/",
+        "/scenario/$scenarioId/_layout/events/_layout/$threadId"
+      ]
+    },
+    "/scenario/$scenarioId/_layout/threads/": {
+      "filePath": "scenario/$scenarioId/_layout/threads/index.tsx",
+      "parent": "/scenario/$scenarioId/_layout"
+    },
+    "/home/_layout/catalog/_layout/associations/$associationId": {
+      "filePath": "home/_layout/catalog/_layout/associations/$associationId.tsx",
+      "parent": "/home/_layout/catalog/_layout"
+    },
+    "/home/_layout/catalog/_layout/templates/$templateId": {
+      "filePath": "home/_layout/catalog/_layout/templates/$templateId.tsx",
+      "parent": "/home/_layout/catalog/_layout"
+    },
+    "/home/_layout/catalog/_layout/types/$objectId": {
+      "filePath": "home/_layout/catalog/_layout/types/$objectId.tsx",
+      "parent": "/home/_layout/catalog/_layout"
+    },
+    "/home/_layout/catalog/_layout/associations/": {
+      "filePath": "home/_layout/catalog/_layout/associations/index.tsx",
+      "parent": "/home/_layout/catalog/_layout"
+    },
+    "/home/_layout/catalog/_layout/templates/": {
+      "filePath": "home/_layout/catalog/_layout/templates/index.tsx",
+      "parent": "/home/_layout/catalog/_layout"
+    },
+    "/home/_layout/catalog/_layout/types/": {
+      "filePath": "home/_layout/catalog/_layout/types/index.tsx",
+      "parent": "/home/_layout/catalog/_layout"
+    },
+    "/scenario/$scenarioId/_layout/events/_layout/": {
+      "filePath": "scenario/$scenarioId/_layout/events/_layout/index.tsx",
+      "parent": "/scenario/$scenarioId/_layout/events/_layout"
+    },
+    "/scenario/$scenarioId/_layout/events/_layout/$threadId": {
+      "filePath": "scenario/$scenarioId/_layout/events/_layout/$threadId",
+      "parent": "/scenario/$scenarioId/_layout/events/_layout",
+      "children": [
+        "/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout"
+      ]
+    },
+    "/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout": {
+      "filePath": "scenario/$scenarioId/_layout/events/_layout/$threadId/_layout.tsx",
+      "parent": "/scenario/$scenarioId/_layout/events/_layout/$threadId",
+      "children": [
+        "/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/",
+        "/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/$eventId/"
+      ]
+    },
+    "/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/": {
+      "filePath": "scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/index.tsx",
+      "parent": "/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout"
+    },
+    "/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/$eventId/": {
+      "filePath": "scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/$eventId/index.tsx",
+      "parent": "/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout"
     }
   }
 }

@@ -28,7 +28,7 @@ const AccordionTrigger = React.forwardRef<
       ref={reference}
       className={cn(
         `flex flex-1 items-center justify-between py-4 text-sm font-medium transition-all
-        text-foreground hover:text-content4 hover:bg-content2/50 rounded-sm
+        text-foreground hover:text-default-800 hover:bg-content3 rounded-sm
         [&[data-state=open]>svg]:rotate-180`,
         className,
       )}
@@ -40,6 +40,32 @@ const AccordionTrigger = React.forwardRef<
   </AccordionPrimitive.Header>
 ));
 AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName;
+
+const AccordionTriggerWithAction = React.forwardRef<
+  React.ElementRef<typeof AccordionPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger> & {
+    actionElement?: React.ReactNode;
+  }
+>(({ className, children, actionElement, ...properties }, reference) => (
+  <AccordionPrimitive.Header className='relative flex items-center min-h-[44px] px-4'>
+    {actionElement}
+    <AccordionPrimitive.Trigger
+      ref={reference}
+      className={cn(
+        `absolute inset-0 flex w-full items-center justify-end py-4 text-sm font-medium
+        transition-all text-foreground hover:text-default-800 hover:bg-content3
+        rounded-sm [&[data-state=open]>svg]:rotate-180`,
+        className,
+      )}
+      {...properties}
+    >
+      {children}
+      <ChevronDown className='h-4 w-4 shrink-0 text-content4 transition-transform duration-200 mr-4' />
+    </AccordionPrimitive.Trigger>
+  </AccordionPrimitive.Header>
+));
+
+AccordionTriggerWithAction.displayName = 'AccordionTriggerWithAction';
 
 const AccordionContent = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Content>,
@@ -60,4 +86,10 @@ const AccordionContent = React.forwardRef<
 ));
 AccordionContent.displayName = AccordionPrimitive.Content.displayName;
 
-export { Accordion, AccordionItem, AccordionTrigger, AccordionContent };
+export {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+  AccordionTriggerWithAction,
+};

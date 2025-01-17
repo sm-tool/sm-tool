@@ -6,6 +6,18 @@
 # The above will handle all files NOT found below
 # These files are text and should be normalized (Convert crlf => lf)
 
+# javadoc
+documentation/backend/* linguist-documentation
+documentation/backend/** linguist-documentation
+
+# jsdoc
+documentation/frontend/* linguist-documentation
+documentation/frontend/** linguist-documentation
+
+# sanity-check
+documentation/backend/* linguist-generated=true
+documentation/frontend/* linguist-generated=true
+
 *.bat           text eol=crlf
 *.cmd           text eol=crlf
 *.ps1           text eol=crlf

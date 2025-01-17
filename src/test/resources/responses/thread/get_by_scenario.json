@@ -1,0 +1,22 @@
+[
+  {
+    "id": 0,
+    "incomingBranchingId": null,
+    "outgoingBranchingId": null,
+    "endTime": 1,
+    "startTime": 0,
+    "description": "GLOBAL_THREAD",
+    "title": "GLOBAL",
+    "objectIds": [1, 2]
+  },
+  {
+    "id": 2,
+    "incomingBranchingId": null,
+    "outgoingBranchingId": null,
+    "endTime": 4,
+    "startTime": 0,
+    "description": "NEW_THREAD_DESCRIPTION",
+    "title": "NEW_THREAD_TITLE",
+    "objectIds": [1, 2]
+  }
+]

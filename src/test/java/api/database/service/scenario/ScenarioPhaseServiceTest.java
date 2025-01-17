@@ -1,46 +1,46 @@
 package api.database.service.scenario;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
-import api.database.entity.scenario.QdsScenarioPhase;
+import api.database.entity.scenario.Scenario;
 import api.database.model.exception.ApiException;
-import api.database.model.scenario.QdsInfoScenarioPhaseAdd;
-import api.database.repository.scenario.QdsScenarioPhaseRepository;
-import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import utils.BaseUnitTest;
+import utils.builders.QdsAddScenarioBuilder;
+import utils.builders.ScenarioPhaseSaveRequestBuilder;
 
-class ScenarioPhaseServiceTest {
+class ScenarioPhaseServiceTest extends BaseUnitTest {
 
-  @Mock
-  private QdsScenarioPhaseRepository qdsScenarioPhaseRepository;
-
-  @InjectMocks
+  @Autowired
   private ScenarioPhaseService scenarioPhaseService;
 
-  @BeforeEach
-  void setUp() {
-    MockitoAnnotations.openMocks(this);
-  }
-
   @Test
-  void testAddPhaseWithoutOverlap() {
-    when(qdsScenarioPhaseRepository.findAllByScenarioId(1)).thenReturn(
-      List.of(new QdsScenarioPhase(1, "Phase 1", "", "", 10, 20, 1, null))
-    );
+  @Transactional
+  void testValidatePhaseOverlapWithoutOverlap() {
+    Scenario addedScenario = getObjectManager()
+      .addScenarioByManager(new QdsAddScenarioBuilder().build());
 
-    scenarioPhaseService.addPhase(
-      1,
-      new QdsInfoScenarioPhaseAdd("New Phase", "", "", 25, 30)
-    );
+    getObjectManager()
+      .addScenarioPhaseByManager(
+        new ScenarioPhaseSaveRequestBuilder()
+          .setStartTime(10)
+          .setEndTime(20)
+          .build(),
+        addedScenario.getId()
+      );
 
-    verify(qdsScenarioPhaseRepository, times(1)).save(any());
+    assertDoesNotThrow(() ->
+      scenarioPhaseService.validatePhaseOverlap(
+        addedScenario.getId(),
+        25,
+        30,
+        null
+      )
+    );
   }
 
   @ParameterizedTest
@@ -49,28 +49,84 @@ class ScenarioPhaseServiceTest {
       "5, 15", // Częściowe nakładanie z przodu
       "15, 25", // Częściowe nakładanie z tyłu
       "12, 18", // Całkowicie w środku
-      "5, 25", // Całkowite nakładanie z obydwu stron
+      "5, 25", // Całkowite nakładanie z obu stron
     }
   )
-  void testAddPhaseWithOverlapParameterized(int startTime, int endTime) {
-    when(qdsScenarioPhaseRepository.findAllByScenarioId(1)).thenReturn(
-      List.of(new QdsScenarioPhase(1, "Phase 1", "", "", 10, 20, 1, null))
-    );
+  void testValidatePhaseOverlapWithOverlap(int startTime, int endTime) {
+    Scenario addedScenario = getObjectManager()
+      .addScenarioByManager(new QdsAddScenarioBuilder().build());
 
-    QdsInfoScenarioPhaseAdd testCase = new QdsInfoScenarioPhaseAdd(
-      "Overlapping Phase",
-      "",
-      "",
-      startTime,
-      endTime
-    );
+    getObjectManager()
+      .addScenarioPhaseByManager(
+        new ScenarioPhaseSaveRequestBuilder()
+          .setStartTime(10)
+          .setEndTime(20)
+          .build(),
+        addedScenario.getId()
+      );
 
     ApiException exception = assertThrows(ApiException.class, () ->
-      scenarioPhaseService.addPhase(1, testCase)
+      scenarioPhaseService.validatePhaseOverlap(
+        addedScenario.getId(),
+        startTime,
+        endTime,
+        null
+      )
     );
 
     assertEquals("PHASE_OVERLAP", exception.getErrorCode().name());
-
-    verify(qdsScenarioPhaseRepository, never()).save(any());
   }
 }
+//class ScenarioPhaseServiceTest extends BaseUnitTest {
+//
+//  @InjectMocks
+//  private ScenarioPhaseService scenarioPhaseService;
+//
+//  @Test
+//  void testAddScenarioPhaseWithoutOverlap() {
+//    scenarioPhaseService.addScenarioPhase(
+//      new ScenarioPhaseSaveRequest("New Phase", "", "", 25, 30),
+//      1
+//    );
+//  }
+//
+//  @ParameterizedTest
+//  @CsvSource(
+//    {
+//      "5, 15", // Częściowe nakładanie z przodu
+//      "15, 25", // Częściowe nakładanie z tyłu
+//      "12, 18", // Całkowicie w środku
+//      "5, 25", // Całkowite nakładanie z obydwu stron
+//    }
+//  )
+//  void testAddScenarioPhaseWithOverlapParameterized(
+//    int startTime,
+//    int endTime
+//  ) {
+//    Scenario addedScenario = getObjectManager()
+//      .addScenarioByManager(new QdsAddScenarioBuilder().build());
+//
+//    ScenarioPhase addedPhase = getObjectManager()
+//      .addScenarioPhaseByManager(
+//        new ScenarioPhaseSaveRequestBuilder()
+//          .setStartTime(10)
+//          .setEndTime(20)
+//          .build(),
+//        addedScenario.getId()
+//      );
+//
+//    ScenarioPhaseSaveRequest testCase = new ScenarioPhaseSaveRequest(
+//      "Overlapping Phase",
+//      "",
+//      "",
+//      startTime,
+//      endTime
+//    );
+//
+//    ApiException exception = assertThrows(ApiException.class, () ->
+//      scenarioPhaseService.addScenarioPhase(testCase, 1)
+//    );
+//
+//    assertEquals("PHASE_OVERLAP", exception.getErrorCode().name());
+//  }
+//}

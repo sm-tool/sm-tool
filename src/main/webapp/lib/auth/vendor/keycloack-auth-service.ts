@@ -1,6 +1,44 @@
 import { AuthenticationTokenData, IAuthService } from '@/lib/auth/types.ts';
 import Keycloak from 'keycloak-js';
+import { core } from '@/lib/core.tsx';
 
+/**
+ * Serwis autoryzacji wykorzystujący Keycloak do implementacji interfejsu IAuthService.
+ *
+ * @description
+ * Klasa implementuje logikę autoryzacji przez Keycloak, w tym:
+ * - inicjalizację klienta Keycloak
+ * - logowanie/wylogowywanie użytkownika
+ * - odświeżanie tokenów
+ * - zarządzanie profilem użytkownika
+ *
+ * Wymaga poprawnie skonfigurowanych zmiennych środowiskowych:
+ * - APP_URL - URL aplikacji
+ * - KEYCLOAK_URL - URL serwera Keycloak
+ * - KEYCLOAK_REALM - nazwa realmu Keycloak
+ * - KEYCLOAK_CLIENT_ID - ID klienta w Keycloak
+ *
+ * @example
+ * ```ts
+ * const auth = new KeycloakService();
+ *
+ * // Inicjalizacja
+ * await auth.initialize();
+ *
+ * // Logowanie z przekierowaniem
+ * await auth.login('/dashboard');
+ *
+ * // Sprawdzanie tokenu
+ * const token = auth.getToken();
+ * const isLoggedIn = auth.isAuthenticated();
+ *
+ * // Odświeżanie tokenu
+ * await auth.refreshToken();
+ *
+ * // Wylogowanie
+ * await auth.logout();
+ * ```
+ */
 export class KeycloakService implements IAuthService {
   private keycloak: Keycloak;
   private url = globalThis.process.env.APP_URL;
@@ -17,11 +55,17 @@ export class KeycloakService implements IAuthService {
 
   async initialize() {
     try {
-      return await this.keycloak.init({
+      const initialized = await this.keycloak.init({
         onLoad: 'login-required',
         pkceMethod: 'S256',
         enableLogging: true,
       });
+
+      this.keycloak.onTokenExpired = () => {
+        core.queryClient.clear();
+      };
+
+      return initialized;
     } catch (error) {
       console.error('Keycloak initialization failed:', error);
       return false;
@@ -36,6 +80,8 @@ export class KeycloakService implements IAuthService {
   }
 
   async logout(redirectUri?: string) {
+    core.queryClient.clear();
+
     return await this.keycloak.logout({
       redirectUri: redirectUri ?? globalThis.location.origin,
     });
@@ -79,6 +125,7 @@ export class KeycloakService implements IAuthService {
         return;
       }
     } catch {
+      core.queryClient.clear();
       await this.logout();
     }
   }

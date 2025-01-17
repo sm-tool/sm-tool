@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/shadcn/input.tsx';
 import Separator from '@/components/ui/shadcn/separator.tsx';
 import { Button } from '@/components/ui/shadcn/button.tsx';
 import { KeyRound, Settings, Trash2 } from 'lucide-react';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 const AccountSettingsModal = () => {
   const authDispatch = useAuthDispatch();
@@ -18,6 +19,10 @@ const AccountSettingsModal = () => {
 
   return (
     <DialogContent className='sm:max-w-[425px]'>
+      <VisuallyHidden>
+        <DialogTitle></DialogTitle>
+        <DialogDescription></DialogDescription>
+      </VisuallyHidden>
       <DialogHeader>
         <DialogTitle>Account Settings</DialogTitle>
         <DialogDescription>

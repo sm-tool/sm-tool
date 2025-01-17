@@ -1,7 +1,9 @@
 package api.database.controller.event;
 
-import api.database.model.QdsResponseUpdateList;
-import api.database.model.event.QdsDataEvent;
+import api.database.model.request.composite.update.EventUpdateRequest;
+import api.database.model.response.EventResponse;
+import api.database.model.response.EventStateResponse;
+import api.database.service.event.EventProvider;
 import api.database.service.event.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,27 +14,69 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/event")
+@RequestMapping("/api/events")
 public class EventController {
 
   private final EventService eventService;
+  private final EventProvider eventProvider;
 
   @Autowired
-  public EventController(EventService eventService) {
+  public EventController(
+    EventService eventService,
+    EventProvider eventProvider
+  ) {
     this.eventService = eventService;
+    this.eventProvider = eventProvider;
   }
 
-  @GetMapping("/all")
-  public ResponseEntity<List<QdsDataEvent>> getAllEvents(
+  //--------------------------------------------------Endpoint GET------------------------------------------------------
+  @ResponseStatus(HttpStatus.OK)
+  @GetMapping
+  public List<EventResponse> getEvents(@RequestHeader Integer scenarioId) {
+    return eventProvider.getEventsForScenario(scenarioId);
+  }
+
+  @ResponseStatus(HttpStatus.OK)
+  @GetMapping("/{id}")
+  public EventResponse getOneEvent(
+    @PathVariable Integer id,
     @RequestHeader Integer scenarioId
   ) {
-    return ResponseEntity.ok(eventService.getEventsForScenario(scenarioId));
+    return eventProvider.getOneEvent(id, scenarioId);
   }
 
+  @ResponseStatus(HttpStatus.OK)
+  @GetMapping("/thread/{threadId}")
+  public List<EventResponse> getThreadEvents(
+    @RequestHeader Integer scenarioId,
+    @PathVariable Integer threadId
+  ) {
+    return eventProvider.getEventsForThread(threadId, scenarioId);
+  }
+
+  @ResponseStatus(HttpStatus.OK)
+  @GetMapping("/state/{id}")
+  public EventStateResponse getEventState(
+    @PathVariable("id") Integer eventId,
+    @RequestHeader Integer scenarioId
+  ) {
+    return eventProvider.getEventState(eventId, scenarioId);
+  }
+
+  @ResponseStatus(HttpStatus.OK)
+  @GetMapping("/previous-state/{id}")
+  public EventStateResponse getEventPreviousState(
+    @PathVariable("id") Integer eventId,
+    @RequestHeader Integer scenarioId
+  ) {
+    return eventProvider.getEventPreviousState(eventId, scenarioId);
+  }
+
+  // ----------------------------------------------------Endpoint PUT---------------------------------------------------
   @Operation(
     summary = "Add a new event",
     operationId = "addEvent",
@@ -41,7 +85,7 @@ public class EventController {
       required = true,
       content = @Content(
         mediaType = "application/json",
-        schema = @Schema(implementation = QdsDataEvent.class)
+        schema = @Schema(implementation = EventUpdateRequest.class)
       )
     ),
     parameters = {
@@ -67,17 +111,13 @@ public class EventController {
       @ApiResponse(responseCode = "400", description = "Invalid input"),
     }
   )
-  @PostMapping("/add")
-  public ResponseEntity<QdsResponseUpdateList> addEvent(
-    @Valid @RequestBody QdsDataEvent info,
-    @RequestHeader Integer scenarioId
+  @ResponseStatus(HttpStatus.OK)
+  @PutMapping("/{id}")
+  public EventResponse changeEvent(
+    @RequestHeader Integer scenarioId,
+    @PathVariable Integer id,
+    @Valid @RequestBody EventUpdateRequest info
   ) {
-    return ResponseEntity.ok(eventService.addEvent(scenarioId, info));
-  }
-
-  @DeleteMapping("/{eventId}")
-  public ResponseEntity<String> deleteEvent(@PathVariable Integer eventId) {
-    eventService.deleteEventIfValid(eventId);
-    return ResponseEntity.ok("Event deleted successfully.");
+    return eventService.changeEvent(id, info, scenarioId);
   }
 }

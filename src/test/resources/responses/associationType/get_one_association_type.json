@@ -1,0 +1,6 @@
+{
+  "id": 1,
+  "description": "Association A-B",
+  "firstObjectTypeId": 1,
+  "secondObjectTypeId": 2
+}

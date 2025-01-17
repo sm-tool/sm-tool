@@ -1,0 +1,53 @@
+{
+  "_embedded": {
+    "associationTypes": [
+      {
+        "id": 4,
+        "description": "Association A-A",
+        "firstObjectTypeId": 1,
+        "secondObjectTypeId": 1
+      },
+      {
+        "id": 1,
+        "description": "Association A-B",
+        "firstObjectTypeId": 1,
+        "secondObjectTypeId": 2
+      },
+      {
+        "id": 3,
+        "description": "Association A-C",
+        "firstObjectTypeId": 1,
+        "secondObjectTypeId": 3
+      },
+      {
+        "id": 2,
+        "description": "Association B-C",
+        "firstObjectTypeId": 2,
+        "secondObjectTypeId": 3
+      },
+      {
+        "id": 5,
+        "description": "Association C-C",
+        "firstObjectTypeId": 3,
+        "secondObjectTypeId": 3
+      },
+      {
+        "id": 6,
+        "description": "Association D-C",
+        "firstObjectTypeId": 4,
+        "secondObjectTypeId": 3
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "http://localhost/api/association-types/scenario?page=0&size=20&sort=description,asc"
+    }
+  },
+  "page": {
+    "size": 20,
+    "totalElements": 6,
+    "totalPages": 1,
+    "number": 0
+  }
+}

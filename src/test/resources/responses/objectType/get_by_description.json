@@ -1,0 +1,28 @@
+{
+  "_embedded": {
+    "objectTypes": [
+      {
+        "id": 10,
+        "title": "Type D",
+        "description": "Description D",
+        "color": "#000FFF",
+        "isOnlyGlobal": false,
+        "hasChildren": false,
+        "isBaseType": false,
+        "canBeUser": false,
+        "parentId": 2
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "http://localhost/api/object-types/search/findByDescription?page=0&size=20&sort=title,asc"
+    }
+  },
+  "page": {
+    "size": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "number": 0
+  }
+}

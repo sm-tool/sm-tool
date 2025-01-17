@@ -1,72 +1,49 @@
-# System Zarządzania Scenariuszami
+# System planowania scenariuszy kryzysowych
 
-System umożliwia modelowanie złożonych scenariuszy składających się z wątków, wydarzeń i obiektów. Pozwala na śledzenie zmian atrybutów obiektów oraz relacji między nimi w czasie.
+Organizacje zajmujące się ćwiczeniami oraz reagowaniem na sytuacje kryzysowe systematycznie przeprowadzają symulacje i testy procedur postępowania. Celem tych działań jest ciągłe ulepszanie systemów bezpieczeństwa oraz doskonalenie umiejętności radzenia sobie w sytuacjach niekontrolowanych. W takich ćwiczeniach biorą udział różne grupy osób, w tym służby mundurowe, personel medyczny, pracownicy infrastruktury transportowej oraz użytkownicy testowanych systemów.
 
-## Kluczowe Koncepcje
+Ze względu na złożoność, koszty oraz zaangażowane zasoby, kluczowe znaczenie ma dokładne planowanie takich działań z uwzględnieniem standardów jak TGM (Trial Guidance Methodology) czy CWA 18009:2023.
 
-### Organizacja Scenariusza
+Niniejsza aplikacja została stworzona jako kompleksowe narzędzie wspierające proces planowania eksperymentów, ze szczególnym uwzględnieniem projektowania scenariuszy sytuacji kryzysowych.
 
-- **Wątek (Thread)** - sekwencja wydarzeń, która może się łączyć z innymi wątkami (JOIN) lub dzielić na wiele wątków (FORK)
-- **Wydarzenie (Event)** - pojedynczy punkt w czasie, w którym następują zmiany atrybutów obiektów lub ich asocjacji
-- **Rozgałęzienie (Branching)** - operacja łączenia (JOIN) lub podziału (FORK) wątków
-- **Akcja** - jednostka czasu w scenariuszu (domyślnie 10 minut)
+## Funkcjonalności systemu
 
-### Typy Wydarzeń
+System umożliwia tworzenie scenariuszy zawierających:
 
-- **START** - rozpoczyna wątek, umożliwia dodanie lokalnych obiektów
-- **END** - kończy wątek
-- **NORMAL** - standardowe wydarzenie w wątku, może modyfikować obiekty
-- **GLOBAL** - wydarzenie w wątku globalnym, zmiany mają priorytet nad NORMAL
-- **JOIN_IN/JOIN_OUT** - wydarzenia oznaczające łączenie wątków
-- **FORK_IN/FORK_OUT** - wydarzenia oznaczające podział wątku
-- **IDLE** - wydarzenie puste (bez zmian)
+* Sekwencje działań pozwalające na uporządkowane planowanie kolejnych kroków procedury
+* Podziały na wątki umożliwiające organizację różnych aspektów scenariusza
+* Poszczególne akcje definiujące konkretne działania do wykonania
+* Obiekty opisane przez typy, szablony i asocjacje, pozwalające na szczegółowe modelowanie elementów scenariusza
+* Zmiany na obiektach przez atrybuty lub asocjacje, umożliwiające śledzenie modyfikacji w czasie
+* Rozdzielone operacje podziałów wątków dla lepszej organizacji złożonych scenariuszy
 
-### Obiekty i Asocjacje
+# Struktura projektu
+## Organizacja katalogów
 
-- **Obiekt** - podstawowa jednostka w scenariuszu, posiada:
-- Typ określający możliwe asocjacje
-- Zestaw atrybutów zgodny z szablonem
-- Może być globalny (dostępny we wszystkich wątkach) lub lokalny
+    /documentation - Zawiera pełną dokumentację projektu, włączając instrukcje techniczne i dokumentację użytkową
+    /src - Główny katalog zawierający kod źródłowy, podzielony na sekcje testową i produkcyjną
+        /main - Kod produkcyjny aplikacji
+            /java - Backend aplikacji napisany w Java
+            /resources - Współdzielone zasoby wykorzystywane przez różne komponenty systemu
+            /webapp - Frontend aplikacji napisany w React
+        /test - Testy jednostkowe i integracyjne
 
-- **Asocjacja** - relacja między dwoma obiektami:
-- Tworzona i modyfikowana tylko w kontekście wydarzeń
-- Zmiana może być typu INSERT lub DELETE
-- Musi być zgodna z regułami określonymi przez typy obiektów
+## Wymagania deweloperskie
+### Konfiguracja środowiska
 
-### Zarządzanie Dostępem
+Przed rozpoczęciem pracy wymagane jest:
 
-- Każdy scenariusz ma swojego autora
-- Autor może nadawać innym użytkownikom uprawnienia do:
-- Podglądu scenariusza
-- Edycji scenariusza
+    Uruchomienie środowiska Docker dla serwera developerskiego
+    Konfiguracja build.gradle.kts do pracy z backendem
+    Instalacja menadżera pakietów Node.js
+    Konfiguracja Husky do weryfikacji kodu
+    Ustawienie Prettier do formatowania kodu
 
-## Kluczowe Zasady
+### Praca z frontendem
 
-1. **Wątki i Obiekty**
-- Obiekty są stałe w ramach wątku
-- Transfer obiektów możliwy tylko przy operacjach FORK/JOIN
-- Obiekty globalne dostępne we wszystkich wątkach
+Do rozpoczęcia pracy z częścią frontendową należy:
 
-2. **Wydarzenia i Zmiany**
-- Zmiany atrybutów i asocjacji tylko w ramach wydarzeń
-- Wydarzenia GLOBAL nadpisują zmiany z wydarzeń NORMAL
-- Każda zmiana musi być zgodna z regułami typów i szablonów
+    Spełnić wszystkie poprzednie wymagania deweloperskie
+    Zainstalować zależności z pliku src/main/webapp/package.json
+    Uruchomić aplikację w trybie deweloperskim za pomocą skryptu dev
 
-3. **Rozgałęzienia**
-- JOIN łączy wiele wątków w jeden
-- FORK dzieli jeden wątek na wiele
-- Przy rozgałęzieniach następuje transfer obiektów między wątkami
-
-![najnowsza.png](database/najnowsza.png)
-
-### Oznaczenie kolorystyczne
-
-Żółte - tabelki globalne
-
-Zielone - tabelki łączące (wiele do wielu)
-
-Białe - główne tabelki scenariusza
-
-Czerwone - tabelki pomocnicze
-
-Niebieski - uprawnienia

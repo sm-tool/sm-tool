@@ -12,7 +12,7 @@ const buttonVariants = cva(
    focus-visible:ring-2 
    focus-visible:ring-content4
    focus-visible:ring-offset-2 
-   disabled:pointer-events-none 
+   disabled:pointer-events-none
    disabled:opacity-50`,
   {
     variants: {
@@ -21,12 +21,13 @@ const buttonVariants = cva(
         primary: 'bg-primary text-background hover:bg-primary/90',
         secondary: 'bg-secondary text-foreground hover:bg-secondary/90',
         outline: `border border-content3 
-                 bg-background 
+                 bg-transparent
                  text-foreground 
-                 hover:bg-content2`,
+                 hover:bg-content3`,
         ghost: `text-foreground 
-               hover:bg-content2`,
-        destructive: 'bg-danger text-background hover:bg-danger/90',
+               hover:bg-content3`,
+        destructive:
+          'bg-danger text-background hover:bg-danger/75 text-foreground',
         success: 'bg-success text-background hover:bg-success/90',
         link: 'text-foreground underline-offset-4 hover:underline !shadow-none',
       },

@@ -1,0 +1,26 @@
+[
+  {
+    "id": 2,
+    "description": "Association B-C",
+    "firstObjectTypeId": 2,
+    "secondObjectTypeId": 3
+  },
+  {
+    "id": 3,
+    "description": "Association A-C",
+    "firstObjectTypeId": 1,
+    "secondObjectTypeId": 3
+  },
+  {
+    "id": 5,
+    "description": "Association C-C",
+    "firstObjectTypeId": 3,
+    "secondObjectTypeId": 3
+  },
+  {
+    "id": 6,
+    "description": "Association D-C",
+    "firstObjectTypeId": 4,
+    "secondObjectTypeId": 3
+  }
+]

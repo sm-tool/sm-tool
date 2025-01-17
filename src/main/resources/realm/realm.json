@@ -11,6 +11,11 @@
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
   "loginTheme": "smt",
+  "eventsEnabled": true,
+  "eventsListeners": ["listener-webhook"],
+  "eventsExpiration": 86400,
+  "adminEventsEnabled": true,
+  "adminEventsDetailsEnabled": true,
   "users": [
     {
       "id": "fixed-student",

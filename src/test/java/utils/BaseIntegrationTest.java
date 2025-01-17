@@ -3,21 +3,22 @@ package utils;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -29,9 +30,16 @@ import pl.smt.SmtApp;
 @SpringBootTest(classes = SmtApp.class)
 @AutoConfigureMockMvc
 @SpringJUnitConfig
+@ComponentScan(basePackages = "utils")
 public abstract class BaseIntegrationTest {
 
   private static PostgreSQLContainer<?> postgreSQLContainer;
+
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
+
+  @Autowired
+  private EntityManager entityManager;
 
   @Autowired
   private MockMvc mockMvc;
@@ -45,6 +53,14 @@ public abstract class BaseIntegrationTest {
 
   protected ObjectMapper getObjectMapper() {
     return objectMapper;
+  }
+
+  protected JdbcTemplate getJdbcTemplate() {
+    return jdbcTemplate;
+  }
+
+  protected EntityManager getEntityManager() {
+    return entityManager;
   }
 
   public static void copyFile() {

@@ -5,34 +5,65 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSkeleton,
 } from '@/components/ui/shadcn/side-bar.tsx';
-import PaginatedStatusComponent from '@/lib/pagination/provider/pagination-provider.tsx';
-import { useScenarios } from '@/features/scenario/queries.ts';
 import { Link } from '@tanstack/react-router';
 import { CircleDot } from 'lucide-react';
-import { Scenario } from '@/features/scenario/types.ts';
+import {
+  Scenario,
+  ScenarioApiFilterMethods,
+} from '@/features/scenario/types.ts';
+import { PaginationProvider } from '@/lib/hal-pagination/context';
+import usePagination from '@/lib/hal-pagination/hooks/use-pagination.ts';
+import { useScenarios } from '@/features/scenario/queries.ts';
+import PaginationStatus from '@/lib/react-query/components/pagination-status';
 
 const RecentScenarios = () => (
   <SidebarGroup>
     <SidebarGroupLabel>Recent scenarios</SidebarGroupLabel>
     <SidebarGroupContent>
-      <PaginatedStatusComponent
-        useQuery={useScenarios}
-        defaultSort={{ field: 'lastModificationDate' }}
+      <PaginationProvider<Scenario, ScenarioApiFilterMethods>
+        initialRequest={{
+          sort: {
+            sort: [
+              {
+                field: 'lastModificationDate',
+                direction: 'desc',
+              },
+            ],
+          },
+        }}
       >
-        {data => (
-          <SidebarMenu>
-            {data.totalElements === 0 ? (
-              <EmptyScenarioState />
-            ) : (
-              <ScenarioList scenarios={data.content} />
-            )}
-          </SidebarMenu>
-        )}
-      </PaginatedStatusComponent>
+        <RecentScenariosContent />
+      </PaginationProvider>
     </SidebarGroupContent>
   </SidebarGroup>
 );
+
+const RecentScenariosContent = () => {
+  const { request } = usePagination<
+    Scenario,
+    'findByTitle' | 'findByDescription'
+  >();
+  const queryResult = useScenarios(request);
+
+  return (
+    <PaginationStatus
+      queryResult={queryResult}
+      loading={<SidebarMenuSkeleton />}
+    >
+      {scenarios => (
+        <SidebarMenu>
+          {scenarios.length === 0 ? (
+            <EmptyScenarioState />
+          ) : (
+            <ScenarioList scenarios={scenarios.slice(0, 5)} />
+          )}
+        </SidebarMenu>
+      )}
+    </PaginationStatus>
+  );
+};
 
 const EmptyScenarioState = () => (
   <div
@@ -48,9 +79,12 @@ const ScenarioList = ({ scenarios }: { scenarios: Scenario[] }) => (
     {scenarios.map(scenario => (
       <SidebarMenuItem key={scenario.id}>
         <SidebarMenuButton asChild>
-          <Link to={`/scenario/${scenario.id}`}>
+          <Link
+            to='/scenario/$scenarioId'
+            params={{ scenarioId: scenario.id.toString() }}
+          >
             <CircleDot />
-            <span>{scenario.title}</span>
+            <span className='truncate'>{scenario.title}</span>
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>

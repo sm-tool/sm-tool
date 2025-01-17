@@ -1,0 +1,7 @@
+{
+  "id": 1,
+  "name": "Configuration for User",
+  "userId": "1",
+  "scenarioId": null,
+  "conf": "{\"key\":\"user value\"}"
+}

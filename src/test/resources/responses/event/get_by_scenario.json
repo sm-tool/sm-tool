@@ -1,0 +1,70 @@
+[
+  {
+    "id": 1,
+    "threadId": 0,
+    "time": 0,
+    "eventType": "START",
+    "description": null,
+    "title": null,
+    "associationChanges": [
+      {
+        "associationTypeId": 1,
+        "object1Id": 1,
+        "object2Id": 2,
+        "changeType": {
+          "from": null,
+          "to": "DELETE"
+        }
+      }
+    ],
+    "attributeChanges": [
+      {
+        "attributeId": 1,
+        "changeType": {
+          "from": null,
+          "to": "20"
+        }
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "threadId": 0,
+    "time": 1,
+    "eventType": "END",
+    "description": null,
+    "title": null,
+    "associationChanges": [],
+    "attributeChanges": []
+  },
+  {
+    "id": 3,
+    "threadId": 2,
+    "time": 0,
+    "eventType": "START",
+    "description": null,
+    "title": null,
+    "associationChanges": [],
+    "attributeChanges": []
+  },
+  {
+    "id": 5,
+    "threadId": 2,
+    "time": 2,
+    "eventType": "IDLE",
+    "description": "description",
+    "title": "title",
+    "associationChanges": [],
+    "attributeChanges": []
+  },
+  {
+    "id": 4,
+    "threadId": 2,
+    "time": 4,
+    "eventType": "END",
+    "description": null,
+    "title": null,
+    "associationChanges": [],
+    "attributeChanges": []
+  }
+]

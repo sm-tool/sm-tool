@@ -1,0 +1,127 @@
+{
+  "_embedded": {
+    "objectTypes": [
+      {
+        "id": 1,
+        "title": "ACTOR",
+        "description": "ACTOR",
+        "color": "#FF0000",
+        "isOnlyGlobal": false,
+        "hasChildren": false,
+        "isBaseType": true,
+        "canBeUser": true,
+        "parentId": null
+      },
+      {
+        "id": 3,
+        "title": "BUILDING",
+        "description": "BUILDING",
+        "color": "#0000FF",
+        "isOnlyGlobal": true,
+        "hasChildren": false,
+        "isBaseType": true,
+        "canBeUser": false,
+        "parentId": null
+      },
+      {
+        "id": 2,
+        "title": "OBSERVER",
+        "description": "OBSERVER",
+        "color": "#0000FF",
+        "isOnlyGlobal": false,
+        "hasChildren": true,
+        "isBaseType": true,
+        "canBeUser": true,
+        "parentId": null
+      },
+      {
+        "id": 6,
+        "title": "PLACE",
+        "description": "PLACE",
+        "color": "#0000FF",
+        "isOnlyGlobal": true,
+        "hasChildren": false,
+        "isBaseType": true,
+        "canBeUser": false,
+        "parentId": null
+      },
+      {
+        "id": 5,
+        "title": "RESOURCE",
+        "description": "RESOURCE",
+        "color": "#0000FF",
+        "isOnlyGlobal": false,
+        "hasChildren": false,
+        "isBaseType": true,
+        "canBeUser": false,
+        "parentId": null
+      },
+      {
+        "id": 7,
+        "title": "Type A",
+        "description": "Description A",
+        "color": "#FF0000",
+        "isOnlyGlobal": false,
+        "hasChildren": false,
+        "isBaseType": false,
+        "canBeUser": true,
+        "parentId": null
+      },
+      {
+        "id": 8,
+        "title": "Type B",
+        "description": "Description B",
+        "color": "#00FF00",
+        "isOnlyGlobal": false,
+        "hasChildren": true,
+        "isBaseType": false,
+        "canBeUser": false,
+        "parentId": null
+      },
+      {
+        "id": 9,
+        "title": "Type C",
+        "description": "Description C",
+        "color": "#0000FF",
+        "isOnlyGlobal": false,
+        "hasChildren": false,
+        "isBaseType": false,
+        "canBeUser": false,
+        "parentId": null
+      },
+      {
+        "id": 10,
+        "title": "Type D",
+        "description": "Description D",
+        "color": "#000FFF",
+        "isOnlyGlobal": false,
+        "hasChildren": false,
+        "isBaseType": false,
+        "canBeUser": false,
+        "parentId": 2
+      },
+      {
+        "id": 4,
+        "title": "VEHICLE",
+        "description": "VEHICLE",
+        "color": "#0000FF",
+        "isOnlyGlobal": false,
+        "hasChildren": false,
+        "isBaseType": true,
+        "canBeUser": false,
+        "parentId": null
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "http://localhost/api/object-types?page=0&size=20&sort=title,asc"
+    }
+  },
+  "page": {
+    "size": 20,
+    "totalElements": 10,
+    "totalPages": 1,
+    "number": 0
+  }
+}

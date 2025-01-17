@@ -1,0 +1,24 @@
+{
+  "_embedded": {
+    "objectTemplates": [
+      {
+        "id": 1,
+        "title": "title1",
+        "description": "description1",
+        "color": "color1",
+        "objectTypeId": 1
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "http://localhost/api/object-templates/search/findByScenarioIdAndObjectTypeId/1?page=0&size=20&sort=template.title,asc"
+    }
+  },
+  "page": {
+    "size": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "number": 0
+  }
+}

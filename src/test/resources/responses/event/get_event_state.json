@@ -1,0 +1,16 @@
+{
+  "attributesState": [
+    {
+      "value": "20",
+      "attributeId": 1
+    }
+  ],
+  "associationsState": [
+    {
+      "associationOperation": "DELETE",
+      "object1Id": 1,
+      "object2Id": 2,
+      "associationTypeId": 1
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "_embedded": {
+    "scenarios": [
+      {
+        "id": 2,
+        "title": "test2",
+        "description": "chat gubi kontekst2",
+        "context": "test2",
+        "purpose": "purpose testowy2",
+        "startDate": "2024-02-15T23:00:00.000Z",
+        "endDate": "2024-02-16T23:00:00.000Z",
+        "eventDuration": 11,
+        "creationDate": null,
+        "lastModificationDate": null
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "http://localhost/api/scenarios/search/findByDescription?page=0&size=10&sort=id,desc"
+    }
+  },
+  "page": {
+    "size": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "number": 0
+  }
+}

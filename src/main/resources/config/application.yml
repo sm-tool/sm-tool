@@ -36,11 +36,11 @@ spring:
       resourceserver:
         jwt:
           # HACK: Don't try to add "-" in front of default values SOMEHOW (docker of spring, does not load value with it)
-          issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_HTTP_PORT:8180}/realms/${REALM_NAME:smt-realm}
-          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_HTTP_PORT:8180}/realms/${REALM_NAME:smt-realm}/protocol/openid-connect/certs
-  config:
-    activate:
-      on-profile: dev
+          #issuer jest cholera z keycloaka który nie wiedzieć czemu bierze localhost
+          issuer-uri: http://localhost/auth/realms/smt-realm
+          jwk-set-uri: http://keycloak:8180/auth/realms/smt-realm/protocol/openid-connect/certs
+          #jwk set uri to adres do keycloaka
+          #ergo chat deszyrfuje issuer uri
 
 server:
   port: ${BACKEND_PORT:-8000}
@@ -96,7 +96,7 @@ springdoc:
   default-consumes-media-type: application/json
 
 cors:
-  allowed-origins: http://localhost:9000
+  allowed-origins: http://nginx,http://nginx:80,http://localhost:9000,http://localhost:6006,http://localhost
   allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
   allowed-headers: Authorization,Content-Type,Access-Control-Allow-Origin,scenarioid
   allow-credentials: true

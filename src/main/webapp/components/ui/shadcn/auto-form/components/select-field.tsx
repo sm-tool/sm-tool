@@ -14,17 +14,30 @@ export const SelectField: React.FC<AutoFormFieldProps> = ({
   inputProps,
   error,
   id,
-}) => (
-  <Select {...inputProps}>
-    <SelectTrigger id={id} className={error ? 'border-destructive' : ''}>
-      <SelectValue placeholder='Select an option' />
-    </SelectTrigger>
-    <SelectContent>
-      {(field.options || []).map(([key, label]) => (
-        <SelectItem key={key} value={key}>
-          {label}
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-);
+  value,
+}) => {
+  return (
+    <Select
+      value={value?.toString()}
+      onValueChange={newValue => {
+        inputProps.onChange?.({
+          target: {
+            value: newValue,
+            name: inputProps.name,
+          },
+        });
+      }}
+    >
+      <SelectTrigger id={id} className={error ? 'border-destructive' : ''}>
+        <SelectValue placeholder='Select an option' />
+      </SelectTrigger>
+      <SelectContent>
+        {(field.options || []).map(([key, label]) => (
+          <SelectItem key={key} value={key}>
+            {label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+};

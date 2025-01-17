@@ -1,45 +1,38 @@
 {
-  "content": [
-    {
-      "id": 1,
-      "title": "title1",
-      "description": "description1",
-      "color": "color1",
-      "objectTypeId": null,
-      "objectType": null
-    },
-    {
-      "id": 2,
-      "title": "title2",
-      "description": "description2",
-      "color": "color2",
-      "objectTypeId": null,
-      "objectType": null
+  "_embedded": {
+    "objectTemplates": [
+      {
+        "id": 1,
+        "title": "title1",
+        "description": "description1",
+        "color": "color1",
+        "objectTypeId": 1
+      },
+      {
+        "id": 2,
+        "title": "title2",
+        "description": "description2",
+        "color": "color2",
+        "objectTypeId": 2
+      },
+      {
+        "id": 3,
+        "title": "title3",
+        "description": "description3",
+        "color": "color3",
+        "objectTypeId": null
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "http://localhost/api/object-templates?page=0&size=20&sort=title,asc"
     }
-  ],
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 2,
-    "sort": {
-      "empty": false,
-      "sorted": true,
-      "unsorted": false
-    },
-    "offset": 0,
-    "paged": true,
-    "unpaged": false
   },
-  "last": false,
-  "totalPages": 2,
-  "totalElements": 3,
-  "size": 2,
-  "number": 0,
-  "sort": {
-    "empty": false,
-    "sorted": true,
-    "unsorted": false
-  },
-  "first": true,
-  "numberOfElements": 2,
-  "empty": false
+  "page": {
+    "size": 20,
+    "totalElements": 3,
+    "totalPages": 1,
+    "number": 0
+  }
 }

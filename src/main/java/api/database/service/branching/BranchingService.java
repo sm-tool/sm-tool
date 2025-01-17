@@ -1,14 +1,11 @@
 package api.database.service.branching;
 
-import api.database.model.QdsResponseUpdateList;
-import api.database.model.branching.QdsInfoForkAdd;
-import api.database.model.branching.QdsInfoForkChange;
-import api.database.model.branching.QdsInfoJoinAdd;
-import api.database.model.branching.QdsResponseBranching;
-import api.database.repository.thread.QdsBranchingRepository;
-import api.database.service.branching.management.ForkManagement;
-import api.database.service.branching.management.JoinManagement;
-import java.util.*;
+import api.database.model.request.composite.create.ForkCreateRequest;
+import api.database.model.request.composite.create.JoinCreateRequest;
+import api.database.model.request.composite.update.ForkUpdateRequest;
+import api.database.model.request.composite.update.JoinUpdateRequest;
+import api.database.model.response.UpdateListResponse;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,31 +15,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class BranchingService {
 
-  private final QdsBranchingRepository qdsBranchingRepository;
-  private final JoinManagement joinManagement;
-  private final ForkManagement forkManagement;
+  private final ForkService forkService;
+  private final JoinService joinService;
 
   @Autowired
-  public BranchingService(
-    QdsBranchingRepository qdsBranchingRepository,
-    JoinManagement joinManagement,
-    ForkManagement forkManagement
-  ) {
-    this.qdsBranchingRepository = qdsBranchingRepository;
-    this.joinManagement = joinManagement;
-    this.forkManagement = forkManagement;
-  }
-
-  //--------------------------------------------------Pobieranie rozgałęzień------------------------------------------------
-
-  /// Pobiera wszystkie rozgałęzienia dla danego scenariusza.
-  ///
-  /// @param scenarioId identyfikator scenariusza
-  /// @return lista rozgałęzień z ich szczegółami
-  public List<QdsResponseBranching> getBranchingForScenario(
-    Integer scenarioId
-  ) {
-    return qdsBranchingRepository.getBranchingForScenario(scenarioId);
+  public BranchingService(ForkService forkService, JoinService joinService) {
+    this.forkService = forkService;
+    this.joinService = joinService;
   }
 
   //----------------------------------------------------Dodawanie rozgałęzień----------------------------------------------
@@ -51,23 +30,20 @@ public class BranchingService {
   /// @param scenarioId identyfikator scenariusza
   /// @param forkInfo dane operacji fork
   /// @return status aktualizacji
-  public QdsResponseUpdateList addFork(
+  public UpdateListResponse addFork(
     Integer scenarioId,
-    QdsInfoForkAdd forkInfo
+    ForkCreateRequest forkInfo
   ) {
-    return forkManagement.addFork(scenarioId, forkInfo);
+    forkService.addFork(forkInfo, scenarioId);
+    return new UpdateListResponse(List.of("branching", "thread", "event"));
   }
 
   /// Dodaje nową operację łączenia wątków (join).
   ///
   /// @param scenarioId identyfikator scenariusza
   /// @param joinInfo dane operacji join
-  /// @return status aktualizacji
-  public QdsResponseUpdateList addJoin(
-    Integer scenarioId,
-    QdsInfoJoinAdd joinInfo
-  ) {
-    return joinManagement.addJoin(scenarioId, joinInfo);
+  public void addJoin(Integer scenarioId, JoinCreateRequest joinInfo) {
+    joinService.addJoin(scenarioId, joinInfo);
   }
 
   //-----------------------------------------------------Zmiana rozgałęzień----------------------------------------------------
@@ -76,19 +52,34 @@ public class BranchingService {
   /// @param scenarioId identyfikator scenariusza
   /// @param forkInfo dane zmian w operacji fork
   /// @return status aktualizacji
-  public QdsResponseUpdateList changeFork(
-    Integer scenarioId,
-    QdsInfoForkChange forkInfo
+
+  public UpdateListResponse changeFork(
+    Integer forkId,
+    ForkUpdateRequest forkInfo,
+    Integer scenarioId
   ) {
-    return forkManagement.changeFork(scenarioId, forkInfo);
+    forkService.changeFork(forkId, forkInfo, scenarioId);
+    return new UpdateListResponse(List.of("branching", "event", "thread"));
+  }
+
+  public UpdateListResponse changeJoin(
+    Integer joinId,
+    JoinUpdateRequest joinInfo,
+    Integer scenarioId
+  ) {
+    joinService.changeJoin(joinId, joinInfo, scenarioId);
+    return new UpdateListResponse(List.of("branching", "thread", "event"));
   }
 
   //------------------------------------------------------Usuwanie rozgałęzień----------------------------------------------------
   /// Usuwa operację podziału wątku.
   ///
   /// @param forkId identyfikator operacji fork
-  /// @return status aktualizacji
-  public QdsResponseUpdateList deleteFork(Integer scenarioId, Integer forkId) {
-    return forkManagement.deleteFork(scenarioId, forkId);
+  public void deleteFork(Integer scenarioId, Integer forkId) {
+    forkService.deleteFork(scenarioId, forkId);
+  }
+
+  public void deleteJoin(Integer scenarioId, Integer joinId) {
+    joinService.deleteJoin(scenarioId, joinId);
   }
 }

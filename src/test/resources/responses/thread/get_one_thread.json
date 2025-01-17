@@ -1,0 +1,10 @@
+{
+  "id": 2,
+  "objectIds": [1, 2],
+  "title": "NEW_THREAD_TITLE",
+  "description": "NEW_THREAD_DESCRIPTION",
+  "startTime": 0,
+  "endTime": 4,
+  "incomingBranchingId": null,
+  "outgoingBranchingId": null
+}

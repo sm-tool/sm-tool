@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { AppError, ErrorLevel } from '@/types/errors.ts';
+import { AppError, ErrorLevel } from '@/lib/errors/errors.ts';
 
 interface UpdateMutationContext<TData> {
   previousData: TData | undefined;

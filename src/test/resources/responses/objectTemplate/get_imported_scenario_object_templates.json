@@ -1,16 +1,31 @@
-[
-  {
-    "id": 1,
-    "title": "title1",
-    "description": "description1",
-    "color": "color1",
-    "objectTypeId": null
+{
+  "_embedded": {
+    "qdsObjectTemplates": [
+      {
+        "id": 1,
+        "title": "title1",
+        "description": "description1",
+        "color": "color1",
+        "objectTypeId": 1
+      },
+      {
+        "id": 2,
+        "title": "title2",
+        "description": "description2",
+        "color": "color2",
+        "objectTypeId": 2
+      }
+    ]
   },
-  {
-    "id": 2,
-    "title": "title2",
-    "description": "description2",
-    "color": "color2",
-    "objectTypeId": null
+  "_links": {
+    "self": {
+      "href": "http://localhost/api/object-templates/search/findByScenarioId/3?page=0&size=20&sort=title,asc"
+    }
+  },
+  "page": {
+    "size": 20,
+    "totalElements": 2,
+    "totalPages": 1,
+    "number": 0
   }
-]
+}

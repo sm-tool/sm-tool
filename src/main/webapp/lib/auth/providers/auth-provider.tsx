@@ -1,7 +1,8 @@
 import { AuthState, IAuthDispatch, IAuthService } from '@/lib/auth/types.ts';
 import React, { useCallback } from 'react';
-import { AppError, ErrorLevel } from '@/types/errors.ts';
+import { AppError, ErrorLevel } from '@/lib/errors/errors.ts';
 import useAuthInterceptors from '@/lib/auth/hooks/use-auth-interceptors.ts';
+import { Timeout } from '@/hooks/use-debounce.ts';
 
 export const AuthContext = React.createContext<IAuthService | undefined>(
   undefined,
@@ -10,6 +11,36 @@ export const AuthDispatchContext = React.createContext<
   IAuthDispatch | undefined
 >(undefined);
 
+/**
+ * Provider kontekstu autoryzacji dla aplikacji React.
+ *
+ * @description
+ * Komponent zarządza stanem autoryzacji, odświeżaniem tokenów oraz udostępnia
+ * metody do zarządzania autoryzacją poprzez context API. Automatycznie inicjalizuje
+ * serwis autoryzacji i ustawia interwał odświeżania tokenu co minutę.
+ *
+ * @param {React.ReactNode} children - Komponenty potomne
+ * @param {IAuthService} authService - Implementacja serwisu autoryzacji (KeycloakService lub MockAuthService)
+ *
+ * Udostępnia dwa konteksty:
+ * - AuthContext: dostęp do instancji serwisu autoryzacji
+ * - AuthDispatchContext: dostęp do akcji autoryzacyjnych (login, logout, etc.)
+ *
+ * @example
+ * ```tsx
+ * const authService = createAuthClient();
+ *
+ * function App() {
+ *   return (
+ *     <AuthProvider authService={authService}>
+ *       <Router>
+ *         <YourApp />
+ *       </Router>
+ *     </AuthProvider>
+ *   );
+ * }
+ * ```
+ */
 const AuthProvider = ({
   children,
   authService,
@@ -23,8 +54,7 @@ const AuthProvider = ({
     tokenData: undefined,
   });
   // HACK: If anyone is willing to spend 1 minute fixing vite types, please do so :>
-  const refreshIntervalReference =
-    React.useRef<ReturnType<typeof globalThis.setTimeout>>();
+  const refreshIntervalReference = React.useRef<Timeout>();
 
   const updateAuthState = useCallback(() => {
     setState({

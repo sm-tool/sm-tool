@@ -1,0 +1,13 @@
+[
+  {
+    "id": 10,
+    "title": "Type D",
+    "description": "Description D",
+    "color": "#000FFF",
+    "isOnlyGlobal": false,
+    "hasChildren": false,
+    "isBaseType": false,
+    "canBeUser": false,
+    "parentId": 2
+  }
+]

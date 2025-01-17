@@ -34,8 +34,7 @@ const DialogOverlay = forwardRef<
 DialogOverlay.displayName = 'DialogOverlay';
 
 export const dialogContentStaticClasses = cn(
-  `grid gap-4 
-  border border-content3
+  `flex flex-col gap-4 border border-content3
   bg-content1
   text-foreground 
   p-7 

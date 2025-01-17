@@ -1,0 +1,93 @@
+#  docker-compose -f docker-compose.prod.yml --env-file ./.env.prod up -d
+
+services:
+  postgresql-master:
+    container_name: postgresql-master
+    image: 'docker.io/bitnami/postgresql:latest'
+    env_file: '.env.prod'
+    environment:
+      - POSTGRESQL_REPLICATION_MODE=master
+    volumes:
+      - 'postgresql-master_data:/bitnami/postgresql'
+    networks:
+      - app-network
+
+  postgresql-slave:
+    image: 'docker.io/bitnami/postgresql:latest'
+    env_file: '.env.prod'
+    depends_on:
+      - postgresql-master
+    environment:
+      - POSTGRESQL_REPLICATION_MODE=slave
+      - POSTGRESQL_MASTER_HOST=postgresql-master
+    networks:
+      - app-network
+
+  keycloak:
+    container_name: keycloak
+    env_file: '.env.prod'
+    image: 'docker.io/bitnami/keycloak:latest'
+    environment:
+      - KEYCLOAK_ADMIN_USER=${KEYCLOAK_ADMIN_USER:-admin}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KEYCLOAK_DATABASE_HOST=postgresql-master
+      - KEYCLOAK_DATABASE_PORT=${POSTGRES_MASTER_PORT:-5432}
+      - KEYCLOAK_DATABASE_NAME=${POSTGRESQL_DATABASE}
+      - KEYCLOAK_DATABASE_USER=${POSTGRES_USER:-smt}
+      - KEYCLOAK_DATABASE_PASSWORD=${POSTGRES_PASSWORD}
+      - KEYCLOAK_EXTRA_ARGS=--import-realm
+      - WEBHOOK_EVENTS_TAKEN=${WEBHOOK_EVENTS_TAKEN}
+      - WEBHOOK_HTTP_BASE_PATH=${WEBHOOK_HTTP_BASE_PATH}
+      - KEYCLOAK_HTTP_RELATIVE_PATH=/auth
+    volumes:
+      - './src/main/resources/realm/realm.json:/opt/bitnami/keycloak/data/import/realm.json'
+      - './src/main/resources/realm/keycloak-theme-for-kc-22-to-25.jar:/opt/bitnami/keycloak/providers/keyclock-theme.jar'
+      - './src/main/resources/realm/keycloak-webhook-0.6.0-all.jar:/opt/bitnami/keycloak/providers/keycloak-webhook-0.6.0-all.jar'
+      - 'keycloak_data:/opt/bitnami/keycloak/data'
+    depends_on:
+      - postgresql-master
+    networks:
+      - app-network
+
+  backend:
+    container_name: backend
+    image: backend
+    build:
+      context: .
+      dockerfile: src/main/java/Dockerfile
+    depends_on:
+      - postgresql-master
+    env_file: '.env.prod'
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql-master:${POSTGRES_MASTER_PORT:-5432}/${POSTGRESQL_DATABASE:-db}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-smt}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - KEYCLOAK_HOST=keycloak
+    networks:
+      - app-network
+
+  nginx:
+    container_name: nginx
+    build:
+      dockerfile: src/main/webapp/Dockerfile
+    ports:
+      - '${NGINX_PORT:-80}:80'
+    env_file: '.env.prod'
+    volumes:
+      - ./src/main/resources/nginx/nginx.conf:/opt/bitnami/nginx/conf/nginx.conf
+      - nginx_data:/bitnami/nginx
+    depends_on:
+      - backend
+      - keycloak
+    networks:
+      - app-network
+
+volumes:
+  postgresql-master_data:
+  keycloak_data:
+  nginx_data:
+
+networks:
+  app-network:
+    driver: bridge

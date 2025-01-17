@@ -1,80 +1,111 @@
 package api.database.controller.scenario;
 
-import api.database.entity.scenario.QdsScenario;
-import api.database.model.constant.ErrorCode;
-import api.database.model.constant.ErrorGroup;
-import api.database.model.exception.ApiException;
-import api.database.service.scenario.ScenarioService;
+import api.database.entity.scenario.Scenario;
+import api.database.model.request.save.ScenarioSaveRequest;
+import api.database.service.global.ScenarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.data.web.SortDefault;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/scenario")
+@RequestMapping("/api/scenarios")
 public class ScenarioController {
 
   private final ScenarioService scenarioService;
+  private final PagedResourcesAssembler<Scenario> pagedResourcesAssembler;
 
   @Autowired
-  public ScenarioController(ScenarioService scenarioService) {
+  public ScenarioController(
+    ScenarioService scenarioService,
+    PagedResourcesAssembler<Scenario> pagedResourcesAssembler
+  ) {
     this.scenarioService = scenarioService;
+    this.pagedResourcesAssembler = pagedResourcesAssembler;
   }
 
-  @GetMapping("/list")
-  public ResponseEntity<Page<QdsScenario>> getAllScenarios(Pageable pageable) {
-    Page<QdsScenario> scenarios = scenarioService.getScenarioList(pageable);
-    return ResponseEntity.ok(scenarios);
-  }
+  //--------------------------------------------------Endpointy GET---------------------------------------------------------
 
-  // GET scenario by ID
-  @GetMapping("/one")
-  public ResponseEntity<QdsScenario> getScenarioById(
-    @RequestHeader("scenarioId") Integer id
+  @GetMapping
+  public PagedModel<EntityModel<Scenario>> getAll(
+    @RequestParam(defaultValue = "0") int page,
+    @RequestParam(defaultValue = "10") int size,
+    @SortDefault(sort = "id", direction = Sort.Direction.DESC) Sort sort
   ) {
-    QdsScenario scenario = scenarioService.getScenarioById(id);
-    if (scenario == null) {
-      throw new ApiException(
-        ErrorCode.DOES_NOT_EXIST,
-        ErrorGroup.SCENARIO,
-        HttpStatus.NOT_FOUND
-      );
-    } else return ResponseEntity.ok(scenario);
+    Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
+    Page<Scenario> scenarios = scenarioService.findAll(pageable);
+    return pagedResourcesAssembler.toModel(scenarios);
   }
 
-  //TODO sprawdzenie
-  @PostMapping("/add")
-  public ResponseEntity<QdsScenario> createScenario(
-    @Valid @RequestBody QdsScenario scenario
-  ) {
-    QdsScenario createdScenario = scenarioService.addScenario(scenario);
-    return ResponseEntity.ok(createdScenario);
+  @ResponseStatus(HttpStatus.OK)
+  @GetMapping("/{id}")
+  public Scenario getById(@PathVariable Integer id) {
+    return scenarioService.getScenarioById(id);
   }
+
+  @GetMapping("/search/findByTitle")
+  public PagedModel<EntityModel<Scenario>> findByTitle(
+    @RequestParam("title") String title,
+    @RequestParam(defaultValue = "0") int page,
+    @RequestParam(defaultValue = "10") int size,
+    @SortDefault(sort = "id", direction = Sort.Direction.DESC) Sort sort
+  ) {
+    Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
+    Page<Scenario> scenarios = scenarioService.findByTitleContaining(
+      title,
+      pageable
+    );
+
+    return pagedResourcesAssembler.toModel(scenarios);
+  }
+
+  @GetMapping("/search/findByDescription")
+  public PagedModel<EntityModel<Scenario>> findByDescription(
+    @RequestParam("description") String description,
+    @RequestParam(defaultValue = "0") int page,
+    @RequestParam(defaultValue = "10") int size,
+    @SortDefault(sort = "id", direction = Sort.Direction.DESC) Sort sort
+  ) {
+    Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
+    Page<Scenario> scenarios = scenarioService.findByDescriptionContaining(
+      description,
+      pageable
+    );
+    return pagedResourcesAssembler.toModel(scenarios);
+  }
+
+  //--------------------------------------------------Endpoint POST---------------------------------------------------------
+  @ResponseStatus(HttpStatus.OK)
+  @PostMapping
+  public Scenario addScenario(
+    @Valid @RequestBody ScenarioSaveRequest scenarioInfo
+  ) {
+    return scenarioService.addScenario(scenarioInfo);
+  }
+
+  //--------------------------------------------------Endpoint PUT---------------------------------------------------------
+  @ResponseStatus(HttpStatus.OK)
+  @PutMapping("/{id}")
+  public Scenario update(
+    @PathVariable Integer id,
+    @Valid @RequestBody ScenarioSaveRequest scenarioDetails
+  ) {
+    return scenarioService.updateScenario(id, scenarioDetails);
+  }
+
+  //--------------------------------------------------Endpoint DELETE---------------------------------------------------------
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<String> deleteScenario(@PathVariable Integer id) {
+  @ResponseStatus(HttpStatus.OK)
+  public void delete(@PathVariable Integer id) {
     scenarioService.deleteScenario(id);
-    return ResponseEntity.ok("Scenario deleted successfully.");
   }
-
-  @PutMapping("/{id}")
-  public ResponseEntity<QdsScenario> updateScenario(
-    @PathVariable Integer id,
-    @RequestBody QdsScenario scenarioDetails
-  ) {
-    QdsScenario updatedScenario = scenarioService.updateScenario(
-      id,
-      scenarioDetails
-    );
-    return ResponseEntity.ok(updatedScenario);
-  }
-  //  // DELETE scenario by ID
-  //  @DeleteMapping("/{id}")
-  //  public ResponseEntity<Void> deleteScenario(@PathVariable Integer id) {
-  //    scenarioService.deleteScenario(id);
-  //    return ResponseEntity.noContent().build();
-  //  }
 }

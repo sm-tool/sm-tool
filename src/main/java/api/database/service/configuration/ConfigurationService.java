@@ -1,71 +1,133 @@
 package api.database.service.configuration;
 
-import api.database.entity.configuration.QdsConfiguration;
-import api.database.model.configuration.QdsInfoSetting;
-import api.database.repository.configuration.QdsConfigurationRepository;
-import jakarta.annotation.PostConstruct;
+import api.database.entity.configuration.Configuration;
+import api.database.repository.configuration.ConfigurationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+/// Serwis zarządzający konfiguracjami w systemie.
+/// Pozwala na pobranie konfiguracji w trzech kontekstach:
+/// - Dla całego scenariusza
+/// - Dla konkretnego użytkownika
+/// - Dla kombinacji użytkownik-scenariusz
 @Service
 public class ConfigurationService {
 
-  private final QdsConfigurationRepository qdsConfigurationRepository;
-
-  public static final Integer CONFIG_ID = 0;
+  private final ConfigurationRepository configurationRepository;
 
   @Autowired
-  public ConfigurationService(
-    QdsConfigurationRepository qdsConfigurationRepository
+  public ConfigurationService(ConfigurationRepository configurationRepository) {
+    this.configurationRepository = configurationRepository;
+  }
+
+  //--------------------------------------------------Pobieranie konfiguracji-------------------------------------------
+
+  /// Pobiera konfigurację zdefiniowaną dla scenariusza.
+  ///
+  /// @param scenarioId id scenariusza
+  /// @param name nazwa konfiguracji
+  /// @return obiekt konfiguracji lub null jeśli nie znaleziono
+  public Configuration getConfigurationForScenario(
+    Integer scenarioId,
+    String name
   ) {
-    this.qdsConfigurationRepository = qdsConfigurationRepository;
+    return configurationRepository.findByScenarioIdAndName(scenarioId, name);
   }
 
-  //--------------------------------------------------Inicjalizacja konfiguracji--------------------------------------------------
-  /** Funkcja inicjalizująca konfigurację w przypadku gdy ta nie istnieje
-   * @apiNote Wykonywana w ramach własnej transakcji
-   */
-  @Transactional
-  @PostConstruct
-  public void initializeConfigurationIfNeeded() {
-    qdsConfigurationRepository.initializeConfigurationIfNeeded();
+  /// Pobiera konfigurację przypisaną do użytkownika.
+  /// Identyfikator użytkownika pobierany jest z tokena JWT.
+  ///
+  /// @param authentication obiekt uwierzytelnienia użytkownika
+  /// @param name nazwa konfiguracji
+  /// @return obiekt konfiguracji lub null jeśli nie znaleziono
+  public Configuration getConfigurationForUser(
+    Authentication authentication,
+    String name
+  ) {
+    Jwt jwt = (Jwt) authentication.getPrincipal();
+    return configurationRepository.findByUserIdAndName(jwt.getSubject(), name);
   }
 
-  //--------------------------------------------------Pobieranie konfiguracji---------------------------------------------------------
-  /** Funkcja pobierająca wszystkie ustawienia konfiguracji
-   * @apiNote Wykonywana w ramach osobnej transakcji
-   */
-  @Transactional
-  public QdsConfiguration getConfiguration() {
-    return qdsConfigurationRepository.getConfiguration(CONFIG_ID);
+  /// Pobiera konfigurację zdefiniowaną dla pary użytkownik-scenariusz.
+  /// Identyfikator użytkownika pobierany jest z tokena JWT.
+  ///
+  /// @param authentication obiekt uwierzytelnienia użytkownika
+  /// @param scenarioId id scenariusza
+  /// @param name nazwa konfiguracji
+  /// @return obiekt konfiguracji lub null jeśli nie znaleziono
+  public Configuration getConfigurationForUserAndScenario(
+    Authentication authentication,
+    Integer scenarioId,
+    String name
+  ) {
+    Jwt jwt = (Jwt) authentication.getPrincipal();
+    return configurationRepository.findByScenarioIdAndUserIdAndName(
+      scenarioId,
+      jwt.getSubject(),
+      name
+    );
   }
 
-  /** Funkcja pobierająca jedno konkretne ustawienie z konfiguracji
-   * @apiNote Wykonywana w ramach osobnej transakcji
-   */
-  @Transactional
-  public QdsInfoSetting getSetting(String name) {
-    System.out.println(name);
-    if ("type_id".equals(name)) {
-      return new QdsInfoSetting(
+  //---------------------------------------Wstawianie konfiguracji------------------------------------------------------
+
+  /// Zapisuje konfigurację zdefiniowaną dla scenariusza.
+  ///
+  /// @param scenarioId id scenariusza
+  /// @param name nazwa konfiguracji
+  /// @return obiekt konfiguracji lub null jeśli nie znaleziono
+  public Configuration saveConfigurationForScenario(
+    Integer scenarioId,
+    String name,
+    String json
+  ) {
+    return configurationRepository.save(
+      new Configuration(null, name, null, scenarioId, json, null, null)
+    );
+  }
+
+  /// Zapisuje konfigurację przypisaną do użytkownika.
+  /// Identyfikator użytkownika pobierany jest z tokena JWT.
+  ///
+  /// @param authentication obiekt uwierzytelnienia użytkownika
+  /// @param name nazwa konfiguracji
+  /// @return obiekt konfiguracji lub null jeśli nie znaleziono
+  public Configuration saveConfigurationForUser(
+    Authentication authentication,
+    String name,
+    String json
+  ) {
+    Jwt jwt = (Jwt) authentication.getPrincipal();
+    return configurationRepository.save(
+      new Configuration(null, name, jwt.getSubject(), null, json, null, null)
+    );
+  }
+
+  /// Zapisuje konfigurację zdefiniowaną dla pary użytkownik-scenariusz.
+  /// Identyfikator użytkownika pobierany jest z tokena JWT.
+  ///
+  /// @param authentication obiekt uwierzytelnienia użytkownika
+  /// @param scenarioId id scenariusza
+  /// @param name nazwa konfiguracji
+  /// @return obiekt konfiguracji lub null jeśli nie znaleziono
+  public Configuration saveConfigurationForUserAndScenario(
+    Authentication authentication,
+    Integer scenarioId,
+    String name,
+    String json
+  ) {
+    Jwt jwt = (Jwt) authentication.getPrincipal();
+    return configurationRepository.save(
+      new Configuration(
+        null,
         name,
-        qdsConfigurationRepository.getTypeIds().toString()
-      );
-    } else {
-      return new QdsInfoSetting(
-        name,
-        qdsConfigurationRepository.getSetting(name)
-      );
-    }
-  }
-
-  //--------------------------------------------------Zmiana konfiguracji---------------------------------------------------------
-  /** Funkcja aktualizująca jedno ustawienie z konfiguracji
-   * @apiNote Wykonywana w ramach osobnej transakcji
-   */
-  public QdsInfoSetting updateOneSetting(QdsInfoSetting newSetting) {
-    qdsConfigurationRepository.updateSetting(newSetting);
-    return newSetting;
+        jwt.getSubject(),
+        scenarioId,
+        json,
+        null,
+        null
+      )
+    );
   }
 }

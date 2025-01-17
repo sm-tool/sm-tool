@@ -1,8 +1,9 @@
-import { AppError, ErrorLevel } from '@/types/errors.ts';
+import { AppError, ErrorLevel } from '@/lib/errors/errors.ts';
 import React from 'react';
 import { router } from '@/lib/core.tsx';
 import { toast } from 'sonner';
 import { todoToast } from '@/components/ui/shadcn/toaster.tsx';
+import { Route as r500Route } from '@/app/errors/500';
 
 interface ErrorBoundaryProperties {
   children: React.ReactNode;
@@ -27,8 +28,7 @@ export class ErrorBoundary extends React.Component<
     todoToast(error.message);
     switch (error.level) {
       case ErrorLevel.CRITICAL: {
-        // @ts-expect-error -- it does exists
-        void router.navigate('/500');
+        void router.navigate({ to: r500Route.to });
         break;
       }
       case ErrorLevel.ERROR: {

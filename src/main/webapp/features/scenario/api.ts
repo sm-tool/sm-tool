@@ -1,61 +1,71 @@
 import {
   Scenario,
-  ScenarioDTO,
-  ScenarioForm,
+  ScenarioApiFilterMethods,
+  scenarioDTO,
   scenarioFormDTO,
+  ScenarioFormType,
 } from '@/features/scenario/types.ts';
 import { API_INSTANCE, apiClient } from '@/lib/api';
-import {
-  DefaultPaginatedParameters,
-  getDefaultPaginatedParameters,
-} from '@/lib/pagination/types';
-import { PaginatedResponse } from '@/lib/pagination/types/pagination.ts';
+import { HalPaginatedResponse } from '@/lib/api/types/response.types.ts';
+import { QueryRequest } from '@/lib/hal-pagination/types/pagination.types.ts';
+
+type HalScenarioResponse = HalPaginatedResponse<Scenario, 'scenario'>;
 
 export const scenarioApi = {
   getAll: async (
-    parameters: DefaultPaginatedParameters<Scenario>,
-  ): Promise<PaginatedResponse<Scenario>> => {
-    const { filter, ...paginationParameters } = parameters;
+    request?: QueryRequest<Scenario, ScenarioApiFilterMethods>,
+  ): Promise<HalScenarioResponse> => {
+    let endpoint = '/scenarios';
+    const queryParameters: Record<string, string | number> = {};
 
-    const endpoint = filter?.searchQuery
-      ? `/scenario/search/${filter.searchType === 'description' ? 'findByDescription' : 'findByTitle'}`
-      : '/scenario/list';
+    if (request?.pagination) {
+      queryParameters.page = request.pagination.page;
+      queryParameters.size = request.pagination.size;
+    }
 
-    const parameters_ = {
-      ...getDefaultPaginatedParameters(paginationParameters),
-      ...(filter?.searchQuery && {
-        [filter.searchType || 'title']: filter.searchQuery,
-      }),
-    };
+    if (request?.sort?.sort.length) {
+      queryParameters.sort = request.sort.sort
+        .map(({ field, direction }) => `${field},${direction}`)
+        .join(',');
+    }
 
-    return apiClient<PaginatedResponse<Scenario>>({
+    if (request?.filter?.searchType && request.filter.searchValue) {
+      endpoint = `/scenarios/search/${request.filter.searchType}`;
+      queryParameters[
+        request.filter.searchType === 'findByTitle' ? 'title' : 'description'
+      ] = request.filter.searchValue;
+    }
+
+    return apiClient<HalScenarioResponse>({
       method: 'GET',
       url: endpoint,
-      params: parameters_,
+      params: queryParameters,
     });
   },
 
-  getOne: async () => {
-    const { data } = await API_INSTANCE.get<Scenario>(`/scenario/one`);
-    return ScenarioDTO.parse(data);
+  getOne: async (scenarioId: number) => {
+    const { data } = await API_INSTANCE.get<Scenario>(
+      `/scenarios/${scenarioId}`,
+    );
+    return scenarioDTO.parse(data);
   },
 
-  create: async (scenario: ScenarioForm) => {
+  create: async (scenario: ScenarioFormType) => {
     const validScenario = scenarioFormDTO.parse(scenario);
-    const { data } = await API_INSTANCE.post<ScenarioForm>(
-      '/scenario',
+    const { data } = await API_INSTANCE.post<ScenarioFormType>(
+      '/scenarios',
       validScenario,
     );
-    return ScenarioDTO.parse(data);
+    return scenarioDTO.parse(data);
   },
 
-  update: async (id: number, scenario: Partial<ScenarioForm>) => {
+  update: async (id: number, scenario: Partial<ScenarioFormType>) => {
     const validScenario = scenarioFormDTO.parse(scenario);
-    const { data } = await API_INSTANCE.put<ScenarioForm>(
-      `/scenario/${id}`,
+    const { data } = await API_INSTANCE.put<ScenarioFormType>(
+      `/scenarios/${id}`,
       validScenario,
     );
-    return ScenarioDTO.parse(data);
+    return scenarioDTO.parse(data);
   },
 
   delete: async (id: number) => {

@@ -1,0 +1,195 @@
+/** @type {import('tailwindcss').Config} */
+import { nextui } from '@nextui-org/theme';
+import animatePlugin from 'tailwindcss-animate';
+import container from '@tailwindcss/container-queries';
+
+export default {
+  darkMode: 'class',
+  content: ['./**/*.{ts,tsx}', '!./node_modules/**'],
+  variants: {
+    fill: ['hover', 'focus'],
+  },
+  prefix: '',
+  theme: {
+    extend: {
+      keyframes: {
+        'appear-from-bottom': {
+          '0%': { opacity: 0, transform: 'translateY(100%)' },
+          '100%': { opacity: 1, transform: 'translateY(0)' },
+        },
+
+        'appear-from-top': {
+          '0%': { opacity: 0, transform: 'translateY(-100%)' },
+          '100%': { opacity: 1, transform: 'translateY(0)' },
+        },
+        'appear-from-right': {
+          '0%': { opacity: 0, transform: 'translateX(100%)' },
+          '100%': { opacity: 1, transform: 'translateX(0%)' },
+        },
+        'accordion-down': {
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' },
+        },
+        'accordion-up': {
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' },
+        },
+        'fade-out': {
+          '0%': { opacity: '1', transform: 'translateY(-30px)' },
+          '20%': { opacity: '1', transform: 'translateY(-40px)' },
+          '100%': { opacity: '0', transform: 'translateY(-60px)' },
+        },
+        'dash-forward': {
+          to: {
+            strokeDashoffset: '-16',
+          },
+        },
+        'dash-backward': {
+          to: {
+            strokeDashoffset: '16',
+          },
+        },
+      },
+      animation: {
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
+        'dash-forward': 'dash-forward 1s linear infinite',
+        'dash-backward': 'dash-backward 1s linear infinite',
+        'appear-from-bottom': 'appear-from-bottom 0.2s ease-out',
+        'appear-from-top': 'appear-from-top 0.2s ease-out',
+        'appear-from-right': 'appear-from-right 0.2s ease-out',
+        'fade-out': 'fade-out 2s ease-out forwards',
+      },
+      fontFamily: {
+        sans: ['var(--font-sans)', 'sans-serif'],
+      },
+    },
+  },
+  plugins: [
+    animatePlugin,
+    container,
+    nextui({
+      addCommonColors: true,
+      themes: {
+        light: {
+          extend: 'light',
+          colors: {
+            foreground: '#0f172a',
+            background: '#f1f5f9',
+            content1: '#e2e8f0',
+            content2: '#f1f5f9',
+            content3: '#cbd5e1',
+            content4: '#94a3b8',
+            divider: '#cbd5e1',
+            overlay: 'rgba(15, 23, 42, 0.1)',
+            danger: '#dc2626',
+            warning: '#f59e0b',
+            success: '#16a34a',
+            default: {
+              '50': '#f8fafc',
+              '100': '#f1f5f9',
+              '200': '#e2e8f0',
+              '300': '#cbd5e1',
+              '400': '#94a3b8',
+              '500': '#64748b',
+              '600': '#475569',
+              '700': '#334155',
+              '800': '#1e293b',
+              '900': '#0f172a',
+              DEFAULT: '#64748b',
+              foreground: '#0f172a',
+            },
+
+            focus: '#f7a200',
+            primary: {
+              DEFAULT: '#f7a200',
+              foreground: '#78360b',
+              50: '#fffbeb',
+              100: '#fef4c8',
+              200: '#fee989',
+              300: '#fed747',
+              400: '#ffc300',
+              500: '#f7a200',
+              600: '#da7a00',
+              700: '#b55500',
+              800: '#934105',
+              900: '#78360b',
+            },
+            secondary: {
+              DEFAULT: '#60a4f0',
+              foreground: '#1e3b7b',
+              50: '#eff6ff',
+              100: '#dae9fc',
+              200: '#bddafa',
+              300: '#92c3f6',
+              400: '#60a4f0',
+              500: '#3b82e8',
+              600: '#2365d9',
+              700: '#1a52c5',
+              800: '#1d439d',
+              900: '#1e3b7b',
+            },
+          },
+        },
+        dark: {
+          extend: 'dark',
+          colors: {
+            foreground: '#f8fafc',
+            background: '#1e293b',
+            content1: '#0f172a',
+            content2: '#1e293b',
+            content3: '#334155',
+            content4: '#475569',
+            divider: '#334155',
+            overlay: 'rgba(0, 0, 0, 0.5)',
+            danger: '#ef4444',
+            warning: '#fbbf24',
+            success: '#22c55e',
+            default: {
+              '50': '#0f172a',
+              '100': '#1e293b',
+              '200': '#334155',
+              '300': '#475569',
+              '400': '#64748b',
+              '500': '#94a3b8',
+              '600': '#cbd5e1',
+              '700': '#e2e8f0',
+              '800': '#f1f5f9',
+              '900': '#f8fafc',
+              DEFAULT: '#94a3b8',
+              foreground: '#f8fafc',
+            },
+            primary: {
+              DEFAULT: '#ffc300',
+              foreground: '#fffbeb',
+              50: '#78360b',
+              100: '#934105',
+              200: '#b55500',
+              300: '#da7a00',
+              400: '#f7a200',
+              500: '#ffc300',
+              600: '#fed747',
+              700: '#fee989',
+              800: '#fef4c8',
+              900: '#fffbeb',
+            },
+            secondary: {
+              DEFAULT: '#3b82e8',
+              foreground: '#eff6ff',
+              50: '#1e3b7b',
+              100: '#1d439d',
+              200: '#1a52c5',
+              300: '#2365d9',
+              400: '#3b82e8',
+              500: '#60a4f0',
+              600: '#92c3f6',
+              700: '#bddafa',
+              800: '#dae9fc',
+              900: '#eff6ff',
+            },
+          },
+        },
+      },
+    }),
+  ],
+};

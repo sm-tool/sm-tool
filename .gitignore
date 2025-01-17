@@ -137,3 +137,5 @@ Desktop.ini
 *storybook.log
 buildSrc
 /dist
+src/main/webapp/dist
+.idea/checkstyle-idea.xml

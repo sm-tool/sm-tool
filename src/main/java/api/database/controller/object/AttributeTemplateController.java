@@ -1,60 +1,72 @@
 package api.database.controller.object;
 
-import api.database.entity.object.QdsAttributeTemplate;
-import api.database.model.object.QdsInfoAddAttributeTemplate;
-import api.database.service.template.AttributeTemplateService;
+import api.database.entity.object.AttributeTemplate;
+import api.database.model.request.create.AttributeTemplateCreateRequest;
+import api.database.model.request.update.AttributeTemplateUpdateRequest;
+import api.database.service.core.provider.AttributeTemplateProvider;
+import api.database.service.global.AttributeTemplateService;
+import jakarta.validation.Valid;
 import java.util.List;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/attribute-template")
+@RequestMapping("/api/attribute-templates")
 public class AttributeTemplateController {
 
   private final AttributeTemplateService attributeTemplateService;
+  private final AttributeTemplateProvider attributeTemplateProvider;
 
   public AttributeTemplateController(
-    AttributeTemplateService attributeTemplateService
+    AttributeTemplateService attributeTemplateService,
+    AttributeTemplateProvider attributeTemplateProvider
   ) {
     this.attributeTemplateService = attributeTemplateService;
+    this.attributeTemplateProvider = attributeTemplateProvider;
   }
 
-  @PostMapping("/add")
-  public ResponseEntity<Integer> addAttributeTemplate(
-    @RequestBody QdsInfoAddAttributeTemplate attributeTemplate,
-    @RequestHeader Integer templateId
-  ) {
-    return ResponseEntity.ok(
-      attributeTemplateService.addAttributeTemplate(
-        attributeTemplate,
-        templateId
-      )
-    );
-  }
-
-  @GetMapping("/one")
-  public ResponseEntity<QdsAttributeTemplate> getOneAttributeTemplate(
-    @RequestHeader Integer attributeTemplateId
-  ) {
-    return ResponseEntity.ok(
-      attributeTemplateService.getOneAttributeTemplate(attributeTemplateId)
-    );
-  }
-
-  @GetMapping("/list/template")
-  public ResponseEntity<List<QdsAttributeTemplate>> getObjectAttributeTemplates(
-    @RequestHeader Integer objectTemplateId
-  ) {
-    List<QdsAttributeTemplate> attributes =
-      attributeTemplateService.getAttributeTemplates(objectTemplateId);
-    return ResponseEntity.ok(attributes);
-  }
-
-  @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteObjectAttributeTemplates(
+  //--------------------------------------------------Endpointy GET---------------------------------------------------------
+  @ResponseStatus(HttpStatus.OK)
+  @GetMapping("/template/{id}")
+  public List<AttributeTemplate> getAttributeTemplates(
     @PathVariable Integer id
   ) {
-    attributeTemplateService.deleteAttributeTemplates(id);
-    return ResponseEntity.noContent().build();
+    return attributeTemplateProvider.getAttributeTemplates(id);
+  }
+
+  @ResponseStatus(HttpStatus.OK)
+  @GetMapping("/{id}")
+  public AttributeTemplate getAttributeTemplate(@PathVariable Integer id) {
+    return attributeTemplateProvider.getOneAttributeTemplate(id);
+  }
+
+  //--------------------------------------------------Endpoint POST---------------------------------------------------------
+  @ResponseStatus(HttpStatus.OK)
+  @PostMapping
+  public AttributeTemplate addAttributeTemplate(
+    @Valid @RequestBody AttributeTemplateCreateRequest attributeTemplateInfo
+  ) {
+    return attributeTemplateService.addAttributeTemplate(attributeTemplateInfo);
+  }
+
+  //--------------------------------------------------Endpoint PUT---------------------------------------------------------
+  @ResponseStatus(HttpStatus.OK)
+  @PutMapping("/{id}")
+  public AttributeTemplate updateAttributeTemplate(
+    @Valid @RequestBody AttributeTemplateUpdateRequest attributeTemplateInfo,
+    @PathVariable Integer id
+  ) {
+    return attributeTemplateService.updateAttributeTemplate(
+      id,
+      attributeTemplateInfo
+    );
+  }
+
+  //--------------------------------------------------Endpoint DELETE---------------------------------------------------------
+
+  @DeleteMapping("/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  public void deleteAttributeTemplate(@PathVariable Integer id) {
+    attributeTemplateService.deleteAttributeTemplate(id);
   }
 }

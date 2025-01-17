@@ -1,22 +1,69 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-const useThrottle = <T>(value: T, interval = 16) => {
+const useThrottle = <T>(
+  value: T,
+  initialInterval = 100,
+  options?: {
+    minInterval?: number;
+    decreaseStep?: number;
+  },
+) => {
   const [throttledValue, setThrottledValue] = useState<T>(value);
+  const [currentInterval, setCurrentInterval] = useState(initialInterval);
   const lastExecuted = useRef(Date.now());
 
   useEffect(() => {
     const now = Date.now();
-    const handler = globalThis.window.setTimeout(() => {
-      if (now >= lastExecuted.current + interval) {
+    const handler = globalThis.setTimeout(() => {
+      if (now >= lastExecuted.current + currentInterval) {
         setThrottledValue(value);
         lastExecuted.current = now;
-      }
-    }, interval);
 
-    return () => globalThis.window.clearTimeout(handler);
-  }, [value, interval]);
+        if (options?.minInterval && options.decreaseStep) {
+          setCurrentInterval(previous =>
+            Math.max(options.minInterval!, previous - options.decreaseStep!),
+          );
+        }
+      }
+    }, currentInterval);
+
+    return () => {
+      globalThis.clearTimeout(handler);
+      setCurrentInterval(initialInterval);
+    };
+  }, [value, currentInterval, options]);
 
   return throttledValue;
+};
+
+export const useThrottleCallback = <
+  T extends (...arguments_: unknown[]) => void,
+>(
+  callback: T,
+  initialInterval = 100,
+  options?: {
+    minInterval?: number;
+    decreaseStep?: number;
+  },
+) => {
+  const [currentInterval, setCurrentInterval] = useState(initialInterval);
+  const lastExecuted = useRef(Date.now());
+
+  return React.useCallback(
+    (...arguments_: Parameters<T>) => {
+      const now = Date.now();
+      if (now >= lastExecuted.current + currentInterval) {
+        callback(...arguments_);
+        lastExecuted.current = now;
+        if (options?.minInterval && options.decreaseStep) {
+          setCurrentInterval(previous =>
+            Math.max(options.minInterval!, previous - options.decreaseStep!),
+          );
+        }
+      }
+    },
+    [callback, currentInterval, options],
+  );
 };
 
 export default useThrottle;

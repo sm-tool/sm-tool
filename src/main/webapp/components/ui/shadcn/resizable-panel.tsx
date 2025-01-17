@@ -21,9 +21,11 @@ const ResizablePanel = ResizablePrimitive.Panel;
 const ResizableHandle = ({
   withHandle,
   className,
+  children,
   ...properties
 }: React.ComponentProps<typeof ResizablePrimitive.PanelResizeHandle> & {
   withHandle?: boolean;
+  handleContent?: React.ReactNode;
 }) => (
   <ResizablePrimitive.PanelResizeHandle
     className={cn(
@@ -47,7 +49,7 @@ const ResizableHandle = ({
       <div
         className={cn(
           `z-50 flex h-4 w-3 items-center justify-center rounded-sm border border-content3
-          bg-content2 hover:bg-content3 hover:border-content4 transition-colors
+          bg-content1 hover:bg-content3 hover:border-content4 transition-colors
           duration-200`,
         )}
       >
@@ -57,4 +59,18 @@ const ResizableHandle = ({
   </ResizablePrimitive.PanelResizeHandle>
 );
 
-export { ResizablePanelGroup, ResizablePanel, ResizableHandle };
+const KinderGardenHandle = ({
+  children,
+  ...properties
+}: React.ComponentProps<typeof ResizablePrimitive.PanelResizeHandle>) => (
+  <ResizablePrimitive.PanelResizeHandle {...properties}>
+    {children}
+  </ResizablePrimitive.PanelResizeHandle>
+);
+
+export {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+  KinderGardenHandle,
+};

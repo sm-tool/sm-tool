@@ -1,0 +1,40 @@
+[
+  {
+    "id": 1,
+    "threadId": 1,
+    "time": 0,
+    "eventType": "START",
+    "description": null,
+    "title": null,
+    "associationChanges": [
+      {
+        "associationTypeId": 1,
+        "object1Id": 1,
+        "object2Id": 2,
+        "changeType": {
+          "from": null,
+          "to": "DELETE"
+        }
+      }
+    ],
+    "attributeChanges": [
+      {
+        "attributeId": 1,
+        "changeType": {
+          "from": null,
+          "to": "20"
+        }
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "threadId": 1,
+    "time": 1,
+    "eventType": "END",
+    "description": null,
+    "title": null,
+    "associationChanges": [],
+    "attributeChanges": []
+  }
+]

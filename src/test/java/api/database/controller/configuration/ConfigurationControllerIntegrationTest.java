@@ -2,18 +2,15 @@ package api.database.controller.configuration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import api.database.model.configuration.QdsInfoSetting;
-import api.database.repository.configuration.QdsConfigurationRepository;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,16 +19,19 @@ import utils.BaseIntegrationTest;
 class ConfigurationControllerIntegrationTest extends BaseIntegrationTest {
 
   @Test
-  @Transactional
-  public void testGetConfiguration() throws Exception {
+  public void testGetConfigurationForUser() throws Exception {
+    String configurationName = "Configuration for User";
+
     String expectedJson = Files.readString(
-      Paths.get(
-        "src/test/resources/responses/configuration/get_configuration_response.json"
-      )
+      Paths.get("src/test/resources/responses/configuration/get_by_user.json")
     );
 
     String actualJson = getMockMvc()
-      .perform(get("/api/configuration/all"))
+      .perform(
+        get("/api/configuration/user")
+          .with(jwt().jwt(jwt -> jwt.subject("1")))
+          .param("name", configurationName)
+      )
       .andReturn()
       .getResponse()
       .getContentAsString();
@@ -40,63 +40,49 @@ class ConfigurationControllerIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  void testGetConfigurationTypeIdsAndCheckSize() throws Exception {
-    MvcResult result = getMockMvc()
-      .perform(
-        get("/api/configuration/one")
-          .content("{\"name\": \"type_id\"}")
-          .contentType(MediaType.APPLICATION_JSON)
+  public void testGetConfigurationForScenario() throws Exception {
+    String configurationName = "Configuration for Scenario";
+
+    String expectedJson = Files.readString(
+      Paths.get(
+        "src/test/resources/responses/configuration/get_by_scenario.json"
       )
-      .andExpect(status().isOk())
-      .andReturn();
+    );
 
-    String responseBody = result.getResponse().getContentAsString();
+    String actualJson = getMockMvc()
+      .perform(
+        get("/api/configuration/scenario")
+          .header("scenarioId", 1)
+          .param("name", configurationName)
+      )
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
 
-    QdsInfoSetting setting = getObjectMapper()
-      .readValue(responseBody, QdsInfoSetting.class);
-
-    List<Integer> typeIds = Arrays.stream(
-      setting.value().replaceAll("[\\[\\]]", "").split(",")
-    )
-      .map(String::trim)
-      .map(Integer::parseInt)
-      .toList();
-
-    System.out.println("Extracted typeIds: " + typeIds);
-
-    assertEquals(6, typeIds.size());
-    assertTrue(typeIds.contains(6));
+    JSONAssert.assertEquals(expectedJson, actualJson, false);
   }
-  //  @Test
-  //  @Transactional
-  //  public void testUpdateConfiguration() throws Exception {
-  //        String updatedConfigJson =
-  //          """
-  //              {
-  //                  "id": 0,
-  //                  "privateKey": "NEW_KEY",
-  //                  "defaultEventDuration": 15,
-  //                  "observerTypeId": 2,
-  //                  "actorTypeId": 3
-  //              }
-  //          """;
-  //
-  //        getMockMvc()
-  //          .perform(
-  //            post("/api/configuration/all")
-  //              .contentType(MediaType.APPLICATION_JSON)
-  //              .content(updatedConfigJson)
-  //          )
-  //          .andExpect(status().isOk())
-  //          .andReturn()
-  //          .getResponse()
-  //          .getContentAsString();
-  //
-  //        QdsConfiguration updatedConfig =
-  //          qdsConfigurationRepository.getConfiguration(0);
-  //        assertEquals("NEW_KEY", updatedConfig.getPrivateKey());
-  //        assertEquals("15", updatedConfig.getDefaultEventDuration());
-  //        assertEquals(2, updatedConfig.getObserverTypeId());
-  //        assertEquals(3, updatedConfig.getActorTypeId());
-  //  }
+
+  @Test
+  public void testGetConfigurationForUserAndScenario() throws Exception {
+    String configurationName = "Configuration for User and Scenario";
+
+    String expectedJson = Files.readString(
+      Paths.get(
+        "src/test/resources/responses/configuration/get_by_scenario_and_user.json"
+      )
+    );
+
+    String actualJson = getMockMvc()
+      .perform(
+        get("/api/configuration/scenario/user")
+          .header("scenarioId", 1)
+          .with(jwt().jwt(jwt -> jwt.subject("1")))
+          .param("name", configurationName)
+      )
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    JSONAssert.assertEquals(expectedJson, actualJson, false);
+  }
 }

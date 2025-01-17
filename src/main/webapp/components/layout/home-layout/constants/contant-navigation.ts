@@ -10,14 +10,12 @@ export interface HomeNavigationCategory {
 export const HOME_NAVIGATION_CATEGORIES: HomeNavigationCategory[] = [
   {
     name: 'Scenario manager',
-    url: '/home',
+    url: '/home/scenarios',
     icon: Book,
-    disabled: false,
   },
   {
-    name: 'Object manager',
-    url: '/objectManager',
+    name: 'Object catalogue',
+    url: '/home/catalog/types',
     icon: FolderDot,
-    disabled: true,
   },
 ];

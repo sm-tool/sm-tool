@@ -103,7 +103,7 @@ const TableCell = forwardRef<
   <td
     ref={reference}
     className={cn(
-      'p-4 align-middle text-foreground [&:has([role=checkbox])]:pr-0',
+      'p-4 align-middle text-foreground [&:has([role=checkbox])]:pr-0 truncate',
       className,
     )}
     {...properties}

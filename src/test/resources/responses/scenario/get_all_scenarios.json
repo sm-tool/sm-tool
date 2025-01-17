@@ -1,43 +1,41 @@
 {
-  "content": [
-    {
-      "id": 1,
-      "title": "test",
-      "description": "chat gubi kontekst",
-      "creationDate": null,
-      "lastModificationDate": null
-    },
-    {
-      "id": 2,
-      "title": "test2",
-      "description": "chat gubi kontekst2",
-      "creationDate": null,
-      "lastModificationDate": null
+  "_embedded": {
+    "scenarios": [
+      {
+        "id": 2,
+        "title": "test2",
+        "description": "chat gubi kontekst2",
+        "context": "test2",
+        "purpose": "purpose testowy2",
+        "startDate": "2024-02-15T23:00:00.000Z",
+        "endDate": "2024-02-16T23:00:00.000Z",
+        "eventDuration": 11,
+        "creationDate": null,
+        "lastModificationDate": null
+      },
+      {
+        "id": 1,
+        "title": "test",
+        "description": "chat gubi kontekst",
+        "context": "test",
+        "purpose": "purpose testowy",
+        "startDate": "2024-02-15T23:00:00.000Z",
+        "endDate": "2024-02-16T23:00:00.000Z",
+        "eventDuration": 10,
+        "creationDate": null,
+        "lastModificationDate": null
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "http://localhost/api/scenarios?page=0&size=10&sort=id,desc"
     }
-  ],
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 10,
-    "sort": {
-      "empty": true,
-      "sorted": false,
-      "unsorted": true
-    },
-    "offset": 0,
-    "paged": true,
-    "unpaged": false
   },
-  "last": true,
-  "totalPages": 1,
-  "totalElements": 2,
-  "first": true,
-  "size": 10,
-  "number": 0,
-  "sort": {
-    "empty": true,
-    "sorted": false,
-    "unsorted": true
-  },
-  "numberOfElements": 2,
-  "empty": false
+  "page": {
+    "size": 10,
+    "totalElements": 2,
+    "totalPages": 1,
+    "number": 0
+  }
 }

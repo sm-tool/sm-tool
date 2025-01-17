@@ -1,40 +1,51 @@
 package api.database.service.thread;
 
-import api.database.entity.thread.QdsThread;
-import api.database.model.QdsResponseUpdateList;
-import api.database.model.constant.QdsEventType;
-import api.database.model.internal.event.QdsInternalEventAddSpecial;
-import api.database.model.thread.QdsInfoThreadAdd;
-import api.database.model.thread.QdsInfoThreadChange;
-import api.database.model.thread.QdsResponseThreadWithObjects;
-import api.database.repository.thread.QdsThreadRepository;
-import api.database.service.core.ThreadBaseOperations;
-import api.database.service.core.ThreadEventOperations;
+import api.database.entity.thread.Thread;
+import api.database.model.constant.ErrorCode;
+import api.database.model.constant.ErrorGroup;
+import api.database.model.exception.ApiException;
+import api.database.model.request.composite.create.ThreadCreateRequest;
+import api.database.model.request.update.ThreadUpdateRequest;
+import api.database.model.response.ThreadResponse;
+import api.database.repository.thread.ThreadRepository;
+import api.database.service.core.ThreadAdder;
+import api.database.service.core.provider.GlobalThreadProvider;
+import api.database.service.operations.ScenarioValidator;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 /// Zarządza podstawowymi operacjami na wątkach scenariusza:
 /// - Pobieranie wątków z ich obiektami
 /// - Tworzenie nowych wątków z bazowymi eventami
 /// - Modyfikacja istniejących wątków
+///
+/// # Powiązania
+/// - {@link Thread} - encja reprezentująca wątek
+/// - {@link ThreadResponse} - odpowiedź zawierająca dane wątku
+/// - {@link ThreadCreateRequest} - dane do utworzenia wątku
+/// - {@link ThreadUpdateRequest} - dane do zmiany danych wątku
 @Service
 public class ThreadService {
 
-  private final QdsThreadRepository qdsThreadRepository;
-  private final ThreadBaseOperations threadBaseOperations;
-  private final ThreadEventOperations threadEventOperations;
+  private final ThreadRepository threadRepository;
+  private final GlobalThreadProvider globalThreadProvider;
+  private final ThreadAdder threadAdder;
+  private final ScenarioValidator scenarioValidator;
 
   @Autowired
   public ThreadService(
-    QdsThreadRepository qdsThreadRepository,
-    ThreadBaseOperations threadBaseOperations,
-    ThreadEventOperations threadEventOperations
+    ThreadRepository threadRepository,
+    GlobalThreadProvider globalThreadProvider,
+    ThreadAdder threadAdder,
+    ScenarioValidator scenarioValidator
   ) {
-    this.qdsThreadRepository = qdsThreadRepository;
-    this.threadBaseOperations = threadBaseOperations;
-    this.threadEventOperations = threadEventOperations;
+    this.threadRepository = threadRepository;
+    this.globalThreadProvider = globalThreadProvider;
+    this.threadAdder = threadAdder;
+    this.scenarioValidator = scenarioValidator;
   }
 
   //--------------------------------------------------Pobieranie wątków---------------------------------------------------------
@@ -45,10 +56,35 @@ public class ThreadService {
   /// @return lista wątków z ich obiektami
   /// @apiNote Wykonywana w ramach osobnej transakcji
   @Transactional
-  public List<QdsResponseThreadWithObjects> getScenarioThreads(
-    Integer scenarioId
-  ) {
-    return qdsThreadRepository.getScenarioThreadsWithObjects(scenarioId);
+  public List<ThreadResponse> getScenarioThreads(Integer scenarioId) {
+    return threadRepository.getThreads(null, scenarioId);
+  }
+
+  /// Pobiera pojedynczy wątek wraz z jego obiektami.
+  /// Weryfikuje czy wątek należy do wskazanego scenariusza.
+  ///
+  /// @param threadId ID wątku (0 dla wątku globalnego)
+  /// @param scenarioId ID scenariusza
+  /// @return dane wątku z jego obiektami
+  /// @throws ApiException gdy wątek nie istnieje lub nie należy do scenariusza
+  @Transactional
+  public ThreadResponse getOneThread(Integer threadId, Integer scenarioId) {
+    scenarioValidator.checkIfThreadsAreInScenario(
+      List.of(threadId),
+      scenarioId
+    );
+    List<ThreadResponse> threads = threadRepository.getThreads(
+      threadId,
+      scenarioId
+    );
+    if (threads.isEmpty()) {
+      throw new ApiException(
+        ErrorCode.DOES_NOT_EXIST,
+        ErrorGroup.THREAD,
+        HttpStatus.NOT_FOUND
+      );
+    }
+    return threads.getFirst();
   }
 
   //----------------------------------------------------Dodawanie wątków-------------------------------------------------------
@@ -62,57 +98,48 @@ public class ThreadService {
   /// @return status aktualizacji
   /// @apiNote Wykonywana w ramach osobnej transakcji
   @Transactional
-  public QdsResponseUpdateList addThread(
+  public ThreadResponse addThread(
     Integer scenarioId,
-    QdsInfoThreadAdd info
+    ThreadCreateRequest info
   ) {
-    QdsThread thread = new QdsThread(
-      null,
-      scenarioId,
-      info.title(),
-      info.description(),
-      false,
-      null
-    );
-    Integer threadId = qdsThreadRepository.save(thread).getId();
-    threadEventOperations.addSpecialEvent(
-      new QdsInternalEventAddSpecial(
-        threadId,
-        QdsEventType.START,
-        info.time(),
-        null
-      )
-    );
-    threadEventOperations.addSpecialEvent(
-      new QdsInternalEventAddSpecial(
-        threadId,
-        QdsEventType.END,
-        info.time() + 1,
-        null
-      )
-    );
-    return new QdsResponseUpdateList(List.of("thread", "event"));
+    Integer threadId = threadAdder.addThread(scenarioId, info);
+
+    return getOneThread(threadId, scenarioId);
   }
 
   //------------------------------------------------------------Zmiana wątków----------------------------------------------
   /// Modyfikuje podstawowe informacje o wątku.
-  /// Obsługuje zarówno wątki normalne, jak i globalny.
+  /// Obsługuje zarówno wątki normalne, jak i globalny (ID=0).
+  /// Aktualizuje tylko tytuł i opis wątku.
   ///
-  /// @param scenarioId identyfikator scenariusza
-  /// @param info dane do zmiany w wątku
+  /// @param threadId ID wątku (0 dla wątku globalnego)
+  /// @param info nowe dane wątku (tytuł i opis)
+  /// @param scenarioId ID scenariusza
+  /// @return zaktualizowany wątek wraz z jego obiektami
+  /// @throws ApiException gdy wątek nie należy do scenariusza
   /// @apiNote Wykonywana w ramach osobnej transakcji
   @Transactional
-  public void changeThread(Integer scenarioId, QdsInfoThreadChange info) {
-    QdsThread thread = new QdsThread(
-      info.threadId() == 0
-        ? threadBaseOperations.getGlobalThreadId(scenarioId)
-        : info.threadId(),
+  public ThreadResponse changeThread(
+    Integer threadId,
+    ThreadUpdateRequest info,
+    Integer scenarioId
+  ) {
+    scenarioValidator.checkIfThreadsAreInScenario(
+      List.of(threadId),
+      scenarioId
+    );
+
+    Thread thread = new Thread(
+      threadId == 0
+        ? globalThreadProvider.getGlobalThreadId(scenarioId)
+        : threadId,
       scenarioId,
       info.title(),
       info.description(),
-      info.threadId() == 0,
+      threadId == 0,
       null
     );
-    qdsThreadRepository.save(thread);
+    threadRepository.save(thread);
+    return getOneThread(threadId, scenarioId);
   }
 }

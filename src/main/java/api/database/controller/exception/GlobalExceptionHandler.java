@@ -6,6 +6,7 @@ import api.database.model.constant.ErrorCode;
 import api.database.model.constant.ErrorGroup;
 import api.database.model.exception.ApiException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,6 +68,27 @@ public class GlobalExceptionHandler {
     return apiException;
   }
 
+  private ApiException parseForeignKeyException(String message) {
+    Pattern pattern = Pattern.compile(
+      "update or delete on table \"(\\w+)\" violates foreign key constraint \"(\\w+)\" on table \"(\\w+)\"[\\s\\S]*Key \\(id\\)=\\((\\d+)\\)"
+    );
+    Matcher matcher = pattern.matcher(message);
+    ApiException apiException = null;
+    if (matcher.find()) {
+      String sourceTable = matcher.group(1);
+      String targetTable = matcher.group(3);
+      String conflictId = matcher.group(4);
+
+      apiException = new ApiException(
+        ErrorCode.ELEMENT_IN_USE,
+        List.of(sourceTable.substring(4), conflictId),
+        ErrorGroup.valueOf(targetTable.substring(4).toUpperCase()),
+        HttpStatus.CONFLICT
+      );
+    }
+    return apiException;
+  }
+
   /** Funkcja przechwytująca błędy z bazy danych i zmieniająca je na klasę ApiException
    * która to jest wysyłana jako odpowiedź
    */
@@ -86,6 +108,8 @@ public class GlobalExceptionHandler {
     ApiException apiException = parseNoKeyException(message);
     //Błędy wartości null
     if (apiException == null) apiException = parseNullException(message);
+    //Błędy klucza obcego
+    if (apiException == null) apiException = parseForeignKeyException(message);
     //Inne błędy
     System.out.println(message);
     if (apiException == null) {
@@ -105,7 +129,6 @@ public class GlobalExceptionHandler {
     System.out.println(
       ex.getBindingResult().getAllErrors().getFirst().getDefaultMessage()
     );
-    //Jak ktoś chce dla Jakarty więcej błędów niż jeden to trzeba zmodyfikować klasę
     String errorMessage = ex
       .getBindingResult()
       .getAllErrors()
@@ -116,9 +139,9 @@ public class GlobalExceptionHandler {
 
     return new ResponseEntity<>(
       new ApiException(
-        ErrorCode.valueOf(errList[1]),
-        List.of(errList[2]),
-        ErrorGroup.valueOf(errList[0]),
+        ErrorCode.valueOf(errList[0]),
+        Arrays.stream(errList).skip(2).toList(),
+        ErrorGroup.valueOf(errList[1]),
         HttpStatus.BAD_REQUEST
       ),
       HttpStatus.BAD_REQUEST

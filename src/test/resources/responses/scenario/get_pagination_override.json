@@ -1,0 +1,38 @@
+{
+  "_embedded": {
+    "scenarios": [
+      {
+        "id": 1,
+        "title": "test",
+        "description": "chat gubi kontekst",
+        "context": "test",
+        "purpose": "purpose testowy",
+        "startDate": "2024-02-15T23:00:00.000Z",
+        "endDate": "2024-02-16T23:00:00.000Z",
+        "eventDuration": 10,
+        "creationDate": null,
+        "lastModificationDate": null
+      }
+    ]
+  },
+  "_links": {
+    "first": {
+      "href": "http://localhost/api/scenarios?page=0&size=1&sort=id,desc"
+    },
+    "prev": {
+      "href": "http://localhost/api/scenarios?page=0&size=1&sort=id,desc"
+    },
+    "self": {
+      "href": "http://localhost/api/scenarios?page=1&size=1&sort=id,desc"
+    },
+    "last": {
+      "href": "http://localhost/api/scenarios?page=1&size=1&sort=id,desc"
+    }
+  },
+  "page": {
+    "size": 1,
+    "totalElements": 2,
+    "totalPages": 2,
+    "number": 1
+  }
+}

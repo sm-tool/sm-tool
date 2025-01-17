@@ -15,7 +15,7 @@ export default [
     languageOptions: {
       parser: tseslintParser,
       parserOptions: {
-        project: './tsconfig.json',
+        project: './src/main/webapp/tsconfig.json',
         ecmaVersion: 2022,
         sourceType: 'module',
       },
@@ -62,6 +62,9 @@ export default [
       'unicorn/no-array-reduce': 'off',
       'react/react-in-jsx-scope': 'off',
       'no-redeclare': 'off',
+      'unicorn/number-literal-case': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
+      'unicorn/no-null': 'off',
     },
   },
   {
@@ -77,6 +80,7 @@ export default [
       'unicorn/no-nested-ternary': 'off',
       'react/prop-types': 'off',
       '@typescript-eslint/only-throw-error': 'off',
+      'unicorn/filename-case': 'off',
     },
   },
   {
@@ -87,6 +91,9 @@ export default [
       'src/main/docker',
       'src/main/docker/',
       'src/test/javascript/cypress/',
+      'src/main/webapp/.storybook/',
+      'src/main/webapp/vite.config.ts',
+      'src/main/webapp/tailwind.config.ts',
       'src/test/javascript/protractor.conf.js',
       'jest.conf.js',
       'src/test/javascript/jest.conf.js',

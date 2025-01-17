@@ -1,10 +1,10 @@
 package api.database.controller.configuration;
 
-import api.database.entity.configuration.QdsConfiguration;
-import api.database.model.configuration.QdsInfoSetting;
+import api.database.entity.configuration.Configuration;
 import api.database.service.configuration.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,22 +18,36 @@ public class ConfigurationController {
     this.configurationService = configurationService;
   }
 
-  @GetMapping("/all")
-  public ResponseEntity<QdsConfiguration> getConfiguration() {
-    return ResponseEntity.ok(configurationService.getConfiguration());
+  //--------------------------------------------------Endpointy GET---------------------------------------------------------
+  @ResponseStatus(HttpStatus.OK)
+  @GetMapping("/user")
+  public Configuration getConfigurationForUser(
+    @RequestParam String name,
+    Authentication authentication
+  ) {
+    return configurationService.getConfigurationForUser(authentication, name);
   }
 
-  @GetMapping("/one")
-  public ResponseEntity<QdsInfoSetting> getConfigurationOne(
-    @RequestBody QdsInfoSetting setting
+  @ResponseStatus(HttpStatus.OK)
+  @GetMapping("/scenario")
+  public Configuration getConfigurationForScenario(
+    @RequestHeader Integer scenarioId,
+    @RequestParam String name
   ) {
-    return ResponseEntity.ok(configurationService.getSetting(setting.name()));
+    return configurationService.getConfigurationForScenario(scenarioId, name);
   }
 
-  @PostMapping("/one")
-  public ResponseEntity<QdsInfoSetting> updateConfigurationOne(
-    @RequestBody QdsInfoSetting newSetting
+  @ResponseStatus(HttpStatus.OK)
+  @GetMapping("/scenario/user")
+  public Configuration getConfigurationForUserAndScenario(
+    @RequestHeader Integer scenarioId,
+    @RequestParam String name,
+    Authentication authentication
   ) {
-    return ResponseEntity.ok(configurationService.updateOneSetting(newSetting));
+    return configurationService.getConfigurationForUserAndScenario(
+      authentication,
+      scenarioId,
+      name
+    );
   }
 }

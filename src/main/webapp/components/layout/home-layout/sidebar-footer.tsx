@@ -16,10 +16,13 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/shadcn/avatar.tsx';
 import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react';
 import useAuth from '@/lib/auth/hooks/use-auth.ts';
-import ThemeSwitcherLong from '@/components/ui/common/buttons/theme-switcher/theme-switcher-long.tsx';
+import ThemeSwitcherLong from '@/components/ui/common/theme/theme-switcher/theme-switcher-long.tsx';
 import useAuthDispatch from '@/lib/auth/hooks/use-auth-dispatch.ts';
 import { Dialog, DialogTrigger } from '@/components/ui/shadcn/dialog.tsx';
 import AccountSettingsModal from '@/components/layout/home-layout/account-settings-modal.tsx';
+import ThemeSwitcher from '../../ui/common/theme/theme-switcher';
+
+type SidebarFooterVariant = 'wide' | 'short';
 
 const IndexedAvatar = ({ text }: { text: string }) => (
   <Avatar className='h-8 w-8 rounded-lg bg-secondary-300'>
@@ -29,7 +32,11 @@ const IndexedAvatar = ({ text }: { text: string }) => (
   </Avatar>
 );
 
-const UserSidebarFooter = () => {
+const UserSidebarFooter = ({
+  variant = 'wide',
+}: {
+  variant?: SidebarFooterVariant;
+}) => {
   const auth = useAuth();
   const { logout } = useAuthDispatch();
 
@@ -43,7 +50,7 @@ const UserSidebarFooter = () => {
     <Dialog>
       <AccountSettingsModal />
       <SidebarFooter>
-        <ThemeSwitcherLong />
+        {variant === 'wide' ? <ThemeSwitcherLong /> : <ThemeSwitcher />}
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
@@ -92,7 +99,7 @@ const UserSidebarFooter = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className='text-red-500'
-                  onClick={void logout}
+                  onClick={() => void logout()}
                 >
                   <LogOut />
                   Log out
