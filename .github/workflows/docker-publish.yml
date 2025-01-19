@@ -1,0 +1,46 @@
+name: Docker Build and Push
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_BACKEND: sm-tool-backend
+  IMAGE_NAME_FRONTEND: sm-tool-frontend
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    # Uprawnienia potrzebne do pushowania na GHCR
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./src/main/java/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/sm-tool/${{ env.IMAGE_NAME_BACKEND }}:latest
+
+      - name: Build and push Frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./src/main/webapp/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/sm-tool/${{ env.IMAGE_NAME_FRONTEND }}:latest
