@@ -9,10 +9,10 @@ import api.database.model.data.OffspringObjectTransferData;
 import api.database.model.domain.transfer.InternalThreadObjects;
 import api.database.model.exception.ApiException;
 import api.database.service.core.ObjectInstanceTransfer;
+import api.database.service.core.ScenarioManager;
 import api.database.service.core.provider.BranchingProvider;
 import api.database.service.core.provider.EventStateProvider;
 import api.database.service.core.provider.ObjectInstanceProvider;
-import api.database.service.operations.ScenarioValidator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,7 +38,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class BranchingValidator {
 
-  private final ScenarioValidator scenarioValidator;
+  private final ScenarioManager scenarioManager;
   private final ObjectInstanceProvider objectInstanceProvider;
   private final EventStateProvider eventStateProvider;
   private final BranchingProvider branchingProvider;
@@ -46,13 +46,13 @@ public class BranchingValidator {
 
   @Autowired
   public BranchingValidator(
-    ScenarioValidator scenarioValidator,
+    ScenarioManager scenarioManager,
     ObjectInstanceProvider objectInstanceProvider,
     EventStateProvider eventStateProvider,
     BranchingProvider branchingProvider,
     ObjectInstanceTransfer objectInstanceTransfer
   ) {
-    this.scenarioValidator = scenarioValidator;
+    this.scenarioManager = scenarioManager;
     this.objectInstanceProvider = objectInstanceProvider;
     this.eventStateProvider = eventStateProvider;
     this.branchingProvider = branchingProvider;
@@ -74,7 +74,7 @@ public class BranchingValidator {
       ErrorGroup.BRANCHING,
       HttpStatus.CONFLICT
     );
-    scenarioValidator.checkIfThreadsAreInScenario(threadIds, scenarioId);
+    scenarioManager.checkIfThreadsAreInScenario(threadIds, scenarioId);
     if (threadIds.contains(0)) throw new ApiException(
       ErrorCode.TRIED_TO_BRANCH_GLOBAL_THREAD,
       ErrorGroup.BRANCHING,
@@ -234,7 +234,10 @@ public class BranchingValidator {
       verifySingleTransfers(forkId, objects, fork.objectTransfer(), scenarioId);
     } catch (ApiException e) {
       // Zamiast propagować wyjątek, oznaczamy fork jako niepoprawny
-      if (e.getErrorCode() == ErrorCode.WRONG_ASSOCIATIONS) {
+      if (
+        e.getErrorCode() == ErrorCode.WRONG_ASSOCIATIONS ||
+        e.getErrorCode() == ErrorCode.NOT_ALL_OBJECTS_WERE_TRANSFERRED
+      ) {
         objectInstanceTransfer.markForkAsIncorrect(forkId);
       } else {
         throw e; // inne błędy propagujemy dalej

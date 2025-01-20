@@ -7,14 +7,12 @@ import api.database.service.core.provider.AssociationTypeProvider;
 import api.database.service.global.AssociationTypeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -54,65 +52,18 @@ public class AssociationTypeController {
 
   //--------------------------------------------------Endpointy GET---------------------------------------------------------
 
-  @ResponseStatus(HttpStatus.OK)
-  @GetMapping("/object-type/{objectTypeId}")
-  public List<AssociationType> getAssociationTypesForObjectType(
-    @PathVariable Integer objectTypeId
-  ) {
-    return associationTypeProvider.getByObjectType(objectTypeId);
-  }
-
   @Operation(summary = "Get all association types")
   @GetMapping
   public PagedModel<EntityModel<AssociationType>> getAllAssociationTypes(
     @RequestParam(defaultValue = "0") int page,
     @RequestParam(defaultValue = "20") int size,
-    @SortDefault(sort = "description") Sort sort
-  ) {
-    Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
-    Page<AssociationType> types = associationTypeProvider.findAll(pageable);
-    return pagedResourcesAssembler.toModel(types);
-  }
-
-  @Operation(
-    summary = "Get all association types",
-    description = "Retrieves a list of all association types"
-  )
-  @ApiResponse(
-    responseCode = "200",
-    description = "List of association types retrieved successfully",
-    content = @Content(
-      mediaType = "application/json",
-      array = @ArraySchema(
-        schema = @Schema(implementation = AssociationType.class)
-      )
-    )
-  )
-  @GetMapping("/scenario")
-  public PagedModel<
-    EntityModel<AssociationType>
-  > getAssociationTypesForScenario(
-    @RequestParam(defaultValue = "0") int page,
-    @RequestParam(defaultValue = "20") int size,
     @SortDefault(sort = "description") Sort sort,
-    @RequestHeader("scenarioId") Integer scenarioId,
-    @Parameter(description = "Enable hierarchical search") @RequestParam(
-      required = false
-    ) Boolean hierarchical,
-    @Parameter(description = "Filter by first object type") @RequestParam(
-      required = false
-    ) Integer firstObjectTypeId,
-    @Parameter(description = "Filter by second object type") @RequestParam(
-      required = false
-    ) Integer secondObjectTypeId
+    @RequestHeader(required = false) Integer scenarioId
   ) {
     Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
-    Page<AssociationType> types = associationTypeProvider.getAssociationTypes(
+    Page<AssociationType> types = associationTypeProvider.findAll(
       pageable,
-      scenarioId,
-      firstObjectTypeId,
-      secondObjectTypeId,
-      hierarchical
+      scenarioId
     );
     return pagedResourcesAssembler.toModel(types);
   }
@@ -126,13 +77,15 @@ public class AssociationTypeController {
     @Parameter(
       description = "Description to search for",
       required = true
-    ) @RequestParam("description") String description
+    ) @RequestParam("description") String description,
+    @RequestHeader(required = false) Integer scenarioId
   ) {
     Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
     Page<AssociationType> types =
       associationTypeProvider.findByDescriptionContaining(
         description,
-        pageable
+        pageable,
+        scenarioId
       );
     return pagedResourcesAssembler.toModel(types);
   }
@@ -146,11 +99,16 @@ public class AssociationTypeController {
     @Parameter(
       description = "First object type ID",
       required = true
-    ) @RequestParam("typeId") Integer typeId
+    ) @RequestParam("typeId") Integer typeId,
+    @RequestHeader(required = false) Integer scenarioId
   ) {
     Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
     Page<AssociationType> types =
-      associationTypeProvider.findByFirstObjectTypeId(typeId, pageable);
+      associationTypeProvider.findByFirstObjectTypeId(
+        typeId,
+        pageable,
+        scenarioId
+      );
     return pagedResourcesAssembler.toModel(types);
   }
 
@@ -163,11 +121,16 @@ public class AssociationTypeController {
     @Parameter(
       description = "Second object type ID",
       required = true
-    ) @RequestParam("typeId") Integer typeId
+    ) @RequestParam("typeId") Integer typeId,
+    @RequestHeader(required = false) Integer scenarioId
   ) {
     Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
     Page<AssociationType> types =
-      associationTypeProvider.findBySecondObjectTypeId(typeId, pageable);
+      associationTypeProvider.findBySecondObjectTypeId(
+        typeId,
+        pageable,
+        scenarioId
+      );
     return pagedResourcesAssembler.toModel(types);
   }
 

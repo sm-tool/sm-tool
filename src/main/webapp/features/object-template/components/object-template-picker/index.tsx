@@ -1,4 +1,3 @@
-import ReferencePickerWithQuery from '@/components/ui/common/input/reference-picker-TODO/reference-picker-with-query.tsx';
 import { useInfiniteObjectTemplateByTypeId } from '@/features/object-template/queries.ts';
 import {
   ObjectTemplate,
@@ -7,6 +6,7 @@ import {
 import { TextSelect } from 'lucide-react';
 import { ObjectTemplateBadge } from '@/features/object-template/components/object-template-badge.tsx';
 import { CreateNewTemplateButton } from '@/app/home/_layout/catalog/_layout/templates';
+import ReferencePickerWithQuery from '@/components/ui/common/input/reference-picker/reference-picker-with-query.tsx';
 
 const ObjectTemplatePicker = ({
   value,
@@ -39,6 +39,7 @@ const ObjectTemplatePicker = ({
           </div>
         </>
       }
+      dialogTitle={'Select supported template'}
       topUtil={
         <CreateNewTemplateButton
           defaultValueForCreator={{

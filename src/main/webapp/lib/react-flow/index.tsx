@@ -329,6 +329,7 @@ const ScenarioManipulationFLow = () => {
             onSubmit: async data => {
               await createJoinCreateRequest.mutateAsync(data);
               setIsMergeDialogOpened(false);
+              scenarioManipulation.clearSelected();
             },
           }}
           onClose={() => {

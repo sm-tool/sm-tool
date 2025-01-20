@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/shadcn/context-menu.tsx';
 import useScenarioCommonNavigation from '@/app/scenario/$scenarioId/_layout/~hooks/use-scenario-common-navigation.ts';
 import { useThreadsFlow } from '@/lib/react-flow/context/scenario-manipulation-flow-context';
+import MovingText from '@/lib/react-flow/components/moving-text';
+import getPhaseFlowRect from '@/lib/react-flow/utils/get-phase-flow-rect.ts';
 
 export type ThreadCardProperties = {
   thread: Thread;
@@ -35,6 +37,11 @@ const ThreadCard = ({ thread }: ThreadCardProperties) => {
   const isSelectedNode = React.useMemo(
     () => scenarioManipulation.selectedThreads.includes(thread.id),
     [scenarioManipulation.selectedThreads, thread.id],
+  );
+
+  const isSelectedNodeFormMerge = React.useMemo(
+    () => scenarioManipulation.selectedThreadsForMerge.includes(thread.id),
+    [scenarioManipulation.selectedThreadsForMerge, thread.id],
   );
 
   const forms: Record<'edit' | 'delete', React.ReactNode> = {
@@ -75,16 +82,25 @@ const ThreadCard = ({ thread }: ThreadCardProperties) => {
       {form === 'edit' ? forms['edit'] : forms['delete']}
       <ContextMenu>
         <ContextMenuTrigger className='relative'>
-          {isSelectedNode && (
+          {(isSelectedNode || isSelectedNodeFormMerge) && (
             <div
-              className='absolute inset-0 z-20 animate-in fade-in duration-300 pointer-events-none
-                bg-primary-400/10'
+              className={cn(
+                'absolute inset-0 z-20 animate-in fade-in duration-300 pointer-events-none',
+                {
+                  'bg-primary-400/10': isSelectedNode,
+                  'bg-secondary-400/10': isSelectedNodeFormMerge,
+                },
+              )}
             />
           )}
           <Card
             onClick={(event: React.MouseEvent) => {
               if (event.shiftKey) {
-                scenarioManipulation.toggleNodeSelection(thread.id);
+                if (scenarioManipulation.isEditingMergeOnBranching) {
+                  scenarioManipulation.handleSetSelectedThreadsForMerge(thread);
+                } else {
+                  scenarioManipulation.toggleNodeSelection(thread.id);
+                }
               } else {
                 navigateWithParameters(`events/${thread.id}`);
               }
@@ -102,13 +118,39 @@ const ThreadCard = ({ thread }: ThreadCardProperties) => {
             )}
           >
             <div className='w-full px-4 py-2 border-b flex-shrink-0 text-center'>
-              <span className='text-2xl font-semibold block overflow-hidden h-8 truncate max-w-5xl'>
-                {thread.title}
+              <span className='text-2xl font-semibold block overflow-hidden h-8 truncate'>
+                <MovingText
+                  containerWidth={getPhaseFlowRect().width}
+                  startTime={
+                    thread.startTime +
+                    (thread.incomingBranchingId && thread.outgoingBranchingId
+                      ? 1
+                      : 0) +
+                    (!thread.incomingBranchingId && !thread.outgoingBranchingId
+                      ? -1
+                      : 0)
+                  }
+                  endTime={thread.endTime}
+                  text={thread.title}
+                />
               </span>
             </div>
             {scenarioManipulation.threadViewMode === 'description' && (
-              <div className='flex-1 overflow-y-auto px-4 py-2 min-h-0 duration-300 animate-appearance-in'>
-                <p className='w-full'>{thread.description}</p>
+              <div className='flex-1'>
+                <MovingText
+                  containerWidth={getPhaseFlowRect().width}
+                  text={thread.description}
+                  startTime={
+                    thread.startTime +
+                    (thread.incomingBranchingId && thread.outgoingBranchingId
+                      ? 1
+                      : 0) +
+                    (!thread.incomingBranchingId && !thread.outgoingBranchingId
+                      ? -1
+                      : 0)
+                  }
+                  endTime={thread.endTime}
+                />
               </div>
             )}
           </Card>

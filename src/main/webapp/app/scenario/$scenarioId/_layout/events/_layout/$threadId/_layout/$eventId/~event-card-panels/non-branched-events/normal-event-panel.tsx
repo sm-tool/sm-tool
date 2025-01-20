@@ -16,16 +16,18 @@ import { useEventState } from '@/features/event-instance/queries.ts';
 import StatusComponent from '@/components/ui/common/data-load-states/status-component';
 import React from 'react';
 import AttribiuteUnChangedCard from '@/features/attribute-changes/components/attribiute-un-changed-card';
-import { Input } from '@/components/ui/shadcn/input.tsx';
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from '@/components/ui/shadcn/toggle-group.tsx';
 import AssociationChangesOverview from '@/features/association-change/components/association-changes-overview';
 import { Undo2 } from 'lucide-react';
 import useScenarioCommonNavigation from '@/app/scenario/$scenarioId/_layout/~hooks/use-scenario-common-navigation.ts';
 import { Button } from '@/components/ui/shadcn/button.tsx';
 import UppercasedDescriptorTooltip from '@/app/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/$eventId/~event-card-panels/non-branched-events/uppercased-descriptor-tooltip.tsx';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandList,
+} from '@/components/ui/shadcn/command.tsx';
 
 const NormalEventPanel = {
   Left: () => {
@@ -33,6 +35,8 @@ const NormalEventPanel = {
     const { event } = useEventForm();
     const { navigateWithParametersBetweenEvents } =
       useScenarioCommonNavigation();
+
+    const eventTitleFilled = event.title?.length !== 0;
 
     return (
       <>
@@ -48,8 +52,13 @@ const NormalEventPanel = {
                   <Undo2 className='size-6' />
                   <span className='w-1 h-[32px] bg-primary absolute right-1' />
                 </Button>
-                <Label variant='foreground' size='3xl' className='pl-12'>
-                  {event.title}
+                <Label
+                  variant={eventTitleFilled ? 'foreground' : 'default'}
+                  size='3xl'
+                  weight='semibold'
+                  className='pl-12'
+                >
+                  {eventTitleFilled ? event.title : 'Titleless event'}
                 </Label>
               </div>
             </div>
@@ -150,50 +159,54 @@ const NormalEventPanel = {
                 value='attributes'
                 className='left-1.5 relative -top-2.5 h-full rounded-xl rounded-tl-none'
               >
-                <div className='flex items-center gap-4 my-2 border-b-2 border-content3'>
-                  <div className='flex-1 p-1'>
-                    <Input placeholder='Search...' className='max-w-xs' />
+                <Command
+                  className='rounded-lg border bg-content2'
+                  filter={(value, search) => {
+                    const includes = value
+                      .toLowerCase()
+                      .includes(search.toLowerCase());
+                    return includes ? 1 : 0;
+                  }}
+                >
+                  <div className='flex items-center gap-4 my-2 border-b-2 border-content3'>
+                    <CommandInput
+                      placeholder='Search attributes...'
+                      className='max-w-xs'
+                    />
                   </div>
+                  <ScrollArea className='h-full w-full'>
+                    <CommandList>
+                      <ScrollArea className='h-full w-full'>
+                        <CommandEmpty>No attributes found.</CommandEmpty>
 
-                  <ToggleGroup type='single' defaultValue='changes'>
-                    <ToggleGroupItem value='changes'>
-                      By Changes
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value='objects'>
-                      By Objects
-                    </ToggleGroupItem>
-                  </ToggleGroup>
-                </div>
-                <ScrollArea className='h-full w-full'>
-                  {event.attributeChanges.length > 0 && (
-                    <div className='mb-4 mt-1 bg-content2'>
-                      <Label className='pl-1'>Changed Attributes</Label>
-                      <div className='space-y-2'>
-                        {event.attributeChanges.map((change, index) => (
-                          <AttributeChangeCard
-                            key={index}
-                            attributeChange={change}
-                            onChange={updateAttribute}
-                            onDelete={deleteAttribute}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {missingAttributes.length > 0 && (
-                    <div>
-                      <Label className='pl-1'>Unchanged Attributes</Label>
-                      <div className='space-y-2'>
-                        {missingAttributes.map((state, index) => (
-                          <AttribiuteUnChangedCard
-                            key={`state-${index}`}
-                            state={state}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </ScrollArea>
+                        {event.attributeChanges.length > 0 && (
+                          <CommandGroup heading='Changed Attributes'>
+                            {event.attributeChanges.map((change, index) => (
+                              <AttributeChangeCard
+                                key={index}
+                                deleteDisabled={event.eventType === 'START'}
+                                attributeChange={change}
+                                onChange={updateAttribute}
+                                onDelete={deleteAttribute}
+                              />
+                            ))}
+                          </CommandGroup>
+                        )}
+
+                        {missingAttributes.length > 0 && (
+                          <CommandGroup heading='Unchanged Attributes'>
+                            {missingAttributes.map((state, index) => (
+                              <AttribiuteUnChangedCard
+                                state={state}
+                                key={index}
+                              />
+                            ))}
+                          </CommandGroup>
+                        )}
+                      </ScrollArea>
+                    </CommandList>
+                  </ScrollArea>
+                </Command>
               </TabsContent>
               <TabsContent
                 value='associations'

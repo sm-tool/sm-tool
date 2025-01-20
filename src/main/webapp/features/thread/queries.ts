@@ -122,18 +122,15 @@ export const useDeleteThread = () => {
 
 export const useDeleteThreads = () => {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (ids: number[]) => {
-      const results = await Promise.allSettled(
-        ids.map(id => threadApi.delete(id)),
-      );
-
-      const successCount = results.filter(
-        result => result.status === 'fulfilled' || result.status === 'rejected',
-      ).length;
-
-      return { total: ids.length, successCount };
+      for (const id of ids) {
+        await threadApi.delete(id).catch(() => {});
+      }
+      return { total: ids.length };
     },
+
     onSuccess: _ => {
       const scenarioId = getScenarioIdFromPath();
       void queryClient.invalidateQueries({
@@ -147,6 +144,7 @@ export const useDeleteThreads = () => {
       });
       successToast('Threads deleted');
     },
+
     onError: error => {
       handleErrorToast(error, 'Failed to delete some threads');
     },

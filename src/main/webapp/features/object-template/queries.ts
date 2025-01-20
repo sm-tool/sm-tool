@@ -22,13 +22,21 @@ import {
   objectTemplateApi,
   ObjectTemplateRequest,
 } from '@/features/object-template/api.ts';
+import { getScenarioIdFromPath } from '@/features/scenario/utils/get-scenario-id-from-path.tsx';
 
 export const objectTemplatesKeys = {
   all: ['objectTemplates'] as const,
   list: (request?: ObjectTemplateRequest) =>
     ['objectTemplates', request] as const,
+  listScenario: (scenarioId: number) => [
+    'objectTemplates',
+    'scenario',
+    scenarioId,
+  ],
   infinite: (request?: ObjectTemplateRequest) =>
     ['objectTemplates', 'infinite', request] as const,
+  infiniteHeaderless: (scenarioId: number, request?: ObjectTemplateRequest) =>
+    ['objectTemplates', 'infiniteHeaderLess', scenarioId, request] as const,
   infiniteByObjectType: (
     objectTypeId: number,
     request: ObjectTemplateRequest,
@@ -60,11 +68,46 @@ export const useObjectTemplate = (id: number, options = {}) => {
   });
 };
 
-export const useInfiniteObjectTemplate = (request?: ObjectTemplateRequest) => {
+export const useObjectTemplatesScenarioList = () => {
+  return useQuery({
+    queryKey: objectTemplatesKeys.listScenario(getScenarioIdFromPath()),
+    queryFn: () => objectTemplateApi.getAllScenarioTemplatesIds(),
+  });
+};
+
+export const useInfiniteObjectTemplateGlobal = (
+  request?: ObjectTemplateRequest,
+) => {
   return useInfiniteQuery<HalObjectTemplateResponse>({
     queryKey: objectTemplatesKeys.infinite(request),
     queryFn: ({ pageParam }) =>
       objectTemplateApi.getAll({
+        ...request,
+        pagination: {
+          page: pageParam as number,
+          size: 10,
+        },
+      }),
+    initialPageParam: 0,
+    getNextPageParam: lastPage => {
+      if (lastPage._links.next) {
+        return lastPage.page.number + 1;
+      }
+      return;
+    },
+    staleTime: STALE_TIME.Short,
+    gcTime: STALE_TIME.XLONG,
+  });
+};
+
+export const useInfiniteObjectTemplateHeaderLess = (
+  scenarioId: number,
+  request?: ObjectTemplateRequest,
+) => {
+  return useInfiniteQuery<HalObjectTemplateResponse>({
+    queryKey: objectTemplatesKeys.infiniteHeaderless(scenarioId, request),
+    queryFn: ({ pageParam }) =>
+      objectTemplateApi.getAllHeaderless(scenarioId, {
         ...request,
         pagination: {
           page: pageParam as number,
@@ -163,6 +206,20 @@ export const useDeleteObjectTemplate = () => {
     },
     onError: error => {
       handleErrorToast(error, 'Failed to delete object type');
+    },
+  });
+};
+
+export const useObjectTemplateAssigment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: objectTemplateApi.assignToScenario,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: objectTemplatesKeys.all });
+      toast.success('Imported types');
+    },
+    onError: error => {
+      handleErrorToast(error, 'Failed to import types');
     },
   });
 };

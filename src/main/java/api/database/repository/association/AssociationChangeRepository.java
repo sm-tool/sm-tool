@@ -11,19 +11,29 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-/// Repozytorium zarządzające zmianami asocjacji w systemie. Odpowiada za:
-/// - Zarządzanie historią zmian asocjacji
-/// - Pobieranie stanu asocjacji dla wydarzeń
-/// - Czyszczenie nieaktualnych zmian
+/// Repozytorium zarządzające zmianami asocjacji (relacji między obiektami) w systemie.
+/// Odpowiada za:
+/// - Śledzenie historii modyfikacji asocjacji
+/// - Analizę stanu asocjacji dla wydarzeń
+/// - Zarządzanie czyszczeniem nieaktualnych zmian
+///
+/// # Istotne aspekty
+/// - Wykorzystuje natywne zapytania SQL dla złożonych operacji
+/// - Uwzględnia kontekst wątków globalnych i lokalnych w analizie stanu
+/// - Zapewnia spójność danych przy usuwaniu powiązanych rekordów
+/// - Optymalizuje zapytania poprzez indeksy i grupowanie operacji
 ///
 /// # Powiązania
-/// - {@link api.database.entity.association.AssociationChange}
-/// - {@link InternalEventAssociationChange}
+/// - {@link AssociationChange} - encja reprezentująca zmianę asocjacji
+/// - {@link InternalEventAssociationChange} - model zmiany w kontekście wydarzenia
+/// - {@link InternalLastAssociationChange} - model ostatniej zmiany asocjacji
+/// - {@link InternalLastAssociationOperation} - model typu ostatniej operacji
+/// - {@link EventAssociationsStateData} - model stanu asocjacji w wydarzeniu
 public interface AssociationChangeRepository
   extends JpaRepository<AssociationChange, Integer> {
   /// Usuwa zmiany asocjacji dla wskazanych obiektów w określonym czasie.
-  /// Zmiany są usuwane gdy dotyczą któregokolwiek z podanych obiektów
-  /// (jako object1 lub object2).
+  /// Usuwa wszystkie zmiany, w których którykolwiek z podanych obiektów
+  /// występuje jako object1 lub object2.
   ///
   /// @param time moment w czasie dla którego usuwane są zmiany
   /// @param object1Ids lista ID pierwszych obiektów w asocjacjach
@@ -49,12 +59,12 @@ public interface AssociationChangeRepository
 
   //--------------------------------------Association Change Inator-----------------------------------------------------
   /// Pobiera ostatnie operacje wykonane na asocjacjach przed wskazanym wydarzeniem.
-  /// Dla każdej asocjacji zwracana jest tylko ostatnia operacja wykonana przed danym
-  /// wydarzeniem.
+  /// Zwraca tylko najbardziej aktualną operację dla każdej asocjacji wykonaną przed
+  /// czasem podanego wydarzenia.
   ///
   /// @param associationIds lista ID asocjacji do sprawdzenia
   /// @param eventId ID wydarzenia względem którego sprawdzane są operacje
-  /// @return Lista obiektów zawierających ID asocjacji i typ ostatniej operacji
+  /// @return lista obiektów zawierających ID asocjacji i typ ostatniej operacji
   @Query(
     value = """
         SELECT DISTINCT ON (ac.association_id)
@@ -74,11 +84,19 @@ public interface AssociationChangeRepository
     @Param("eventId") Integer eventId
   );
 
-  /// Usuwa zmiany asocjacji dla wskazanego wydarzenia oraz jedno późniejsze (jeśli istnieje)
-  /// ze względu na powtórzenie zmiany. Używane przy czyszczeniu historii zmian.
+  /// Usuwa zmiany asocjacji dla wskazanego wydarzenia oraz pierwsze późniejsze zmiany.
+  /// Proces usuwania:
+  /// - Usuwa zmiany z podanego wydarzenia dla wskazanych asocjacji
+  /// - Dla każdej asocjacji usuwa również jej pierwszą późniejszą zmianę
+  /// - Służy do czyszczenia redundantnych zmian w historii
   ///
-  /// @param eventId ID wydarzenia
-  /// @param associationIds lista ID asocjacji do usunięcia
+  /// # Szczegóły implementacji
+  /// - Wykorzystuje CTE do identyfikacji pierwszych późniejszych zmian
+  /// - Wykonuje usunięcie w jednej operacji dla zachowania spójności
+  /// - Sortuje po czasie aby zapewnić prawidłową kolejność zmian
+  ///
+  /// @param eventId ID wydarzenia, którego zmiany mają być usunięte
+  /// @param associationIds lista ID asocjacji, których zmiany mają być usunięte
   @Modifying
   @Query(
     value = """
@@ -103,6 +121,19 @@ public interface AssociationChangeRepository
     @Param("associationIds") Integer[] associationIds
   );
 
+  /// Usuwa pierwsze zmiany asocjacji występujące po wskazanym wydarzeniu.
+  /// W przeciwieństwie do deleteChangesAndNext():
+  /// - Nie usuwa zmian z samego wydarzenia
+  /// - Usuwa tylko pierwsze późniejsze zmiany dla każdej asocjacji
+  /// - Zachowuje oryginalną zmianę z wydarzenia
+  ///
+  /// # Szczegóły implementacji
+  /// - Wykorzystuje tę samą logikę identyfikacji zmian co deleteChangesAndNext()
+  /// - Różni się zakresem usuwanych rekordów
+  /// - Używane gdy chcemy zachować oryginalną zmianę
+  ///
+  /// @param eventId ID wydarzenia, względem którego identyfikowane są zmiany do usunięcia
+  /// @param associationIds lista ID asocjacji, których późniejsze zmiany mają być usunięte
   @Modifying
   @Query(
     value = """
@@ -210,7 +241,7 @@ public interface AssociationChangeRepository
   ///
   /// @param eventId ID wydarzenia
   /// @param scenarioId ID scenariusza
-  /// @return Lista asocjacji aktywnych w momencie wydarzenia
+  /// @return lista asocjacji aktywnych w momencie wydarzenia
   @Query(
     value = """
     WITH EventInfo AS (
@@ -250,6 +281,13 @@ public interface AssociationChangeRepository
     @Param("scenarioId") Integer scenarioId
   );
 
+  /// Pobiera stan asocjacji z momentu poprzedzającego wskazane wydarzenie.
+  /// Analogicznie do getAssociationsStateForEvent(), ale zwraca stan
+  /// sprzed wystąpienia wydarzenia.
+  ///
+  /// @param eventId ID wydarzenia
+  /// @param scenarioId ID scenariusza
+  /// @return lista asocjacji aktywnych przed wydarzeniem
   @Query(
     value = """
     WITH EventInfo AS (

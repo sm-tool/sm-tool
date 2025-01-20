@@ -17,60 +17,95 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
+  BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/shadcn/breadcrumb.tsx';
 import useScenarioSearchParameterNavigation from '@/app/scenario/$scenarioId/_layout/~hooks/use-scenario-search-parameter-navigation.ts';
 import { useObjectTemplate } from '@/features/object-template/queries.ts';
-import { Label } from '@/components/ui/shadcn/label.tsx';
 import { useAttributeInstanceMapping } from '@/features/attribute/queries.ts';
 import { useObjectInstance } from '@/features/object-instance/queries.ts';
+import { CommandItem } from '@/components/ui/shadcn/command.tsx';
+import MultiStatusComponent from '@/components/ui/common/data-load-states/status-multi-query-component';
+import QuickTooltip from '@/components/ui/common/display/quick-tooltip';
 
-const ObjectTemplateBreadcrumb = ({ templateId }: { templateId: number }) => {
+export const ObjectTemplateBreadcrumb = ({
+  templateId,
+}: {
+  templateId: number;
+}) => {
   const objectTemplateQuery = useObjectTemplate(templateId);
   const { navigateRelative } = useScenarioSearchParameterNavigation();
 
   return (
     <StatusComponent useQuery={objectTemplateQuery}>
       {objectTemplate => (
-        <BreadcrumbLink
-          onClick={() =>
-            navigateRelative(`catalogue:templates:${objectTemplate!.id}`)
-          }
-        >
-          <Label variant='entity' size='xl' className='hover:cursor-pointer'>
-            {objectTemplate!.title}
-          </Label>
-        </BreadcrumbLink>
+        <BreadcrumbItem>
+          <QuickTooltip content={<span>{objectTemplate!.title}</span>}>
+            <BreadcrumbLink
+              onClick={() =>
+                navigateRelative(`catalogue:templates:${objectTemplate!.id}`)
+              }
+              className='max-w-[200px] truncate text-xl border-l-3 border-primary-500 pl-2'
+            >
+              {objectTemplate!.title}
+            </BreadcrumbLink>
+          </QuickTooltip>
+        </BreadcrumbItem>
       )}
     </StatusComponent>
   );
 };
 
-const BreadCrumbLink = ({ objectId }: { objectId: number }) => {
+export const BreadCrumbLink = ({ objectId }: { objectId: number }) => {
   const objectInstanceQuery = useObjectInstance(objectId);
+  const { navigateRelative } = useScenarioSearchParameterNavigation();
 
   return (
     <StatusComponent useQuery={objectInstanceQuery}>
       {objectInstance => (
-        <ObjectTemplateBreadcrumb templateId={objectInstance!.templateId} />
+        <div className='flex items-center'>
+          <ObjectTemplateBreadcrumb templateId={objectInstance!.templateId} />
+          <BreadcrumbSeparator className='mr-1' />
+          <BreadcrumbItem>
+            <QuickTooltip content={<span>{objectInstance!.name}</span>}>
+              <BreadcrumbLink
+                onClick={() =>
+                  navigateRelative(`objects:${objectInstance!.id}`)
+                }
+                className='max-w-[200px] text-xl truncate'
+              >
+                {objectInstance!.name}
+              </BreadcrumbLink>
+            </QuickTooltip>
+          </BreadcrumbItem>
+        </div>
       )}
     </StatusComponent>
   );
 };
 
-const BreadCrumbTemplateName = ({
+export const BreadCrumbTemplateName = ({
   attributeTemplateId,
 }: {
   attributeTemplateId: number;
 }) => {
+  const attributeTemplateQuery = useAttributeTemplate(attributeTemplateId);
+
   return (
-    <StatusComponent useQuery={useAttributeTemplate(attributeTemplateId)}>
+    <StatusComponent useQuery={attributeTemplateQuery}>
       {attributeTemplate => (
-        <BreadcrumbItem>
-          <Label size='xl' className='text-default-700'>
-            {attributeTemplate!.name}
-          </Label>
-        </BreadcrumbItem>
+        <div className='flex items-center'>
+          <BreadcrumbItem>
+            <QuickTooltip content={<span>{attributeTemplate!.name}</span>}>
+              <BreadcrumbPage
+                className='max-w-[200px] text-xl truncate text-default-700 max-lg:border-l-3
+                  max-lg:border-primary-500 max-lg:pl-2'
+              >
+                {attributeTemplate!.name}
+              </BreadcrumbPage>
+            </QuickTooltip>
+          </BreadcrumbItem>
+        </div>
       )}
     </StatusComponent>
   );
@@ -84,13 +119,15 @@ const AttributeForm = ({
   attributeTemplateId,
   onDelete,
   onChange,
-  disabled = false,
+  editDisabled = false,
+  deleteDisabled = false,
 }: {
   attributeChange: AttributeChange;
   attributeTemplateId: number;
   onDelete: (attributeChange: AttributeChange) => void;
   onChange: (attributeChange: AttributeChange) => void;
-  disabled?: boolean;
+  editDisabled?: boolean;
+  deleteDisabled?: boolean;
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -111,12 +148,12 @@ const AttributeForm = ({
       {attributeTemplate => (
         <div className='flex gap-2 p-2'>
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild disabled={disabled}>
+            <DialogTrigger asChild disabled={editDisabled}>
               <Button
                 variant='outline'
                 size='icon'
                 className='w-12'
-                disabled={disabled}
+                disabled={editDisabled}
               >
                 <Pencil className='size-5' />
               </Button>
@@ -128,7 +165,12 @@ const AttributeForm = ({
               onClose={() => setIsOpen(false)}
             />
           </Dialog>
-          <ConfirmDoubleClickButton onConfirm={() => onDelete(attributeChange)}>
+          <ConfirmDoubleClickButton
+            onConfirm={() => onDelete(attributeChange)}
+            disabled={deleteDisabled}
+            side='left'
+            disabledText={'default value change cannot be deleted '}
+          >
             <Trash2 className='size-5' />
           </ConfirmDoubleClickButton>
         </div>
@@ -226,65 +268,91 @@ const AttributeChangeCard = ({
   attributeChange,
   onChange,
   onDelete,
+  deleteDisabled = false,
+  editDisabled = false,
 }: {
   attributeChange: AttributeChange;
   onChange: (attributeChange: AttributeChange) => void;
   onDelete: (attributeChange: AttributeChange) => void;
-  disabled?: boolean;
+  editDisabled?: boolean;
+  deleteDisabled?: boolean;
 }) => {
   const attributeInstanceMappingQuery = useAttributeInstanceMapping(
     attributeChange.attributeId,
+  );
+  const objectQuery = useObjectInstance(
+    attributeInstanceMappingQuery.data?.objectId,
+  );
+
+  const attributeQuery = useAttributeTemplate(
+    attributeInstanceMappingQuery.data?.attributeTemplateId,
   );
 
   const { originalMaps } = useEventForm();
 
   return (
-    <StatusComponent useQuery={attributeInstanceMappingQuery}>
-      {attributeInstanceMapping => {
-        if (!attributeInstanceMapping) return <></>;
+    <MultiStatusComponent
+      queries={{
+        attributeInstanceMapping: attributeInstanceMappingQuery,
+        object: objectQuery,
+        attribute: attributeQuery,
+      }}
+    >
+      {queries => {
+        if (!queries.attributeInstanceMapping) return <></>;
 
         return (
-          <Card className={'w-full rounded-lg p-2'}>
-            <div className='flex justify-between items-start w-full'>
-              <div className='truncate max-w-[70%]'>
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    <BreadcrumbItem>
+          <CommandItem
+            value={`${queries.object.name} ${queries.attribute.name}`}
+          >
+            <Card
+              className={'w-full rounded-lg p-2'}
+              onClick={() =>
+                console.log(`${queries.object.name} ${queries.attribute.name}`)
+              }
+            >
+              <div className='flex justify-between items-start w-full'>
+                <Breadcrumb className='flex w-full'>
+                  <BreadcrumbList className='flex items-center'>
+                    <BreadcrumbItem className='max-lg:hidden'>
                       <BreadCrumbLink
-                        objectId={attributeInstanceMapping.objectId}
+                        objectId={queries.attributeInstanceMapping.objectId}
                       />
                       <BreadcrumbSeparator />
                     </BreadcrumbItem>
                     <BreadCrumbTemplateName
                       attributeTemplateId={
-                        attributeInstanceMapping.attributeTemplateId
+                        queries.attributeInstanceMapping.attributeTemplateId
                       }
                     />
                   </BreadcrumbList>
                 </Breadcrumb>
-              </div>
-              <AttributeForm
-                attributeChange={attributeChange}
-                attributeTemplateId={
-                  attributeInstanceMapping.attributeTemplateId
-                }
-                onDelete={onDelete}
-                onChange={onChange}
-              />
-            </div>
 
-            {originalMaps?.attributes?.[attributeChange.attributeId] && (
-              <AttributeDetails
-                attributeChange={attributeChange}
-                attribtueTemplateId={
-                  attributeInstanceMapping.attributeTemplateId
-                }
-              />
-            )}
-          </Card>
+                <AttributeForm
+                  attributeChange={attributeChange}
+                  attributeTemplateId={
+                    queries.attributeInstanceMapping.attributeTemplateId
+                  }
+                  onDelete={onDelete}
+                  onChange={onChange}
+                  deleteDisabled={deleteDisabled}
+                  editDisabled={editDisabled}
+                />
+              </div>
+
+              {originalMaps?.attributes?.[attributeChange.attributeId] && (
+                <AttributeDetails
+                  attributeChange={attributeChange}
+                  attribtueTemplateId={
+                    queries.attributeInstanceMapping.attributeTemplateId
+                  }
+                />
+              )}
+            </Card>
+          </CommandItem>
         );
       }}
-    </StatusComponent>
+    </MultiStatusComponent>
   );
 };
 

@@ -36,12 +36,6 @@ const authClients = {
  */
 export const createAuthClient = (): AuthClient => {
   const authType = globalThis.process.env.FRONTEND_AUTH_PROVIDER;
-  console.log('Auth config:', {
-    url: globalThis.process.env.KEYCLOAK_URL,
-    realm: globalThis.process.env.KEYCLOAK_REALM,
-    clientId: globalThis.process.env.KEYCLOAK_CLIENT_ID,
-  });
-  console.log(globalThis.process.env);
   const client = authClients[authType as keyof typeof authClients];
 
   if (!client) {

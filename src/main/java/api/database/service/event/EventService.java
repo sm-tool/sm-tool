@@ -10,11 +10,11 @@ import api.database.model.exception.ApiException;
 import api.database.model.request.composite.update.EventUpdateRequest;
 import api.database.model.response.EventResponse;
 import api.database.repository.event.EventRepository;
+import api.database.service.core.ScenarioManager;
 import api.database.service.core.provider.GlobalThreadProvider;
 import api.database.service.core.validator.BranchingValidator;
 import api.database.service.event.processor.EventChangeProcessor;
 import api.database.service.event.validator.EventValidator;
-import api.database.service.operations.ScenarioValidator;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Objects;
@@ -32,7 +32,7 @@ public class EventService {
 
   private final EventRepository eventRepository;
   private final GlobalThreadProvider globalThreadProvider;
-  private final ScenarioValidator scenarioValidator;
+  private final ScenarioManager scenarioManager;
   private final EventProvider eventProvider;
   private final EventChangeProcessor eventChangeProcessor;
   private final EventValidator eventValidator;
@@ -42,7 +42,7 @@ public class EventService {
   public EventService(
     EventRepository eventRepository,
     GlobalThreadProvider globalThreadProvider,
-    ScenarioValidator scenarioValidator,
+    ScenarioManager scenarioManager,
     EventProvider eventProvider,
     EventChangeProcessor eventChangeProcessor,
     EventValidator eventValidator,
@@ -50,7 +50,7 @@ public class EventService {
   ) {
     this.eventRepository = eventRepository;
     this.globalThreadProvider = globalThreadProvider;
-    this.scenarioValidator = scenarioValidator;
+    this.scenarioManager = scenarioManager;
     this.eventProvider = eventProvider;
     this.eventChangeProcessor = eventChangeProcessor;
     this.eventValidator = eventValidator;
@@ -86,13 +86,23 @@ public class EventService {
     Integer globalThreadId = globalThreadProvider.getGlobalThreadId(scenarioId);
 
     // 2. Podstawowa walidacja i update eventu
-    validateAndUpdateEvent(event, request, globalThreadId, scenarioId);
+    validateEvent(event, globalThreadId, scenarioId);
 
     // 3. Przetworzenie zmian zawartości
     if (event.eventType().equals(EventType.IDLE)) {
       processNewChanges(event, request, globalThreadId, scenarioId);
     } else {
       processExistingChanges(event, request, globalThreadId, scenarioId);
+    }
+
+    if (!event.eventType().equals(EventType.START)) {
+      EventType newType = calculateEventType(
+        event.eventType(),
+        request,
+        globalThreadId,
+        event.threadId()
+      );
+      eventRepository.save(Event.from(event, request, newType));
     }
 
     // 4. Walidacja spójności rozgałęzień i zwrócenie rezultatu
@@ -144,20 +154,18 @@ public class EventService {
     else return EventType.NORMAL;
   }
 
-  /// Weryfikuje możliwość zmiany wydarzenia i aktualizuje jego podstawowe dane.
+  /// Weryfikuje możliwość zmiany wydarzenia.
   /// Sprawdza:
   /// - Czy typ pozwala na modyfikację
   /// - Czy wątek należy do scenariusza
   /// - Oblicza nowy typ na podstawie zmian
   ///
   /// @param event wydarzenie do weryfikacji
-  /// @param request nowe dane
   /// @param globalThreadId id wątku globalnego
   /// @param scenarioId id scenariusza
   /// @throws ApiException gdy modyfikacja jest niedozwolona
-  private void validateAndUpdateEvent(
+  private void validateEvent(
     InternalEvent event,
-    EventUpdateRequest request,
     Integer globalThreadId,
     Integer scenarioId
   ) {
@@ -169,20 +177,10 @@ public class EventService {
       );
     }
 
-    scenarioValidator.checkIfThreadsAreInScenario(
+    scenarioManager.checkIfThreadsAreInScenario(
       List.of(event.threadId().equals(globalThreadId) ? 0 : event.threadId()),
       scenarioId
     );
-
-    if (!event.eventType().equals(EventType.START)) {
-      EventType newType = calculateEventType(
-        event.eventType(),
-        request,
-        globalThreadId,
-        event.threadId()
-      );
-      eventRepository.save(Event.from(event, request, newType));
-    }
   }
 
   /// Przetwarza nowy zestaw zmian dla wydarzenia typu IDLE.

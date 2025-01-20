@@ -64,9 +64,13 @@ const renderField = (
           State set to:
           <Checkbox
             disabled={disabled}
+            checked={field.value === 'true'}
             onCheckedChange={checked =>
               field.onChange({
-                target: { name: 'defaultValue', value: checked.toString() },
+                target: {
+                  name: 'defaultValue',
+                  value: checked.toString(),
+                },
               })
             }
           />

@@ -5,13 +5,13 @@ import SearchInput from '../../../../../../../components/ui/common/input/search-
 import InfiniteList from '@/lib/react-query/components/infinite-scroll';
 import { ObjectType } from '@/features/object-type/types.ts';
 import {
-  useInfiniteObjectType,
+  useInfiniteObjectTypeHeaderLess,
   useObjectType,
 } from '@/features/object-type/queries.ts';
 import ObjectTypeCard from '@/features/object-type/components/object-type-card.tsx';
 import { ObjectTemplate } from '@/features/object-template/types.ts';
 import {
-  useInfiniteObjectTemplate,
+  useInfiniteObjectTemplateHeaderLess,
   useObjectTemplate,
 } from '@/features/object-template/queries.ts';
 import ObjectTemplateCard from '@/features/object-template/components/object-template-card.tsx';
@@ -39,6 +39,9 @@ import { Button } from '@/components/ui/shadcn/button.tsx';
 import { ArrowLeft } from 'lucide-react';
 import { useSearch } from '@tanstack/react-router';
 import useScenarioSearchParamNavigation from '@/app/scenario/$scenarioId/_layout/~hooks/use-scenario-search-parameter-navigation.ts';
+import ImportButtonForObjectTypes from '@/features/object-type/components/import-button-for-object-types';
+import { getScenarioIdFromPath } from '@/features/scenario/utils/get-scenario-id-from-path.tsx';
+import ImportButtonForObjectTemplates from '@/features/object-template/components/import-button-for-object-templates';
 
 type CatalogSection = 'types' | 'templates' | 'associations';
 type QueryFilter = {
@@ -106,7 +109,9 @@ const ObjectsList = ({
   onSelect: (id: number) => void;
 }) => (
   <InfiniteList<ObjectType, 'qdsObjectTypes'>
-    queryResult={useInfiniteObjectType({ filter: queryFilter })}
+    queryResult={useInfiniteObjectTypeHeaderLess(getScenarioIdFromPath(), {
+      filter: queryFilter,
+    })}
   >
     {items => (
       <div className='space-y-2'>
@@ -132,7 +137,9 @@ const TemplatesList = ({
   onSelect: (id: number) => void;
 }) => (
   <InfiniteList<ObjectTemplate, 'qdsObjectTemplates'>
-    queryResult={useInfiniteObjectTemplate({ filter: queryFilter })}
+    queryResult={useInfiniteObjectTemplateHeaderLess(getScenarioIdFromPath(), {
+      filter: queryFilter,
+    })}
   >
     {items => (
       <div className='space-y-2'>
@@ -203,8 +210,18 @@ const CatalogContent = ({
 
 const FooterContent = ({ queryPath }: { queryPath: CatalogSection }) => {
   const footerMap: Record<CatalogSection, React.ReactNode> = {
-    types: <CreateNewObjectButton variant={'outline'} />,
-    templates: <CreateNewTemplateButton variant={'outline'} />,
+    types: (
+      <div className='flex flex-col w-full'>
+        <CreateNewObjectButton variant={'outline'} />
+        <ImportButtonForObjectTypes />
+      </div>
+    ),
+    templates: (
+      <div className='flex flex-col w-full'>
+        <CreateNewTemplateButton variant={'outline'} />
+        <ImportButtonForObjectTemplates />
+      </div>
+    ),
     associations: <CreateNewAssociation variant={'outline'} />,
   };
 

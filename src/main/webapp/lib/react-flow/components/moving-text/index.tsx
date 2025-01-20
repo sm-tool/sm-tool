@@ -1,71 +1,78 @@
-import { useReactFlow, useViewport } from '@xyflow/react';
 import React from 'react';
+import { FLOW_UNIT_WIDTH } from '@/lib/react-flow/config/scenario-flow-config.ts';
+import { useViewport } from '@xyflow/react';
+import { cn } from '@nextui-org/theme';
 
-interface MovingTextProperties {
-  positionStartX: number;
-  positionXEnd: number;
-  children: React.ReactNode;
-}
+const PADDING = 40;
 
 const MovingText = ({
-  positionStartX,
-  positionXEnd,
-  children,
-}: MovingTextProperties) => {
-  const [textPosition, setTextPosition] = React.useState({ x: 0, y: 0 });
-  const viewport = useViewport();
+  startTime,
+  endTime,
+  text,
+  containerWidth,
+  unitWidth = FLOW_UNIT_WIDTH,
+  className,
+  doNotTakezoomIntoAccount = false,
+}: {
+  startTime: number;
+  endTime: number;
+  text: string;
+  containerWidth: number;
+  className?: string;
+  unitWidth?: number;
+  doNotTakezoomIntoAccount?: boolean;
+}) => {
+  const { x: viewportX, zoom } = useViewport();
+  const elementWidth = (endTime - startTime) * FLOW_UNIT_WIDTH - 40;
   const textReference = React.useRef<HTMLDivElement>(null);
-  const { flowToScreenPosition } = useReactFlow();
+  const [textWidth, setTextWidth] = React.useState(0);
 
-  const getOffset = () => {
-    if (!textReference.current) return 0;
-
-    const textWidth = textReference.current.offsetWidth;
-    const screenCenterX = window.innerWidth / 2;
-
-    const centerOnScreen = flowToScreenPosition({
-      x: positionStartX + (positionXEnd - positionStartX) / 2,
-      y: 0,
-    }).x;
-
-    const startOnScreen = flowToScreenPosition({ x: positionStartX, y: 0 }).x;
-    const endOnScreen = flowToScreenPosition({ x: positionXEnd, y: 0 }).x;
-
-    let offset = screenCenterX - centerOnScreen;
-
-    if (offset > endOnScreen - screenCenterX) {
-      return endOnScreen - screenCenterX;
-    }
-
-    if (offset < startOnScreen - screenCenterX + textWidth) {
-      return startOnScreen - screenCenterX + textWidth;
-    }
-
-    return offset;
-  };
-
-  const calculateTextPosition = React.useCallback(() => {
-    setTextPosition({ x: getOffset(), y: 0 });
-  }, [positionStartX, positionXEnd, viewport]);
+  const displayText = text?.length === 0 ? 'No description set' : text;
 
   React.useEffect(() => {
-    calculateTextPosition();
-  }, [calculateTextPosition, viewport, positionStartX, positionXEnd]);
+    if (textReference.current) {
+      const width = textReference.current.getBoundingClientRect().width;
+      setTextWidth(width);
+    }
+  }, [text]);
+
+  const textPosition = React.useMemo(() => {
+    if (elementWidth <= 1024) {
+      return elementWidth / 2;
+    }
+    const paddedElementWidth = elementWidth - PADDING;
+    const viewportCenter = doNotTakezoomIntoAccount
+      ? -viewportX + containerWidth / 2 - startTime * unitWidth
+      : -viewportX / zoom + containerWidth / (2 * zoom) - startTime * unitWidth;
+    const halfTextWidth = textWidth / 2;
+    const minPosition = +halfTextWidth;
+    const maxPosition = paddedElementWidth - halfTextWidth;
+    return Math.min(Math.max(viewportCenter, minPosition), maxPosition);
+  }, [viewportX, zoom, startTime, elementWidth, textWidth, containerWidth]);
 
   return (
     <div
-      className='absolute flex justify-center items-center w-full'
+      className='relative size-full'
       style={{
-        transform: `translateX(${textPosition.x}px)`,
-        left: `${positionStartX}px`,
-        width: `${positionXEnd - positionStartX}px`,
+        width: elementWidth,
       }}
     >
-      <div
-        ref={textReference}
-        className='flex min-w-0 max-w-5xl overflow-y-scroll animate-appearance-in p-4'
-      >
-        {children}
+      <div className='h-full relative'>
+        <div
+          ref={textReference}
+          className='absolute top-1/2 max-w-5xl min-w-0 flex h-full overflow-y-auto overflow-x-hidden
+            w-fit'
+          style={{
+            left: textPosition,
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
+          <div
+            className={cn(className, text?.length === 0 && 'text-default-400')}
+          >
+            <span className='whitespace-normal break-words'>{displayText}</span>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -3,7 +3,6 @@ package api.database.model.response;
 import api.database.entity.event.Event;
 import api.database.model.constant.EventType;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 /// Reprezentuje pełny stan wydarzenia wraz ze wszystkimi powiązanymi zmianami.

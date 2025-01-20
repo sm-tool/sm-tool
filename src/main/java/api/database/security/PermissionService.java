@@ -1,6 +1,7 @@
 package api.database.security;
 
 import api.database.entity.user.Permission;
+import api.database.entity.user.User;
 import api.database.model.constant.ErrorCode;
 import api.database.model.constant.ErrorGroup;
 import api.database.model.constant.PermissionType;
@@ -98,5 +99,40 @@ public class PermissionService {
       ErrorGroup.PERMISSION,
       HttpStatus.FORBIDDEN
     );
+  }
+
+  public void checkIfAuthor(Integer scenarioId) {
+    if (env.acceptsProfiles(Profiles.of("dev"))) return;
+    Authentication authentication = SecurityContextHolder.getContext()
+      .getAuthentication();
+    Jwt jwt = (Jwt) authentication.getPrincipal();
+    Permission permission = permissionRepository.findByUserIdAndScenarioId(
+      jwt.getSubject(),
+      scenarioId
+    );
+    if (
+      permission == null || permission.getType() != PermissionType.AUTHOR
+    ) throw new ApiException(
+      ErrorCode.LACK_OF_PERMISSIONS,
+      ErrorGroup.PERMISSION,
+      HttpStatus.FORBIDDEN
+    );
+  }
+
+  public String getUser() {
+    if (env.acceptsProfiles(Profiles.of("dev"))) return null;
+    Authentication authentication = SecurityContextHolder.getContext()
+      .getAuthentication();
+    Jwt jwt = (Jwt) authentication.getPrincipal();
+    return userRepository
+      .findById(jwt.getSubject())
+      .orElseThrow(() ->
+        new ApiException(
+          ErrorCode.DOES_NOT_EXIST,
+          ErrorGroup.USER,
+          HttpStatus.FORBIDDEN
+        )
+      )
+      .getId();
   }
 }

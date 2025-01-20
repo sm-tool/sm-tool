@@ -1,4 +1,5 @@
 import {
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
@@ -25,6 +26,8 @@ const scenarioKeys = {
   list: (request?: QueryRequest<Scenario, ScenarioApiFilterMethods>) =>
     [...scenarioKeys.all, request] as const,
   detail: (id: number) => [...scenarioKeys.all, 'detail', id] as const,
+  infinite: (request?: QueryRequest<Scenario, ScenarioApiFilterMethods>) =>
+    ['scenarios', 'infinite', request] as const,
 } as const;
 
 export const useScenarios = (
@@ -35,6 +38,29 @@ export const useScenarios = (
     queryFn: () => scenarioApi.getAll(request),
     staleTime: STALE_TIME.Short,
     gcTime: STALE_TIME.XLONG,
+  });
+};
+
+export const useInfiniteScenarios = (
+  request?: QueryRequest<Scenario, ScenarioApiFilterMethods>,
+) => {
+  return useInfiniteQuery<HalPaginatedResponse<Scenario, 'scenario'>>({
+    queryKey: scenarioKeys.infinite(request),
+    queryFn: ({ pageParam }) =>
+      scenarioApi.getAll({
+        ...request,
+        pagination: {
+          page: pageParam as number,
+          size: 10,
+        },
+      }),
+    initialPageParam: 0,
+    getNextPageParam: lastPage => {
+      if (lastPage._links.next) {
+        return lastPage.page.number + 1;
+      }
+      return;
+    },
   });
 };
 

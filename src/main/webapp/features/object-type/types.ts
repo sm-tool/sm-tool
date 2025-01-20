@@ -3,7 +3,10 @@ import { color } from '@/lib/zod-types/color.types.ts';
 import { objectTypeIdReference } from '@/lib/zod-types/object-type-id-reference.ts';
 import { z } from '@/lib/zod-types/hiden-field.types.ts';
 
-export type ObjectTypeApiFilterMethods = 'findByTitle' | 'findByDescription';
+export type ObjectTypeApiFilterMethods =
+  | 'findByTitle'
+  | 'findByDescription'
+  | 'findByScenarioId';
 
 export const objectTypeDTO = z.object({
   id: z.coerce.number().hiddenField(),
@@ -53,3 +56,10 @@ export const objectTypeFormDTO = objectTypeDTO.omit({
 
 export type ObjectType = z.infer<typeof objectTypeDTO>;
 export type ObjectTypeForm = z.infer<typeof objectTypeFormDTO>;
+
+export const objectTypeAssigmentRequestDTO = z.object({
+  assign: z
+    .array(z.coerce.number())
+    .min(1, 'At least one type has to be assigned'),
+});
+export type ObjectTypeAssigment = z.infer<typeof objectTypeAssigmentRequestDTO>;

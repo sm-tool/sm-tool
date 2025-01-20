@@ -8,10 +8,12 @@ import api.database.model.exception.ApiException;
 import api.database.model.request.create.ObjectTemplateCreateRequest;
 import api.database.model.request.update.ObjectTemplateUpdateRequest;
 import api.database.repository.object.ObjectTemplateRepository;
-import api.database.repository.scenario.ScenarioRepository;
 import api.database.repository.scenario.ScenarioToObjectTemplateRepository;
-import api.database.repository.scenario.ScenarioToObjectTypeRepository;
+import api.database.service.core.ObjectTypeManager;
 import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,22 +22,19 @@ import org.springframework.stereotype.Service;
 public class ObjectTemplateService {
 
   private final ObjectTemplateRepository objectTemplateRepository;
-  private final ScenarioRepository scenarioRepository;
   private final ScenarioToObjectTemplateRepository scenarioToObjectTemplateRepository;
-  private final ScenarioToObjectTypeRepository scenarioToObjectTypeRepository;
+  private final ObjectTypeManager objectTypeManager;
 
   @Autowired
   public ObjectTemplateService(
     ObjectTemplateRepository objectTemplateRepository,
-    ScenarioRepository scenarioRepository,
     ScenarioToObjectTemplateRepository scenarioToObjectTemplateRepository,
-    ScenarioToObjectTypeRepository scenarioToObjectTypeRepository
+    ObjectTypeManager objectTypeManager
   ) {
     this.objectTemplateRepository = objectTemplateRepository;
-    this.scenarioRepository = scenarioRepository;
     this.scenarioToObjectTemplateRepository =
       scenarioToObjectTemplateRepository;
-    this.scenarioToObjectTypeRepository = scenarioToObjectTypeRepository;
+    this.objectTypeManager = objectTypeManager;
   }
 
   @Transactional
@@ -63,71 +62,30 @@ public class ObjectTemplateService {
     return savedObjectTemplate;
   }
 
-  //  @Transactional
-  //  public void copyObjectTemplatesBetweenScenarios(
-  //    Integer sourceScenarioId,
-  //    Integer targetScenarioId
-  //  ) {
-  //    if (!scenarioRepository.existsById(sourceScenarioId)) {
-  //      throw new ApiException(
-  //        ErrorCode.DOES_NOT_EXIST,
-  //        ErrorGroup.SCENARIO,
-  //        HttpStatus.NOT_FOUND
-  //      );
-  //    }
-  //    if (!scenarioRepository.existsById(targetScenarioId)) {
-  //      throw new ApiException(
-  //        ErrorCode.DOES_NOT_EXIST,
-  //        ErrorGroup.SCENARIO,
-  //        HttpStatus.NOT_FOUND
-  //      );
-  //    }
-  //    scenarioToObjectTemplateRepository.copyObjectTemplatesBetweenScenarios(
-  //      sourceScenarioId,
-  //      targetScenarioId
-  //    );
-  //  }
-
   @Transactional
-  public void assignTemplateToScenario(Integer templateId, Integer scenarioId) {
-    ObjectTemplate template = objectTemplateRepository
-      .findById(templateId)
-      .orElseThrow(() ->
-        new ApiException(
-          ErrorCode.DOES_NOT_EXIST,
-          ErrorGroup.OBJECT_TEMPLATE,
-          HttpStatus.NOT_FOUND
-        )
-      );
-    if (template.getObjectTypeId() == null) {
-      throw new ApiException(
-        ErrorCode.NULL_VALUE,
-        ErrorGroup.OBJECT_TEMPLATE,
-        HttpStatus.BAD_REQUEST
-      );
-    }
-    if (!scenarioRepository.existsById(scenarioId)) {
-      throw new ApiException(
-        ErrorCode.DOES_NOT_EXIST,
-        ErrorGroup.SCENARIO,
-        HttpStatus.NOT_FOUND
-      );
-    }
-    if (
-      !scenarioToObjectTypeRepository.existsByScenarioIdAndObjectTypeId(
-        scenarioId,
-        template.getObjectTypeId()
-      )
-    ) {
-      throw new ApiException(
-        ErrorCode.DOES_NOT_EXIST,
-        ErrorGroup.OBJECT_TEMPLATE,
-        HttpStatus.BAD_REQUEST
-      );
-    }
+  public void assignTemplatesToScenario(
+    List<Integer> templateIds,
+    Integer scenarioId
+  ) {
+    // Pobranie wszystkich szablonów wraz z ich typami
+    List<ObjectTemplate> templates = objectTemplateRepository.findAllById(
+      templateIds
+    );
 
-    scenarioToObjectTemplateRepository.save(
-      ScenarioToObjectTemplate.create(templateId, scenarioId)
+    // Znalezienie typów obiektów, które trzeba dodać do scenariusza
+    Set<Integer> requiredTypeIds = templates
+      .stream()
+      .map(ObjectTemplate::getObjectTypeId)
+      .collect(Collectors.toSet());
+
+    objectTypeManager.assignObjectTypesToScenario(
+      requiredTypeIds.stream().toList(),
+      scenarioId
+    );
+
+    scenarioToObjectTemplateRepository.addTemplatesToScenario(
+      scenarioId,
+      templateIds.toArray(new Integer[0])
     );
   }
 

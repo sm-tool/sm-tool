@@ -5,8 +5,7 @@ import {
 } from '@/lib/react-flow/config/scenario-flow-config.ts';
 import React from 'react';
 import useDarkMode from '@/hooks/use-dark-mode.tsx';
-import { branchingType } from '@/features/branching/types.ts';
-import { z } from '@/lib/zod-types/hiden-field.types.ts';
+import { Branching } from '@/features/branching/types.ts';
 import {
   Popover,
   PopoverContent,
@@ -22,12 +21,13 @@ import {
 import { GLOBAL_THREAD_HEIGHT } from '@/features/thread/components/global-thread-card';
 import { cn } from '@nextui-org/theme';
 import { ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/shadcn/button.tsx';
+import { useThreadsFlow } from '@/lib/react-flow/context/scenario-manipulation-flow-context';
+import ExistingForkEventButton from '@/app/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/$eventId/~components/start-event-summary/existing-fork-event-button.tsx';
+import DeleteBranchingDialog from '@/features/branching/components/delete-branching-dialog';
 
 type BranchingData = {
-  type: z.infer<typeof branchingType>;
-  isCorrect: boolean | null;
-  title: string;
-  description: string;
+  branching: Branching;
   transfer: number;
 };
 
@@ -53,8 +53,8 @@ const BranchingTransferBadge = ({ count }: { count: number }) => {
 };
 
 const getBranchingCorrectness = (data: BranchingData) => {
-  if (data.type === 'JOIN') return true;
-  return data.isCorrect;
+  if (data.branching.type === 'JOIN') return true;
+  return data.branching.isCorrect;
 };
 
 const ThreadCardEdge = ({
@@ -80,9 +80,10 @@ const ThreadCardEdge = ({
 
   const { theme } = useDarkMode();
   const isCorrect = getBranchingCorrectness(data);
+  const { scenarioManipulation } = useThreadsFlow();
 
-  const positionX = data.type === 'JOIN' ? sourceX : targetX;
-  const positionY = data.type === 'JOIN' ? sourceY : targetY;
+  const positionX = data.branching.type === 'JOIN' ? sourceX : targetX;
+  const positionY = data.branching.type === 'JOIN' ? sourceY : targetY;
   const angle =
     Math.atan2(targetY - sourceY, targetX - sourceX) * (180 / Math.PI);
 
@@ -114,7 +115,11 @@ const ThreadCardEdge = ({
       />
 
       <foreignObject
-        x={positionX - FLOW_UNIT_WIDTH / 2 + (data.type === 'JOIN' ? 30 : -30)}
+        x={
+          positionX -
+          FLOW_UNIT_WIDTH / 2 +
+          (data.branching.type === 'JOIN' ? 30 : -30)
+        }
         y={positionY - GLOBAL_THREAD_HEIGHT / 2 - 20}
         width={FLOW_UNIT_WIDTH}
         height={GLOBAL_THREAD_HEIGHT + 40}
@@ -133,7 +138,7 @@ const ThreadCardEdge = ({
                     className='text-foreground'
                     style={{
                       transform:
-                        data.type === 'JOIN'
+                        data.branching.type === 'JOIN'
                           ? `rotate(${angle - 45}deg)`
                           : `rotate(-45deg)`,
                     }}
@@ -152,11 +157,13 @@ const ThreadCardEdge = ({
           >
             <div className='border-b pb-2'>
               <span className='text-2xl font-semibold line-clamp-2'>
-                {data.title}
+                {data.branching.title}
               </span>
             </div>
             <ScrollArea className='max-h-[15rem] flex flex-col'>
-              <p className='w-full pr-4 break-words'>{data.description}</p>
+              <p className='w-full pr-4 break-words'>
+                {data.branching.description}
+              </p>
               <ScrollBar />
             </ScrollArea>
             <div className='absolute bottom-1 left-2 flex justify-between w-full'>
@@ -167,11 +174,35 @@ const ThreadCardEdge = ({
                 <BranchingTransferBadge count={data.transfer} />
               </div>
             </div>
+            {data.branching.type === 'JOIN' ? (
+              <div className='flex justify-center items-center w-full gap-x-6'>
+                <Button
+                  variant='outline'
+                  className='border-default-600 hover:bg-content2 w-64'
+                  onClick={() => {
+                    scenarioManipulation.handleSetIsEditingMergeOnBranching(
+                      data?.branching,
+                    );
+                  }}
+                >
+                  Change merged threads
+                </Button>
+                <DeleteBranchingDialog branching={data.branching} />
+              </div>
+            ) : (
+              <div className='flex justify-center items-center w-full gap-x-6'>
+                <ExistingForkEventButton
+                  className='border-foreground w-full hover:bg-content2 flex-1'
+                  branchingValue={data.branching}
+                />
+                <DeleteBranchingDialog branching={data.branching} />
+              </div>
+            )}
             <span
               className='absolute text-default-400 uppercase font-bold tracking-widest text-xs right-1
                 bottom-1'
             >
-              {data.type}
+              {data.branching.type}
             </span>
           </PopoverContent>
         </Popover>

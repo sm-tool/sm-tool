@@ -3,6 +3,7 @@ import {
   JoinCreateRequest,
   joinCreateRequestDTO,
   JoinUpdateRequest,
+  joinUpdateRequestDTO,
 } from '@/features/branching/join/types.ts';
 
 const endpoint = 'branchings/join';
@@ -17,7 +18,7 @@ export const branchingJoinApi = {
     branchingId: number,
     joinUpdateRequest: JoinUpdateRequest,
   ) => {
-    const validUpdate = joinCreateRequestDTO.parse(joinUpdateRequest);
+    const validUpdate = joinUpdateRequestDTO.parse(joinUpdateRequest);
     return await API_INSTANCE.put<JoinCreateRequest>(
       `${endpoint}/${branchingId}`,
       validUpdate,

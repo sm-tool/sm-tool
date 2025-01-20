@@ -1,7 +1,6 @@
 package api.database.model.request.create;
 
 import api.database.model.constant.AttributeType;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 /// Reprezentuje dane požądane podczas tworzenia nowego szablonu atrybutu obiektu.

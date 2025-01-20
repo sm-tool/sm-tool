@@ -8,14 +8,17 @@ import api.database.model.request.save.ScenarioSaveRequest;
 import api.database.repository.scenario.ScenarioRepository;
 import api.database.security.PermissionService;
 import api.database.service.core.BranchingDeleter;
+import api.database.service.core.ScenarioManager;
 import api.database.service.core.ThreadAdder;
 import api.database.service.core.ThreadRemovalService;
 import api.database.service.object.ObjectInstanceService;
-import api.database.service.operations.ScenarioValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +27,7 @@ public class ScenarioService {
 
   private final ScenarioRepository scenarioRepository;
   private final ObjectInstanceService objectInstanceService;
-  private final ScenarioValidator scenarioValidator;
+  private final ScenarioManager scenarioManager;
   private final ThreadAdder threadAdder;
   private final BranchingDeleter branchingDeleter;
   private final PermissionService permissionService;
@@ -34,7 +37,7 @@ public class ScenarioService {
   public ScenarioService(
     ScenarioRepository scenarioRepository,
     ObjectInstanceService objectInstanceService,
-    ScenarioValidator scenarioValidator,
+    ScenarioManager scenarioManager,
     ThreadAdder threadAdder,
     BranchingDeleter branchingDeleter,
     PermissionService permissionService,
@@ -42,7 +45,7 @@ public class ScenarioService {
   ) {
     this.scenarioRepository = scenarioRepository;
     this.objectInstanceService = objectInstanceService;
-    this.scenarioValidator = scenarioValidator;
+    this.scenarioManager = scenarioManager;
     this.threadAdder = threadAdder;
     this.branchingDeleter = branchingDeleter;
     this.permissionService = permissionService;
@@ -52,31 +55,36 @@ public class ScenarioService {
   //--------------------------------------------------Pobieranie scenariusza---------------------------------------------------------
 
   public Scenario getScenarioById(Integer id) {
-    Scenario scenario = scenarioRepository.findQdsScenarioById(id);
-    if (scenario == null) {
-      throw new ApiException(
-        ErrorCode.DOES_NOT_EXIST,
-        ErrorGroup.SCENARIO,
-        HttpStatus.NOT_FOUND
+    permissionService.checkPermission("GET", id);
+    return scenarioRepository
+      .findById(id)
+      .orElseThrow(() ->
+        new ApiException(
+          ErrorCode.DOES_NOT_EXIST,
+          ErrorGroup.SCENARIO,
+          HttpStatus.NOT_FOUND
+        )
       );
-    }
-    return scenario;
   }
 
   public Page<Scenario> findAll(Pageable pageable) {
-    return scenarioRepository.findAll(pageable);
+    String userId = permissionService.getUser();
+    return scenarioRepository.findAllForUser(userId, pageable);
   }
 
   public Page<Scenario> findByTitleContaining(String title, Pageable pageable) {
-    return scenarioRepository.findByTitleContaining(title, pageable);
+    String userId = permissionService.getUser();
+    return scenarioRepository.findByTitleContaining(title, userId, pageable);
   }
 
   public Page<Scenario> findByDescriptionContaining(
     String description,
     Pageable pageable
   ) {
+    String userId = permissionService.getUser();
     return scenarioRepository.findByDescriptionContaining(
       description,
+      userId,
       pageable
     );
   }
@@ -101,7 +109,7 @@ public class ScenarioService {
     Scenario scenario = Scenario.create(scenarioInfo);
 
     scenario = scenarioRepository.save(scenario);
-    scenarioValidator.addDefaultTypes(scenario.getId());
+    scenarioManager.addDefaultTypes(scenario.getId());
     threadAdder.addGlobalThread(scenario.getId());
     permissionService.addAuthor(scenario.getId());
     return scenario;
@@ -111,6 +119,7 @@ public class ScenarioService {
 
   @Transactional
   public void deleteScenario(Integer scenarioId) {
+    permissionService.checkIfAuthor(scenarioId);
     branchingDeleter.deleteScenarioBranchings(scenarioId);
     threadRemovalService.deleteScenarioThreads(scenarioId);
     objectInstanceService.deleteObjectsByScenarioId(scenarioId);
@@ -126,23 +135,24 @@ public class ScenarioService {
     Integer scenarioId,
     ScenarioSaveRequest scenarioDetails
   ) {
-    Scenario scenario = scenarioRepository.findQdsScenarioById(scenarioId);
-    if (scenario != null) {
-      scenario.setTitle(scenarioDetails.title());
-      scenario.setDescription(scenarioDetails.description());
-      scenario.setContext(scenarioDetails.context());
-      scenario.setPurpose(scenarioDetails.purpose());
-      scenario.setStartDate(scenarioDetails.startDate());
-      scenario.setEndDate(scenarioDetails.endDate());
-      scenario.setEventDuration(scenarioDetails.eventDuration());
-      scenario.setEventUnit(scenarioDetails.eventUnit());
-      return scenarioRepository.save(scenario);
-    } else {
-      throw new ApiException(
-        ErrorCode.DOES_NOT_EXIST,
-        ErrorGroup.SCENARIO,
-        HttpStatus.NOT_FOUND
+    permissionService.checkPermission("PUT", scenarioId);
+    Scenario scenario = scenarioRepository
+      .findById(scenarioId)
+      .orElseThrow(() ->
+        new ApiException(
+          ErrorCode.DOES_NOT_EXIST,
+          ErrorGroup.SCENARIO,
+          HttpStatus.NOT_FOUND
+        )
       );
-    }
+    scenario.setTitle(scenarioDetails.title());
+    scenario.setDescription(scenarioDetails.description());
+    scenario.setContext(scenarioDetails.context());
+    scenario.setPurpose(scenarioDetails.purpose());
+    scenario.setStartDate(scenarioDetails.startDate());
+    scenario.setEndDate(scenarioDetails.endDate());
+    scenario.setEventDuration(scenarioDetails.eventDuration());
+    scenario.setEventUnit(scenarioDetails.eventUnit());
+    return scenarioRepository.save(scenario);
   }
 }

@@ -22,6 +22,7 @@ type EventFormContext = {
   createAssociationState: (associationChange: AssociationChange) => void;
   changeAssociationState: (associationChange: AssociationChange) => void;
   deleteAssociationState: (associationChange: AssociationChange) => void;
+  associationBrakeIds: number[];
 };
 
 const EventFormContext = React.createContext<EventFormContext | null>(null);
@@ -47,6 +48,9 @@ const EventFormProvider = ({ children }: { children: React.ReactNode }) => {
     | undefined
   >();
 
+  const [associationBrakeIds, setAssociationBrakeId] = React.useState<number[]>(
+    [],
+  );
   const isDirty = React.useMemo(() => {
     if (!formState || !event) return false;
     return JSON.stringify(formState) !== JSON.stringify(event);
@@ -113,6 +117,12 @@ const EventFormProvider = ({ children }: { children: React.ReactNode }) => {
       if (!previous) {
         return previous;
       }
+      setAssociationBrakeId(previous =>
+        previous.filter(
+          associationId =>
+            associationId !== associationChange.associationTypeId,
+        ),
+      );
       return {
         ...previous,
         associationChanges: [...previous.associationChanges, associationChange],
@@ -139,6 +149,10 @@ const EventFormProvider = ({ children }: { children: React.ReactNode }) => {
       if (!previous) {
         return previous;
       }
+      setAssociationBrakeId(previous => [
+        ...previous,
+        change.associationTypeId,
+      ]);
       return {
         ...previous,
         associationChanges: previous.associationChanges.filter(
@@ -155,6 +169,7 @@ const EventFormProvider = ({ children }: { children: React.ReactNode }) => {
 
   const submitChanges = async () => {
     if (!event || !formState) return;
+    setAssociationBrakeId([]);
     await updateEventQuery.mutateAsync({
       id: Number(eventId),
       data: convertToEventInstanceForm(formState),
@@ -235,6 +250,7 @@ const EventFormProvider = ({ children }: { children: React.ReactNode }) => {
         createAssociationState,
         changeAssociationState,
         deleteAssociationState,
+        associationBrakeIds,
       }}
     >
       {children}

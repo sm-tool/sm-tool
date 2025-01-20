@@ -163,4 +163,6 @@ public enum ErrorCode {
   CANNOT_INSERT_JOIN,
   /// Nie można utworzyć asocajcji dla 2 obiektów globalnych w wątku nieglobalnym
   CANNOT_CREATE_ASSOCIATION_BETWEEN_GLOBAL_OBJECTS_IN_NOT_GLOBAL_THREAD,
+  /// Wartość już istnieje - wymóg unikalności
+  ALREADY_EXISTS,
 }

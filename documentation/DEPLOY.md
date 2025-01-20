@@ -13,6 +13,26 @@
 - [Backup i recovery](#backup-i-recovery)
 - [Rozwiązywanie problemów](#rozwiązywanie-problemów)
 
+## ⚠️ WAŻNE UWAGI
+
+1. **Status Keycloak**: Z powodu problemów z nieskończonymi zapętleniami w wywołaniach,
+   Keycloak został tymczasowo wyłączony i zastąpiony mockiem autoryzacji.
+   Wszystkie odniesienia do Keycloak w dokumentacji należy obecnie ignorować.
+
+2. **Środowisko "produkcyjne"**:
+
+   - Obecna konfiguracja "produkcyjna" (docker-compose.prod.yml) jest w rzeczywistości środowiskiem testowym/rozwojowym
+   - W konfiguracji ustawiono CORS na '\*' dla ułatwienia testów
+   - Zalecane jest używanie konfiguracji "produkcyjnej", ponieważ ukrywa ona większość komunikatów błędów i logów debugowych
+   - To środowisko można określić jako "prodomock" lub "prododev"
+
+3. **Bezpieczeństwo**: Ze względu na powyższe, obecna konfiguracja NIE jest odpowiednia do prawdziwego wdrożenia produkcyjnego. Przed faktycznym wdrożeniem produkcyjnym wymagane będzie:
+   - Implementacja właściwej autoryzacji
+   - Konfiguracja odpowiednich ustawień CORS
+   - Włączenie pełnego logowania błędów
+   - Przegląd i dostosowanie wszystkich aspektów bezpieczeństwas
+   - Przygotowanie kontenerów pod środowisko produkcyjne
+
 ## Wymagania systemowe
 
 ### Oprogramowanie
@@ -26,7 +46,7 @@
 
 - 80: Nginx (konfigurowalny przez NGINX_PORT)
 - 5432: PostgreSQL master
-- 8180: Keycloak (dostępny przez /auth)
+- ~~8180: Keycloak (dostępny przez /auth)~~~
 - 8000: Backend API
 
 ## Struktura projektu
@@ -64,7 +84,25 @@ Wymagana struktura katalogów:
 
 > **WAŻNE**: Plik `.env.prod` zawiera krytyczne dane dostępowe. Przed deploymentem należy bezwzględnie zmienić wszystkie domyślne hasła i dane dostępowe na własne, bezpieczne wartości.
 
-#### Domyślne uruchamianie
+### Uwaga odnośnie środowiska produkcyjnego
+
+Obecna konfiguracja "produkcyjna" (.env.prod i docker-compose.prod.yml) jest w rzeczywistości konfiguracją testową z wyłączonym Keycloak
+i zastąpionym mockiem autoryzacji. Służy ona głównie do celów rozwojowych i testowych,
+gdzie priorytetem jest stabilność działania nad bezpieczeństwem.
+
+### Domyślne uruchamianie - opcje
+
+#### 1. Użycie gotowych kontenerów (zalecane)
+
+```bash
+# Najszybsza opcja - użycie przygotowanych kontenerów z GHCR
+docker-compose -f docker-compose.registry.yml --env-file ./.env.prod up -d
+```
+
+Ta opcja wykorzystuje gotowe kontenery z GitHub Container Registry przyspieszając proces wdrożenia.
+Zbudowane są na konfiguracji "produkcyjnej" (.env.prod)
+
+#### 2. Budowanie lokalne
 
 ```bash
 # Uruchomienie z domyślnym plikiem .env (środowisko developerskie)
@@ -112,119 +150,54 @@ System uruchomi kontenery w następującej kolejności:
 docker-compose -f docker-compose.prod.yml ps
 ```
 
-## Weryfikacja deploymentu
+## Weryfikacja deploymentu i prawidłowego uruchomienia
 
 - Frontend: `http://localhost:${NGINX_PORT}`
 - Keycloak: `http://localhost:${NGINX_PORT}/auth`
 - API: `http://localhost:${NGINX_PORT}/api`
 
-## Przygotowanie serwera
+1. Status kontenerów powinien być "healthy" lub "running". Jeśli któryś z kontenerów ma status "exited" lub "dead", należy sprawdzić logi tego kontenera
 
-Tutaj zakładamy, że administrator serwera posiada własną konfigurację, ale poniżej przedstawiona jest przykładowa konfiguracja
+### Uwaga: Kontenery uruchamiają się z opóźnieniem do 40 sekund, aby uniknąć problemów z zależnościami. Należy poczekać przed weryfikacją.
 
-### 1. Podstawowa konfiguracja serwera
+## Sprawdzanie podstawowej funkcjonalności
 
-```bash
-# Aktualizacja systemu
-sudo apt update && sudo apt upgrade -y
+### 1. Połącz się z serwerem na porcie 80 przez przeglądarke - wynikiem powinien być następujący widok:
 
-# Instalacja wymaganych narzędzi
-sudo apt install -y \
-    apt-transport-https \
-    ca-certificates \
-    curl \
-    gnupg \
-    lsb-release \
-    ufw \
-    fail2ban
+[widok strony głównej](deploy-images/img.png)
 
-# Konfiguracja firewalla
-sudo ufw allow ssh
-sudo ufw allow http
-sudo ufw allow https
-sudo ufw enable
-```
+#### Typowe błędy tego punktu
 
-### 2. Instalacja Dockera i Docker Compose
+#### Błąd 502 Bad Gateway
 
-```bash
-# Dodanie oficjalnego repozytorium Dockera
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+Możliwe przyczyny i rozwiązania:
 
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+1. Niedokończona inicjalizacja kontenerów
 
-# Instalacja Dockera
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+- Odczekaj dodatkowe 30 sekund na pełne uruchomienie wszystkich serwisów
+- Sprawdź status kontenerów: `docker ps`
+- Zweryfikuj logi: `docker-compose logs -f`
 
-# Dodanie użytkownika do grupy docker
-sudo usermod -aG docker $USER
-```
+2. Problem z siecią Docker
 
-### 3. Przygotowanie struktury katalogów
+- Wyczyść nieużywane sieci Docker:
 
-```bash
-# Utworzenie katalogów
-mkdir -p ~/app/{config,data,logs}
-cd ~/app
+### Scenariusze testowe weryfikujące poprawność działania
 
-# Konfiguracja uprawnień
-chmod 700 config
-```
+#### 1. Test edycji scenariusza
 
-### 4. Konfiguracja SSH
+1. Kliknij prawym przyciskiem myszy na dowolny scenariusz
+2. Wybierz opcję edycji z menu kontekstowego [menu kontekstowe z wyborem](deploy-images/img_1.png)
+3. W formularzu edycji dodaj krótki opis w polu opisu [Opis](deploy-images/img_2.png)
+4. Zapisz zmiany
+5. Oczekiwany rezultat: Pojawi się powiadomienie potwierdzające poprawne zapisanie zmian [Rezultat](deploy-images/img_3.png)
 
-```bash
-# Generowanie klucza SSH na lokalnej maszynie (jeśli nie istnieje)
-ssh-keygen -t ed25519 -C "twoj_email@domena.com"
+#### 2. Test uruchomienia scenariusza
 
-# Kopiowanie klucza na serwer
-ssh-copy-id user@twoj-serwer.com
+1. Kliknij lewym przyciskiem myszy na wiersz wybranego scenariusza
+2. Oczekiwany rezultat: [Widok scenariusza](deploy-images/img_4.png)
 
-# Konfiguracja SSH na serwerze
-sudo nano /etc/ssh/sshd_config
-```
-
-```conf
-# Zalecane ustawienia SSH
-PermitRootLogin no
-PasswordAuthentication no
-PubkeyAuthentication yes
-```
-
-## Konfiguracja HTTPS
-
-### 1. Instalacja Certbot
-
-```bash
-sudo apt install -y certbot python3-certbot-nginx
-```
-
-### 2. Generowanie certyfikatu
-
-```bash
-sudo certbot --nginx -d twoja-domena.com
-```
-
-### 3. Aktualizacja konfiguracji Nginx
-
-```nginx
-server {
-    listen 443 ssl;
-    server_name twoja-domena.com;
-
-    ssl_certificate /etc/letsencrypt/live/twoja-domena.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/twoja-domena.com/privkey.pem;
-
-    # Dodanie nagłówków bezpieczeństwa
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-XSS-Protection "1; mode=block" always;
-    add_header X-Content-Type-Options "nosniff" always;
-}
-```
+> **Uwaga**: Szczegółowe przypadki testowe i pełna funkcjonalność systemu zostały opisane w [dokumentacji użytkowej](user-manual/smt-user-manual-0.95.pdf)
 
 ## Problem z połączeniem do bazy danych
 
@@ -237,16 +210,16 @@ docker-compose -f docker-compose.prod.yml logs postgresql-master
 2. Zweryfikuj zmienne środowiskowe w `.env.prod`
 3. Sprawdź dostępność portu 5432
 
-### Problem z autoryzacją Keycloak
+### ~~Problem z autoryzacją Keycloak~~
 
-1. Sprawdź logi Keycloak:
+~~1. Sprawdź logi Keycloak:~~
 
 ```bash
 docker-compose -f docker-compose.prod.yml logs keycloak
 ```
 
-2. Zweryfikuj, czy realm.json został poprawnie zaimportowany
-3. Sprawdź połączenie Keycloak z bazą danych
+~~2. Zweryfikuj, czy realm.json został poprawnie zaimportowany~~
+~~3. Sprawdź połączenie Keycloak z bazą danych~~
 
 ### Problem z Nginx
 
@@ -256,8 +229,7 @@ docker-compose -f docker-compose.prod.yml logs keycloak
 docker-compose -f docker-compose.prod.yml logs nginx
 ```
 
-2. Zweryfikuj konfigurację CORS
-3. Sprawdź czy wszystkie upstream serwisy są dostępne
+~~2. Zweryfikuj konfigurację CORS~~ 3. Sprawdź czy wszystkie upstream serwisy są dostępne
 
 ### Restart pojedynczego serwisu
 

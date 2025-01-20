@@ -19,6 +19,7 @@ interface InfiniteListProperties<TEntity, TSearchEndpoint extends string> {
   queryResult: UseInfiniteQueryResult<{
     pages: HalPaginatedResponse<TEntity, TSearchEndpoint>[];
   }>;
+  filterCondition?: (item: TEntity) => boolean;
 }
 
 export const InfiniteList = <TEntity, TSearchEndpoint extends string>({
@@ -33,6 +34,7 @@ export const InfiniteList = <TEntity, TSearchEndpoint extends string>({
   ),
   queryResult,
   children,
+  filterCondition,
 }: InfiniteListProperties<TEntity, TSearchEndpoint>) => {
   const {
     data,
@@ -67,13 +69,16 @@ export const InfiniteList = <TEntity, TSearchEndpoint extends string>({
     if (!data?.pages?.length) return [];
     if (!data.pages[0]?._embedded) return [];
 
-    return data.pages.flatMap(page => {
+    const baseItems = data.pages.flatMap(page => {
       if (!page._embedded) return [];
-
       const key = Object.keys(page._embedded)[0] as TSearchEndpoint;
       return (page._embedded[key] as TEntity[]) || [];
     });
-  }, [data]);
+
+    return filterCondition
+      ? baseItems.filter(element => filterCondition(element))
+      : baseItems;
+  }, [data, filterCondition]);
 
   if (isLoading) return loadingComponent;
   if (isError) return errorComponent(error as ErrorType);

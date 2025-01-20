@@ -12,7 +12,7 @@ import {
 import { scenarioPhaseApi } from '@/features/scenario-phase/api.ts';
 import { getScenarioIdFromPath } from '@/features/scenario/utils/get-scenario-id-from-path.tsx';
 
-const phasesKeys = {
+export const phasesKeys = {
   all: (scenarioId: number) => ['phases', scenarioId] as const,
   detail: (scenarioId: number, id: number) =>
     [...phasesKeys.all(scenarioId), 'detail', id] as const,

@@ -1,5 +1,5 @@
 // Let's not post original type names over here :|
-import { UseQueryResult } from '@tanstack/react-query';
+import { useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import React from 'react';
 import { Card } from '@/components/ui/shadcn/card.tsx';
 import { Progress } from '@/components/ui/shadcn/progress.tsx';
@@ -18,12 +18,14 @@ interface LoadingScreenPropertie {
   children: React.ReactNode;
   queries: QueryHookExecutor[];
   onLoadingCompleated?: () => void;
+  queriesToInvalidate?: string[];
 }
 
 const LoadingScreen = ({
   children,
   queries,
   onLoadingCompleated,
+  queriesToInvalidate = [],
 }: LoadingScreenPropertie) => {
   const [retryCountdown, setRetryCountdown] = React.useState<number>(0);
   const queryResults = queries.map(queryFunction => queryFunction());
@@ -35,6 +37,13 @@ const LoadingScreen = ({
     ...queryResults.map(query => query.failureCount),
   );
   const isMaxRetriesReached = maxFailureCount > 5;
+  const queryClient = useQueryClient();
+
+  React.useEffect(() => {
+    for (const queryKey of queriesToInvalidate) {
+      void queryClient.invalidateQueries({ queryKey: [queryKey] });
+    }
+  }, []);
 
   React.useEffect(() => {
     if (failedQueries.length === 0) {

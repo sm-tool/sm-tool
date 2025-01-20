@@ -7,7 +7,6 @@ import api.database.repository.thread.ThreadRepository;
 import api.database.service.core.internal.ThreadObjectCleaner;
 import api.database.service.core.internal.ThreadRemovalAnalyzer;
 import api.database.service.core.provider.BranchingProvider;
-import api.database.service.operations.ScenarioValidator;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,7 @@ public class ThreadRemovalService {
   private final BranchingDeleter branchingDeleter;
   private final ThreadRepository threadRepository;
   private final IdleEventManager idleEventManager;
-  private final ScenarioValidator scenarioValidator;
+  private final ScenarioManager scenarioManager;
 
   @Autowired
   public ThreadRemovalService(
@@ -36,7 +35,7 @@ public class ThreadRemovalService {
     BranchingDeleter branchingDeleter,
     ThreadRepository threadRepository,
     IdleEventManager idleEventManager,
-    ScenarioValidator scenarioValidator
+    ScenarioManager scenarioManager
   ) {
     this.analyzer = analyzer;
     this.objectCleaner = objectCleaner;
@@ -46,15 +45,12 @@ public class ThreadRemovalService {
     this.branchingDeleter = branchingDeleter;
     this.threadRepository = threadRepository;
     this.idleEventManager = idleEventManager;
-    this.scenarioValidator = scenarioValidator;
+    this.scenarioManager = scenarioManager;
   }
 
   @Transactional
   public void removeThread(Integer scenarioId, Integer threadId) {
-    scenarioValidator.checkIfThreadsAreInScenario(
-      List.of(threadId),
-      scenarioId
-    );
+    scenarioManager.checkIfThreadsAreInScenario(List.of(threadId), scenarioId);
     Event firstEvent = eventManager.getFirstEvent(threadId);
 
     switch (firstEvent.getEventType()) {
@@ -87,9 +83,19 @@ public class ThreadRemovalService {
       branchingDeleter.deleteBranchings(List.of(firstEvent.getBranchingId()));
       eventManager.ensureEndEvents(branchingData.comingIn());
       idleEventManager.cleanupIdleEvents(scenarioId);
-    } else objectInstanceTransfer.markForkAsIncorrect(
-      firstEvent.getBranchingId()
-    );
+    } else if (
+      !branchingData
+        .objectTransfer()
+        .stream()
+        .filter(t -> t.id().equals(firstEvent.getThreadId()))
+        .findFirst() //Id pobrane z eventu - musi istnieć
+        .get()
+        .objectIds()
+        .isEmpty()
+    ) {
+      //Tylko gdy były przekazane obiekty do danego wątku
+      objectInstanceTransfer.markForkAsIncorrect(firstEvent.getBranchingId());
+    }
     removeThreadWithDependencies(threadId, scenarioId);
   }
 

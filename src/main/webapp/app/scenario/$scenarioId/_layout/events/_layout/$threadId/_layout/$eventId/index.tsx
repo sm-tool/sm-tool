@@ -1,7 +1,7 @@
 import { Block, createFileRoute, useParams } from '@tanstack/react-router';
 import { EventInstance } from '@/features/event-instance/types.ts';
 import NormalEventPanel from '@/app/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/$eventId/~event-card-panels/non-branched-events/normal-event-panel.tsx';
-import React from 'react';
+import React, { useEffect } from 'react';
 import EventFormProvider, {
   useEventForm,
 } from '@/app/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/$eventId/~components/event-form-context.tsx';
@@ -51,7 +51,7 @@ export const PANELS: {
     NORMAL: NormalEventPanel.Right,
     IDLE: NormalEventPanel.Right,
     GLOBAL: NormalEventPanel.Right,
-    START: NormalEventPanel.Right,
+    START: StartEventPanel.Right,
     END: EndEventPanel.Right,
     JOIN_OUT: EndEventPanel.Right,
     JOIN_IN: EndEventPanel.Right,
@@ -93,17 +93,31 @@ const EventRightPanel = () => {
 
 const SaveButton = () => {
   const { submitChanges, isDirty } = useEventForm();
+  const [showTooltip, setShowTooltip] = React.useState(false);
+
+  useEffect(() => {
+    if (isDirty) {
+      const timer = globalThis.setTimeout(() => {
+        setShowTooltip(true);
+      }, 100);
+      return () => globalThis.clearTimeout(timer);
+    } else {
+      setShowTooltip(false);
+    }
+  }, [isDirty]);
 
   return (
     <Block
       enableBeforeUnload={() => isDirty}
-      shouldBlockFn={() => isDirty}
+      shouldBlockFn={({ current, next }) =>
+        isDirty && next.pathname !== current.pathname
+      }
       withResolver
     >
       {({ status, proceed, reset }) => (
         <>
           <div className='fixed bottom-4 right-4'>
-            <Tooltip open={isDirty} delayDuration={100}>
+            <Tooltip open={showTooltip} delayDuration={300}>
               <TooltipTrigger asChild>
                 <Button
                   className={cn('w-full', isDirty && 'bg-warning')}
@@ -124,8 +138,9 @@ const SaveButton = () => {
               </TooltipContent>
             </Tooltip>
           </div>
+
           {status === 'blocked' && (
-            <Dialog open={true} onOpenChange={() => reset()}>
+            <Dialog open={status === 'blocked'} onOpenChange={() => reset()}>
               <DialogContent className='bg-content1 border-2 border-danger animate-in'>
                 <DialogHeader>
                   <DialogTitle className='text-danger font-semibold'>

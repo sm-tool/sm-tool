@@ -28,7 +28,7 @@ const FlowObjectsToggleablePanel = () => {
   }, [combinedObjects, search]);
 
   return (
-    <Panel position='top-right' className='!p-0 !m-0' style={{ width: 400 }}>
+    <Panel position='top-right' className='!p-0 !m-0' style={{ width: 500 }}>
       <div className='bg-background p-4 border-l-2 border-content4 h-full'>
         <Input
           placeholder='Search objects'
@@ -36,7 +36,7 @@ const FlowObjectsToggleablePanel = () => {
           onChange={event => setSearch(event.target.value)}
           className='mb-4'
         />
-        <ScrollArea className='h-[700px]'>
+        <ScrollArea className='h-[654px]'>
           <div className='space-y-2'>
             {filteredObjects.map(object => (
               <div key={object.id} className='flex items-center gap-2'>

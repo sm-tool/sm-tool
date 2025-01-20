@@ -48,11 +48,7 @@ export const CreateNewObjectButton = ({
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <Button
-            variant={variant ?? 'default'}
-            size='lg'
-            className='w-full max-w-md'
-          >
+          <Button variant={variant ?? 'default'} size='lg' className='w-full'>
             <Plus className='mr-2 h-5 w-5' />
             Create new object type
           </Button>

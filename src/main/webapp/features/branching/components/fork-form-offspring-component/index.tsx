@@ -38,6 +38,7 @@ import { useFormContext } from 'react-hook-form';
 import { cn } from '@nextui-org/theme';
 import { Label } from '@/components/ui/shadcn/label.tsx';
 import ObjectStylizedDnd from '@/features/object-instance/components/object-card/object-stylized-dnd.tsx';
+import { ScrollArea } from '@/components/ui/shadcn/scroll-area.tsx';
 
 const OffspringAccordion = ({
   id,
@@ -45,12 +46,14 @@ const OffspringAccordion = ({
   onTitleChange,
   onDescriptionChange,
   onDelete,
+  disabledEdits,
 }: {
   id: number;
   offspring: OffspringData;
   onTitleChange: (index: number, value: string) => void;
   onDescriptionChange: (index: number, value: string) => void;
   onDelete: (index: number) => void;
+  disabledEdits: boolean;
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -122,6 +125,7 @@ const OffspringAccordion = ({
               topTooltip='Provide thread title'
               onChange={handleTitleChange}
               className='z-50 p-2'
+              disabled={disabledEdits}
               placeholderChildren={
                 <Label
                   variant='uppercased'
@@ -149,8 +153,13 @@ const OffspringAccordion = ({
           <TextAreaEditable
             value={offspring.description}
             onChange={handleDescriptionChange}
-            className='text-default-800'
+            className={cn(
+              'text-default-800',
+              disabledEdits &&
+                '!hover:cursor-not-allowed pointer-events-none opacity-50',
+            )}
             placeholder='Thread description has not been set'
+            disabled={disabledEdits}
           />
         </div>
         <div className='flex flex-col gap-y-3'>
@@ -226,10 +235,12 @@ const ForkFormOffspringComponent = ({
   threadId,
   offsprings: initialOffsprings,
   onOffspringsChange,
+  disabledEdits = false,
 }: {
   threadId: number;
   offsprings: OffspringData[];
   onOffspringsChange: (offsprings: OffspringData[]) => void;
+  disabledEdits?: boolean;
 }) => {
   const setOffspringsAndNotify = (newOffsprings: OffspringData[]) => {
     setOffsprings(newOffsprings);
@@ -247,7 +258,6 @@ const ForkFormOffspringComponent = ({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        delay: 300,
         tolerance: 5,
         distance: 1,
       },
@@ -354,7 +364,7 @@ const ForkFormOffspringComponent = ({
         return {
           ...offspring,
           transfer: {
-            id: null,
+            id: offspring?.transfer?.id ?? null,
             objectIds: [...(offspring.transfer?.objectIds || []), objectId],
           },
         };
@@ -447,54 +457,57 @@ const ForkFormOffspringComponent = ({
                 />
               </div>
               <CommandList className='flex-1 flex flex-col'>
-                {offsprings.length > 0 && (
-                  <div className='flex-1'>
-                    <Accordion type='multiple'>
-                      <CommandGroup>
-                        {offsprings.map((offspring, index) => (
-                          <CommandItem
-                            key={index}
-                            value={offspring.title || ''}
-                            className='p-0 data-[selected=true]:bg-transparent'
-                          >
-                            <OffspringAccordion
-                              id={index}
-                              offspring={offspring}
-                              onTitleChange={(index, value) =>
-                                handleTitleChange(index, value)
-                              }
-                              onDescriptionChange={(index, value) =>
-                                handleDescriptionChange(index, value)
-                              }
-                              onDelete={index => handleDelete(index)}
-                            />
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Accordion>
-                  </div>
-                )}
-                <NewOffspringTemplate
-                  key={`${new Date()}`}
-                  onAdd={newOffspring => {
-                    const updatedOffsprings = [...offsprings, newOffspring];
-                    setOffspringsAndNotify(updatedOffsprings);
-                  }}
-                />
-                {offsprings.length === 0 && (
-                  <div className='h-[500px] relative'>
-                    <CommandEmpty className='absolute inset-0 flex items-center justify-center'>
-                      <EmptyComponent
-                        text={
-                          <>
-                            No threads available <br /> create a new thread to
-                            get started
-                          </>
-                        }
-                      />
-                    </CommandEmpty>
-                  </div>
-                )}
+                <ScrollArea className='h-[600px]'>
+                  {offsprings.length > 0 && (
+                    <div className='flex-1'>
+                      <Accordion type='multiple'>
+                        <CommandGroup>
+                          {offsprings.map((offspring, index) => (
+                            <CommandItem
+                              key={index}
+                              value={offspring.title || ''}
+                              className='p-0 data-[selected=true]:bg-transparent'
+                            >
+                              <OffspringAccordion
+                                disabledEdits={disabledEdits}
+                                id={index}
+                                offspring={offspring}
+                                onTitleChange={(index, value) =>
+                                  handleTitleChange(index, value)
+                                }
+                                onDescriptionChange={(index, value) =>
+                                  handleDescriptionChange(index, value)
+                                }
+                                onDelete={index => handleDelete(index)}
+                              />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Accordion>
+                    </div>
+                  )}
+                  <NewOffspringTemplate
+                    key={`${new Date()}`}
+                    onAdd={newOffspring => {
+                      const updatedOffsprings = [...offsprings, newOffspring];
+                      setOffspringsAndNotify(updatedOffsprings);
+                    }}
+                  />
+                  {offsprings.length === 0 && (
+                    <div className='h-[500px] relative'>
+                      <CommandEmpty className='absolute inset-0 flex items-center justify-center'>
+                        <EmptyComponent
+                          text={
+                            <>
+                              No threads available <br /> create a new thread to
+                              get started
+                            </>
+                          }
+                        />
+                      </CommandEmpty>
+                    </div>
+                  )}
+                </ScrollArea>
               </CommandList>
             </Command>
           </Card>

@@ -18,9 +18,13 @@ export const joinCreateRequestDTO = z.object({
 });
 export type JoinCreateRequest = z.infer<typeof joinCreateRequestDTO>;
 
-export const joinUpdateRequestDTO = joinCreateRequestDTO.omit({
-  joinTime: true,
-  threadTitle: true,
-  threadDescription: true,
+export const joinUpdateRequestDTO = z.object({
+  threadIdsToJoin: z.array(z.coerce.number()).superRefine(
+    fieldConfig({
+      fieldType: 'threadCheckout',
+    }),
+  ),
+  joinTitle: z.string().min(1, 'Join title is required'),
+  joinDescription: z.string().default(''),
 });
 export type JoinUpdateRequest = z.infer<typeof joinUpdateRequestDTO>;

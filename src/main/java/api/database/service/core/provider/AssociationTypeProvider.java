@@ -9,6 +9,7 @@ import api.database.model.exception.ApiException;
 import api.database.model.response.PossibleAssociationResponse;
 import api.database.repository.association.AssociationTypeRepository;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,22 +36,18 @@ public class AssociationTypeProvider {
 
   //--------------------------------------------------Pobieranie typów asocjacji---------------------------------------------------------
 
-  public List<AssociationType> getByObjectType(Integer objectTypeId) {
-    Integer[] types = prepareObjectTypeIdsForGet(objectTypeId, true);
-    return associationTypeRepository.getByObjectTypes(types);
-  }
-
   public List<PossibleAssociationResponse> getAvailableAssociationTypes(
     Integer selectedObjectTypeId,
     Integer[] availableObjectTypes,
-    Integer[] availableObjects,
-    Integer scenarioId
+    Integer[] availableObjects
   ) {
+    System.out.println(selectedObjectTypeId);
+    System.out.println(Arrays.toString(availableObjectTypes));
+    System.out.println(Arrays.toString(availableObjects));
     return associationTypeRepository.getAvailableAssociationTypesWithObjects(
       selectedObjectTypeId,
       availableObjectTypes,
-      availableObjects,
-      scenarioId
+      availableObjects
     );
   }
 
@@ -90,73 +87,55 @@ public class AssociationTypeProvider {
     return result.toArray(new Integer[0]);
   }
 
-  /// Pobiera stronę z typami asocjacji spełniającymi kryteria.
-  ///
-  /// @param pageable parametry stronicowania
-  /// @param scenarioId id scenariusza
-  /// @param firstObjectTypeId typ pierwszego obiektu (lub null)
-  /// @param secondObjectTypeId typ drugiego obiektu (lub null)
-  /// @param hierarchical czy uwzględniać hierarchię typów
-  /// @return strona z pasującymi typami asocjacji
-  /// @throws ApiException gdy hierarchical=true a brak typów obiektów
-  public Page<AssociationType> getAssociationTypes(
-    Pageable pageable,
-    Integer scenarioId,
-    Integer firstObjectTypeId,
-    Integer secondObjectTypeId,
-    Boolean hierarchical
-  ) {
-    if (
-      firstObjectTypeId == null &&
-      secondObjectTypeId == null &&
-      hierarchical != null
-    ) throw new ApiException(
-      ErrorCode.INCOMPATIBLE_TYPES,
-      ErrorGroup.ASSOCIATION_TYPE,
-      HttpStatus.BAD_REQUEST
-    );
-    Integer[] firstObjectTypesId = prepareObjectTypeIdsForGet(
-      firstObjectTypeId,
-      hierarchical
-    );
-    Integer[] secondObjectTypesId = prepareObjectTypeIdsForGet(
-      secondObjectTypeId,
-      hierarchical
-    );
-    return associationTypeRepository.findAssociationTypes(
-      pageable,
-      scenarioId,
-      firstObjectTypesId,
-      secondObjectTypesId
-    );
-  }
-
   public Page<AssociationType> findByDescriptionContaining(
     String description,
-    Pageable pageable
+    Pageable pageable,
+    Integer scenarioId
   ) {
-    return associationTypeRepository.findByDescriptionContaining(
-      description,
-      pageable
-    );
+    return scenarioId == null
+      ? associationTypeRepository.findByDescriptionContaining(
+        description,
+        pageable
+      )
+      : associationTypeRepository.findByDescriptionContainingAndScenarioId(
+        description,
+        scenarioId,
+        pageable
+      );
   }
 
   public Page<AssociationType> findByFirstObjectTypeId(
     Integer typeId,
-    Pageable pageable
+    Pageable pageable,
+    Integer scenarioId
   ) {
-    return associationTypeRepository.findByFirstObjectTypeId(typeId, pageable);
+    return scenarioId == null
+      ? associationTypeRepository.findByFirstObjectTypeId(typeId, pageable)
+      : associationTypeRepository.findByFirstObjectTypeIdAndScenarioId(
+        typeId,
+        scenarioId,
+        pageable
+      );
   }
 
   public Page<AssociationType> findBySecondObjectTypeId(
     Integer typeId,
-    Pageable pageable
+    Pageable pageable,
+    Integer scenarioId
   ) {
-    return associationTypeRepository.findBySecondObjectTypeId(typeId, pageable);
+    return scenarioId == null
+      ? associationTypeRepository.findBySecondObjectTypeId(typeId, pageable)
+      : associationTypeRepository.findBySecondObjectTypeIdAndScenarioId(
+        typeId,
+        scenarioId,
+        pageable
+      );
   }
 
-  public Page<AssociationType> findAll(Pageable pageable) {
-    return associationTypeRepository.findAll(pageable);
+  public Page<AssociationType> findAll(Pageable pageable, Integer scenarioId) {
+    return scenarioId == null
+      ? associationTypeRepository.findAll(pageable)
+      : associationTypeRepository.findAllByScenarioId(scenarioId, pageable);
   }
 
   public Map<

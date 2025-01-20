@@ -90,7 +90,8 @@ const SearchInputPanel = React.forwardRef<
                                 <CommandItem
                                   key={result.id}
                                   onSelect={() => onResultSelect?.(result)}
-                                  className='flex justify-between items-start px-4 py-3'
+                                  className='flex justify-between items-start px-4 py-3 data-[selected=true]:bg-secondary
+                                    data-[selected=true]:text-foreground'
                                 >
                                   <div className='flex-1'>
                                     <div className='text-base font-medium'>

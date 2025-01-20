@@ -162,7 +162,9 @@ const BaseAssociationEdge = ({
                 dominantBaseline='middle'
                 textAnchor='middle'
               >
-                {association.description}
+                {association.description.length > 26
+                  ? association.description.slice(0, 26) + '...'
+                  : association.description}
               </text>
             </g>
           )

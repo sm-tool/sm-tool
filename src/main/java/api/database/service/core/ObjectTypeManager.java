@@ -1,21 +1,30 @@
-package api.database.service.core.validator;
+package api.database.service.core;
 
+import api.database.entity.scenario.ScenarioToObjectType;
 import api.database.model.constant.ErrorCode;
 import api.database.model.constant.ErrorGroup;
 import api.database.model.exception.ApiException;
 import api.database.repository.object.ObjectTypeRepository;
+import api.database.repository.scenario.ScenarioToObjectTypeRepository;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class ObjectTypeValidator {
+public class ObjectTypeManager {
 
   private final ObjectTypeRepository objectTypeRepository;
+  private final ScenarioToObjectTypeRepository scenarioToObjectTypeRepository;
 
   @Autowired
-  public ObjectTypeValidator(ObjectTypeRepository objectTypeRepository) {
+  public ObjectTypeManager(
+    ObjectTypeRepository objectTypeRepository,
+    ScenarioToObjectTypeRepository scenarioToObjectTypeRepository
+  ) {
     this.objectTypeRepository = objectTypeRepository;
+    this.scenarioToObjectTypeRepository = scenarioToObjectTypeRepository;
   }
 
   /// Sprawdza relację hierarchiczną między dwoma typami.
@@ -50,6 +59,18 @@ public class ObjectTypeValidator {
       ErrorCode.TRIED_TO_ADD_GLOBAL_TYPE_TO_NOT_GLOBAL_OBJECT,
       ErrorGroup.OBJECT,
       HttpStatus.BAD_REQUEST
+    );
+  }
+
+  //------------------------------Przypisanie typu do scenariusza----------------------
+  @Transactional
+  public void assignObjectTypesToScenario(
+    List<Integer> objectTypeIds,
+    Integer scenarioId
+  ) {
+    scenarioToObjectTypeRepository.addTypesToScenario(
+      scenarioId,
+      objectTypeIds.toArray(new Integer[0])
     );
   }
 }

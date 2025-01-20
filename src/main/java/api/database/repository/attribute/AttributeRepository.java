@@ -9,23 +9,39 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-/// Repozytorium zarządzające atrybutami obiektów w systemie.
-/// Odpowiada za:
+/// Repozytorium zarządzające atrybutami obiektów w systemie,
+/// dostarczające operacje bazodanowe dla encji `Attribute`.
+///
+/// # Główne funkcjonalności
 /// - Podstawowe operacje CRUD na atrybutach
 /// - Pobieranie atrybutów wraz z ich typami
 /// - Pobieranie atrybutów dla wielu obiektów
+/// - Wsparcie dla zapytań natywnych SQL
 ///
-/// # Powiązania
+/// # Przykład użycia
+/// ```java
+/// @Autowired
+/// private AttributeRepository attributeRepository;
+///
+/// // Pobranie typów dla listy atrybutów
+/// List<InternalAttributeIdWithType> types = attributeRepository.getAttributeTypes(ids);
+/// ```
+///
+/// # Powiązane komponenty
 /// - {@link Attribute} - encja reprezentująca atrybut obiektu
 /// - {@link api.database.entity.object.AttributeTemplate} - definicja typu atrybutu
-/// - {@link InternalAttributeWithType} - projekcja atrybutu z typem
+/// - {@link InternalAttributeWithType} - projekcja łącząca atrybut z typem
+/// - {@link InternalAttributeIdWithType} - projekcja ID atrybutu z typem
 @Repository
 public interface AttributeRepository extends JpaRepository<Attribute, Integer> {
-  /// Pobiera typy atrybutów na podstawie ich identyfikatorów.
-  /// Łączy atrybuty z ich szablonami by pobrać informacje o typie.
+  /// Pobiera typy atrybutów dla podanych identyfikatorów.
   ///
-  /// @param attributeIds lista ID atrybutów
-  /// @return lista projekcji zawierających ID i typ atrybutu
+  /// Wykonuje złączenie z tabelą szablonów atrybutów aby uzyskać informacje o typie.
+  /// Wykorzystuje natywne zapytanie SQL dla lepszej wydajności.
+  ///
+  /// # Parametry
+  /// @param attributeIds Lista identyfikatorów atrybutów do pobrania
+  /// @return Lista projekcji zawierających ID atrybutu i jego typ
   @Query(
     value = """
     SELECT a.id, at.type
@@ -39,11 +55,20 @@ public interface AttributeRepository extends JpaRepository<Attribute, Integer> {
     @Param("attributeIds") Integer[] attributeIds
   );
 
-  /// Pobiera wszystkie atrybuty dla wskazanych obiektów wraz z ich typami.
-  /// Zwraca posortowaną listę wg ID obiektu i ID atrybutu.
+  /// Pobiera komplet informacji o atrybutach dla wskazanych obiektów.
   ///
-  /// @param objectIds lista ID obiektów
-  /// @return lista atrybutów z informacją o ich typach
+  /// Wykonuje złączenie z szablonami aby pobrać również typ każdego atrybutu.
+  /// Wyniki są sortowane po ID obiektu i ID atrybutu dla zachowania spójnej kolejności.
+  ///
+  /// # SQL
+  /// Zapytanie wykonuje:
+  /// - Złączenie `qds_attribute` z `qds_attribute_template`
+  /// - Filtrowanie po przekazanych ID obiektów
+  /// - Sortowanie wyników
+  ///
+  /// # Parametry
+  /// @param objectIds Lista identyfikatorów obiektów
+  /// @return Lista atrybutów wraz z informacją o ich typach, posortowana
   @Query(
     value = """
     SELECT a.*, at.type

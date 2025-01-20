@@ -53,10 +53,11 @@ export const useObjectInstances = () => {
   });
 };
 
-export const useObjectInstance = (objectId: number) => {
+export const useObjectInstance = (objectId?: number) => {
   return useQuery({
-    queryKey: objectInstanceKeys.detail(getScenarioIdFromPath(), objectId),
-    queryFn: () => objectInstanceApi.detail(objectId),
+    queryKey: objectInstanceKeys.detail(getScenarioIdFromPath(), objectId!),
+    queryFn: () => objectInstanceApi.detail(objectId!),
+    enabled: Number.isInteger(objectId) && objectId! > 0,
   });
 };
 
@@ -99,10 +100,10 @@ export const useArrayOfObjectInstances = (objectsId: number[]) => {
 
 export const useObjectStartingAttributesValues = (objectId: number) => {
   const object = useObjectInstance(objectId);
-  const defaultAttributes = useAllTemplateAttributes(object.data!.templateId, {
+  const defaultAttributes = useAllTemplateAttributes(object.data?.templateId, {
     enabled: object.isSuccess,
   });
-  const startingEvent = useThreadFirstEvent(object.data!.originThreadId, {
+  const startingEvent = useThreadFirstEvent(object.data?.originThreadId, {
     enabled: object.isSuccess,
   });
 

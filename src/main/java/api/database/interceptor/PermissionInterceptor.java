@@ -32,7 +32,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
     // Request
     String method = request.getMethod(); // GET, POST, etc.
     String[] resourceType = request.getServletPath().split("/"); // 0 - ""
-    // Error
+    // Error + webhook
     if (resourceType.length < 3) {
       return true;
     }

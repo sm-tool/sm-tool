@@ -22,31 +22,20 @@ import {
   successToast,
 } from '@/components/ui/shadcn/toaster.tsx';
 import { toast } from 'sonner';
+import { getScenarioIdFromPath } from '@/features/scenario/utils/get-scenario-id-from-path.tsx';
 
-type ObjectTypesQueryKey = {
-  all: ['objectTypes'];
-  list: (
-    request?: QueryRequest<ObjectType, ObjectTypeApiFilterMethods>,
-  ) => readonly ['objectTypes', typeof request];
-  infinite: (
-    request?: QueryRequest<ObjectType, ObjectTypeApiFilterMethods>,
-  ) => readonly ['objectTypes', 'infinite', typeof request];
-  detail: (id: number) => readonly ['objectTypes', 'detail', number];
-  hierarchy: {
-    all: readonly ['objectTypes', 'hierarchy'];
-    roots: () => readonly ['objectTypes', 'hierarchy', 'roots'];
-    children: (
-      parentId: number,
-    ) => readonly ['objectTypes', 'hierarchy', 'children', number];
-  };
-};
-
-export const objectTypesKeys: ObjectTypesQueryKey = {
+export const objectTypesKeys = {
   all: ['objectTypes'] as const,
   list: (request?: QueryRequest<ObjectType, ObjectTypeApiFilterMethods>) =>
     ['objectTypes', request] as const,
-  infinite: (request?: QueryRequest<ObjectType, ObjectTypeApiFilterMethods>) =>
-    ['objectTypes', 'infinite', request] as const,
+  listScenario: (scenarioId: number) => ['objectTypes', 'scenario', scenarioId],
+  infiniteGlobal: (
+    request?: QueryRequest<ObjectType, ObjectTypeApiFilterMethods>,
+  ) => ['objectTypes', 'infiniteGlobal', request] as const,
+  infiniteHeadless: (
+    scenarioId: number,
+    request?: QueryRequest<ObjectType, ObjectTypeApiFilterMethods>,
+  ) => ['objectTypes', 'infiniteHeadless', scenarioId, request] as const,
   detail: (id: number) => ['objectTypes', 'detail', id] as const,
   hierarchy: {
     all: ['objectTypes', 'hierarchy'] as const,
@@ -81,13 +70,42 @@ export const useObjectType = (id?: number, options = {}) => {
   });
 };
 
-export const useInfiniteObjectType = (
+export const useObjectTypeScenarioList = () => {
+  return useQuery({
+    queryKey: objectTypesKeys.listScenario(getScenarioIdFromPath()),
+    queryFn: () => objectTypeApi.getAllScenarioTypesIds(),
+  });
+};
+
+export const useInfiniteGlobalObjectType = (
   request?: QueryRequest<ObjectType, ObjectTypeApiFilterMethods>,
 ) => {
   return useInfiniteQuery<HalObjectTypeResponse>({
-    queryKey: objectTypesKeys.infinite(request),
+    queryKey: objectTypesKeys.infiniteGlobal(request),
     queryFn: ({ pageParam }) =>
       objectTypeApi.getAll({
+        ...request,
+        pagination: {
+          page: pageParam as number,
+          size: 10,
+        },
+      }),
+    initialPageParam: 0,
+    getNextPageParam: lastPage =>
+      lastPage._links.next ? lastPage.page.number + 1 : undefined,
+    staleTime: STALE_TIME.Short,
+    gcTime: STALE_TIME.XLONG,
+  });
+};
+
+export const useInfiniteObjectTypeHeaderLess = (
+  scenarioId: number,
+  request?: QueryRequest<ObjectType, ObjectTypeApiFilterMethods>,
+) => {
+  return useInfiniteQuery<HalObjectTypeResponse>({
+    queryKey: objectTypesKeys.infiniteHeadless(scenarioId, request),
+    queryFn: ({ pageParam }) =>
+      objectTypeApi.getAllHeaderless(scenarioId, {
         ...request,
         pagination: {
           page: pageParam as number,
@@ -166,6 +184,20 @@ export const useDeleteObjectType = () => {
     },
     onError: error => {
       handleErrorToast(error, 'Failed to delete object type');
+    },
+  });
+};
+
+export const useObjectTypeAssigment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: objectTypeApi.assignToScenario,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: objectTypesKeys.all });
+      toast.success('Imported types');
+    },
+    onError: error => {
+      handleErrorToast(error, 'Failed to import types');
     },
   });
 };

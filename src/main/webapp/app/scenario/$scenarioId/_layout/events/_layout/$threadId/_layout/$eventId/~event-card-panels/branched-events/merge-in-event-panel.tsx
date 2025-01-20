@@ -8,7 +8,7 @@ import BranchingDescription from '@/features/branching/components/branching-card
 
 const ForkOutEventPanel = {
   Left: () => {
-    const direction = 'incoming';
+    const direction = 'outgoing';
 
     const { navigateWithParametersBetweenEvents } =
       useScenarioCommonNavigation();

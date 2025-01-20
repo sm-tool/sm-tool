@@ -9,9 +9,9 @@ import api.database.model.domain.association.InternalAssociationKeyWithId;
 import api.database.model.domain.association.InternalAssociationObjectTypes;
 import api.database.model.exception.ApiException;
 import api.database.repository.association.AssociationRepository;
+import api.database.service.core.ObjectTypeManager;
 import api.database.service.core.provider.AssociationTypeProvider;
 import api.database.service.core.provider.ObjectInstanceProvider;
-import api.database.service.core.validator.ObjectTypeValidator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,19 +31,19 @@ public class AssociationInator {
   private final AssociationRepository associationRepository;
   private final ObjectInstanceProvider objectInstanceProvider;
   private final AssociationTypeProvider associationTypeProvider;
-  private final ObjectTypeValidator objectTypeValidator;
+  private final ObjectTypeManager objectTypeManager;
 
   @Autowired
   public AssociationInator(
     AssociationRepository associationRepository,
     ObjectInstanceProvider objectInstanceProvider,
     AssociationTypeProvider associationTypeProvider,
-    ObjectTypeValidator objectTypeValidator
+    ObjectTypeManager objectTypeManager
   ) {
     this.associationRepository = associationRepository;
     this.objectInstanceProvider = objectInstanceProvider;
     this.associationTypeProvider = associationTypeProvider;
-    this.objectTypeValidator = objectTypeValidator;
+    this.objectTypeManager = objectTypeManager;
   }
 
   /// Pobiera istniejące asocjacje na podstawie zadanego zbioru zmian.
@@ -156,11 +156,11 @@ public class AssociationInator {
       );
 
       if (
-        !objectTypeValidator.checkIfTypesAreInHierarchy(
+        !objectTypeManager.checkIfTypesAreInHierarchy(
           assocType.firstObjectTypeId(),
           obj1Type
         ) ||
-        !objectTypeValidator.checkIfTypesAreInHierarchy(
+        !objectTypeManager.checkIfTypesAreInHierarchy(
           assocType.secondObjectTypeId(),
           obj2Type
         )

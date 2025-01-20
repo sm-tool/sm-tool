@@ -6,6 +6,7 @@ import PhaseOverview from '@/features/scenario-phase/components/phase-card';
 import DndTimeline from '@/lib/dnd/dnd-timeline.tsx';
 import { useActiveScenario } from '@/features/scenario/queries.ts';
 import DndPhaseAlert from '@/lib/dnd/dnd-phase-alert';
+import DndScenarioLengthAlert from '@/lib/dnd/dnd-scenario-length-alert.tsx';
 
 const ScenarioDescriptionPhases = () => {
   return (
@@ -19,6 +20,7 @@ const ScenarioDescriptionPhases = () => {
               )}
             </StatusComponent>
             <DndPhaseAlert phases={phases!} />
+            <DndScenarioLengthAlert />
             {phases
               ?.sort((a, b) => a.startTime - b.startTime)
               .map((phase, id) => <PhaseOverview phase={phase} key={id} />)}

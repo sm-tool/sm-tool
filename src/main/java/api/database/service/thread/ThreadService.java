@@ -8,9 +8,9 @@ import api.database.model.request.composite.create.ThreadCreateRequest;
 import api.database.model.request.update.ThreadUpdateRequest;
 import api.database.model.response.ThreadResponse;
 import api.database.repository.thread.ThreadRepository;
+import api.database.service.core.ScenarioManager;
 import api.database.service.core.ThreadAdder;
 import api.database.service.core.provider.GlobalThreadProvider;
-import api.database.service.operations.ScenarioValidator;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,19 +33,19 @@ public class ThreadService {
   private final ThreadRepository threadRepository;
   private final GlobalThreadProvider globalThreadProvider;
   private final ThreadAdder threadAdder;
-  private final ScenarioValidator scenarioValidator;
+  private final ScenarioManager scenarioManager;
 
   @Autowired
   public ThreadService(
     ThreadRepository threadRepository,
     GlobalThreadProvider globalThreadProvider,
     ThreadAdder threadAdder,
-    ScenarioValidator scenarioValidator
+    ScenarioManager scenarioManager
   ) {
     this.threadRepository = threadRepository;
     this.globalThreadProvider = globalThreadProvider;
     this.threadAdder = threadAdder;
-    this.scenarioValidator = scenarioValidator;
+    this.scenarioManager = scenarioManager;
   }
 
   //--------------------------------------------------Pobieranie wątków---------------------------------------------------------
@@ -69,10 +69,7 @@ public class ThreadService {
   /// @throws ApiException gdy wątek nie istnieje lub nie należy do scenariusza
   @Transactional
   public ThreadResponse getOneThread(Integer threadId, Integer scenarioId) {
-    scenarioValidator.checkIfThreadsAreInScenario(
-      List.of(threadId),
-      scenarioId
-    );
+    scenarioManager.checkIfThreadsAreInScenario(List.of(threadId), scenarioId);
     List<ThreadResponse> threads = threadRepository.getThreads(
       threadId,
       scenarioId
@@ -124,10 +121,7 @@ public class ThreadService {
     ThreadUpdateRequest info,
     Integer scenarioId
   ) {
-    scenarioValidator.checkIfThreadsAreInScenario(
-      List.of(threadId),
-      scenarioId
-    );
+    scenarioManager.checkIfThreadsAreInScenario(List.of(threadId), scenarioId);
 
     Thread thread = new Thread(
       threadId == 0

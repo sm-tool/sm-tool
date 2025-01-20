@@ -24,6 +24,7 @@ import EmptyComponentDashed from '@/components/ui/common/data-load-states/empty-
 import AssociationTypeCard from '@/features/association-type/components/association-type-card.tsx';
 import PageNavigation from '@/lib/react-query/components/page-navigation';
 import { CreateNewAssociation } from '@/app/home/_layout/catalog/_layout/associations';
+import ComponentSizeLimit from '@/components/ui/common/display/resolution-wrapper/component-size-limit.tsx';
 
 const AssociationTypeByIdSearch = ({
   selectedType,
@@ -128,73 +129,78 @@ const ObjectTypeOverview = ({ data }: { data: ObjectType }) => {
           </div>
           <Separator />
           <ObjectTypeDetails data={data} />
-          <div className='w-full h-full p-4 space-y-4'>
-            <div className='flex flex-row justify-between'>
-              <h3 className='text-lg font-medium text-default-500'>
-                Possible associations with{' '}
-              </h3>
-            </div>
 
-            <Card className='bg-content3 @container'>
-              <Tabs defaultValue='findByFirstObjectTypeId'>
-                <TabsList className='w-full'>
-                  <div className='px-4 hidden @md:block'>
-                    Search where selected type is:
-                  </div>
-                  <div className='px-4 hidden @xs:block @md:hidden'>
-                    Search type by
-                  </div>
-                  {Object.entries(SEARCH_TYPES).map(([type, { label }]) => (
-                    <TabsTrigger key={type} value={type}>
-                      {label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+          <ComponentSizeLimit minWidth={400}>
+            <div className='w-full h-full p-4 space-y-4'>
+              <div className='flex flex-row justify-between'>
+                <h3 className='text-lg font-medium text-default-500'>
+                  Possible associations with{' '}
+                </h3>
+              </div>
 
-                {Object.entries(SEARCH_TYPES).map(([type, { buttonText }]) => (
-                  <TabsContent
-                    key={type}
-                    value={type}
-                    className='w-full grid place-items-center'
-                  >
-                    <CreateNewAssociation
-                      className='border-content1 hover:bg-content1/80 bg-content1/60 mb-1'
-                      variant='outline'
-                      buttonText={buttonText}
-                      initialData={{
-                        firstObjectTypeId:
-                          type === 'findByFirstObjectTypeId'
-                            ? data.id
-                            : undefined,
-                        secondObjectTypeId:
-                          type === 'findBySecondObjectTypeId'
-                            ? data.id
-                            : undefined,
-                      }}
-                    />
-                    <Card className='bg-content3 w-full max-w-3xl'>
-                      <PaginationProvider<
-                        AssociationType,
-                        AssociationTypeByIdRequest
+              <Card className='bg-content3 @container'>
+                <Tabs defaultValue='findByFirstObjectTypeId'>
+                  <TabsList className='w-full'>
+                    <div className='px-4 hidden @md:block'>
+                      Search where selected type is:
+                    </div>
+                    <div className='px-4 hidden @xs:block @md:hidden'>
+                      Search type by
+                    </div>
+                    {Object.entries(SEARCH_TYPES).map(([type, { label }]) => (
+                      <TabsTrigger key={type} value={type}>
+                        {label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+
+                  {Object.entries(SEARCH_TYPES).map(
+                    ([type, { buttonText }]) => (
+                      <TabsContent
+                        key={type}
+                        value={type}
+                        className='w-full grid place-items-center'
                       >
-                        initialRequest={{
-                          filter: {
-                            searchType: type as AssociationTypeByIdRequest,
-                          },
-                        }}
-                      >
-                        <AssociationTypeByIdSearch
-                          selectedType={type}
-                          typeId={data.id}
+                        <CreateNewAssociation
+                          className='border-content1 hover:bg-content1/80 bg-content1/60 mb-1'
+                          variant='outline'
+                          buttonText={buttonText}
+                          initialData={{
+                            firstObjectTypeId:
+                              type === 'findByFirstObjectTypeId'
+                                ? data.id
+                                : undefined,
+                            secondObjectTypeId:
+                              type === 'findBySecondObjectTypeId'
+                                ? data.id
+                                : undefined,
+                          }}
                         />
-                      </PaginationProvider>
-                    </Card>
-                  </TabsContent>
-                ))}
-              </Tabs>
-            </Card>
-            <div className='w-full flex justify-center'></div>
-          </div>
+                        <Card className='bg-content3 w-full max-w-3xl'>
+                          <PaginationProvider<
+                            AssociationType,
+                            AssociationTypeByIdRequest
+                          >
+                            initialRequest={{
+                              filter: {
+                                searchType: type as AssociationTypeByIdRequest,
+                              },
+                            }}
+                          >
+                            <AssociationTypeByIdSearch
+                              selectedType={type}
+                              typeId={data.id}
+                            />
+                          </PaginationProvider>
+                        </Card>
+                      </TabsContent>
+                    ),
+                  )}
+                </Tabs>
+              </Card>
+              <div className='w-full flex justify-center'></div>
+            </div>
+          </ComponentSizeLimit>
         </CardContent>
       </Card>
     </div>

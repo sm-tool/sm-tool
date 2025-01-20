@@ -2,6 +2,7 @@ import { QueryRequest } from '@/lib/hal-pagination/types/pagination.types.ts';
 import {
   ObjectType,
   ObjectTypeApiFilterMethods,
+  ObjectTypeAssigment,
   objectTypeDTO,
   ObjectTypeForm,
   objectTypeFormDTO,
@@ -47,6 +48,34 @@ export const objectTypeApi = {
     });
   },
 
+  getAllHeaderless: async (
+    scenarioId: number,
+    request?: QueryRequest<ObjectType, ObjectTypeApiFilterMethods>,
+  ): Promise<HalObjectTypeResponse> => {
+    const queryParameters: Record<string, number> = {};
+
+    if (request?.pagination) {
+      queryParameters.page = request.pagination.page;
+      queryParameters.size = request.pagination.size;
+    }
+
+    const endpoint = `/object-types/findByScenarioId/${scenarioId}`;
+
+    return apiClient<HalObjectTypeResponse>({
+      method: 'GET',
+      url: endpoint,
+      params: queryParameters,
+    });
+  },
+
+  // SCENARIO IN THE HEADER
+  getAllScenarioTypesIds: async () => {
+    const { data } = await API_INSTANCE.get<number[]>(
+      `object-types/findIdsByScenarioId`,
+    );
+    return data;
+  },
+
   getOne: async (id: number) => {
     const { data } = await API_INSTANCE.get<ObjectType>(`object-types/${id}`);
     return objectTypeDTO.parse(data);
@@ -84,5 +113,9 @@ export const objectTypeApi = {
 
   delete: async (id: number) => {
     await API_INSTANCE.delete(`object-types/${id}`);
+  },
+
+  assignToScenario: async (assigment: ObjectTypeAssigment) => {
+    await API_INSTANCE.post(`object-types/scenario`, assigment);
   },
 };

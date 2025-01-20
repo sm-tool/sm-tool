@@ -36,8 +36,27 @@ public class GlobalExceptionHandler {
       String tableName = matcher.group(3); // Przechwytuje nazwę tabeli (np. qds_object_type)
       apiException = new ApiException(
         ErrorCode.DOES_NOT_EXIST,
-        List.of(keyValue),
+        List.of(keyName, keyValue),
         ErrorGroup.valueOf(tableName.substring(4).toUpperCase()),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+    return apiException;
+  }
+
+  ApiException parseDuplicatedKey(String message) {
+    Pattern pattern = Pattern.compile(
+      "Key \\((\\w+)\\)=\\((\\d+)\\) already exists"
+    );
+    Matcher matcher = pattern.matcher(message);
+    ApiException apiException = null;
+    if (matcher.find()) {
+      String keyName = matcher.group(1); // Przechwytuje nazwę klucza (np. object_type_id)
+      String keyValue = matcher.group(2); // Przechwytuje wartość klucza (np. 1)
+      apiException = new ApiException(
+        ErrorCode.ALREADY_EXISTS,
+        List.of(keyName, keyValue),
+        ErrorGroup.OTHERS,
         HttpStatus.BAD_REQUEST
       );
     }
@@ -110,6 +129,8 @@ public class GlobalExceptionHandler {
     if (apiException == null) apiException = parseNullException(message);
     //Błędy klucza obcego
     if (apiException == null) apiException = parseForeignKeyException(message);
+    // Błędy unikalności
+    if (apiException == null) apiException = parseDuplicatedKey(message);
     //Inne błędy
     System.out.println(message);
     if (apiException == null) {

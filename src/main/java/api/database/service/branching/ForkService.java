@@ -1,11 +1,9 @@
 package api.database.service.branching;
 
-import api.database.entity.event.Event;
 import api.database.entity.thread.Branching;
 import api.database.model.constant.BranchingType;
 import api.database.model.constant.ErrorCode;
 import api.database.model.constant.ErrorGroup;
-import api.database.model.constant.EventType;
 import api.database.model.data.BranchingData;
 import api.database.model.data.OffspringData;
 import api.database.model.data.OffspringObjectTransferData;
@@ -201,7 +199,7 @@ public class ForkService {
 
   //----------------------------------------Zmiana----------------------------------------------------------------------
 
-  private BranchingData baseChangeForkOperations(
+  private BranchingData changeForkValidation(
     Integer forkId,
     ForkUpdateRequest forkChangeInfo,
     Integer scenarioId
@@ -223,10 +221,7 @@ public class ForkService {
       branching.comingIn()[0],
       scenarioId
     );
-    // 3. Zmiana tytułu i opisu
-    branchingRepository.save(
-      Branching.from(forkChangeInfo, branching, scenarioId)
-    );
+
     return branching;
   }
 
@@ -305,7 +300,7 @@ public class ForkService {
     ForkUpdateRequest forkChangeInfo,
     Integer scenarioId
   ) {
-    BranchingData branching = baseChangeForkOperations(
+    BranchingData branching = changeForkValidation(
       forkId,
       forkChangeInfo,
       scenarioId
@@ -340,6 +335,11 @@ public class ForkService {
     InternalTransferPairs pairs = createTransferPairs(branching, allTransfers);
     objectInstanceTransfer.handleObjectTransfers(pairs, scenarioId);
     objectStateCleaner.deleteInvalidChanges(scenarioId);
+
+    // 7. Zmiana samych danych - tytułu i opisu
+    branchingRepository.save(
+      Branching.from(forkChangeInfo, branching, scenarioId)
+    );
   }
 
   private InternalTransferPairs createTransferPairs(
@@ -368,44 +368,5 @@ public class ForkService {
         .toList(),
       allTransfers.stream().map(OffspringObjectTransferData::id).toList()
     );
-  }
-
-  //--------------------------------------------------Usuwanie FORKa----------------------------------------------------
-  /// Usuwa podział wątku wraz z jego konsekwencjami.
-  /// Dla pojedynczego wątku potomnego (fork 1-1):
-  /// - Przenosi eventy z wątku źródłowego
-  /// - Usuwa eventy FORKa
-  /// Dla wielu wątków potomnych:
-  /// - Usuwa wszystkie wątki potomne
-  /// - Zastępuje event FORK_IN przez END
-  ///
-  /// @param forkId id usuwanego forka
-  /// @param scenarioId id scenariusza
-  @Transactional
-  public void deleteFork(Integer forkId, Integer scenarioId) {
-    // 1. Sprawdzenie i pobranie wątku
-    BranchingData branching = getAndCheckFork(forkId);
-
-    if (branching.comingOut().length == 1) {
-      branchingRepository.deleteById(forkId); // Usunięcie forka wraz z jego eventami
-      // Wypełnienie pustej przestrzeni po eventach FORKa
-      idleEventManager.fillWithIdleEvents(
-        branching.comingIn()[0],
-        branching.time(),
-        branching.time() + 1
-      );
-      // Przesunięcie eventów do wątku wchodząccego
-      eventManager.moveEventsBetweenThreads(
-        branching.comingIn(),
-        branching.comingOut(),
-        0
-      );
-      threadRemovalService.removeThreadsAfterMove(branching.comingOut());
-    } else {
-      //Usuwanie już niewystępujących wątków
-      for (Integer threadId : branching.comingOut()) {
-        threadRemovalService.removeThread(scenarioId, threadId);
-      }
-    }
   }
 }

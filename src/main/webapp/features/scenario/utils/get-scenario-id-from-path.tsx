@@ -20,3 +20,8 @@ export const getScenarioIdFromPath = () => {
 
   return scenarioId;
 };
+
+export const hasScenarioInPath = () => {
+  const pathname = router.state.location.pathname;
+  return pathname.split('/').includes('scenario');
+};

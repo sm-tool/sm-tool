@@ -1,7 +1,5 @@
 package api.database.model.request.save;
 
-import api.database.controller.exception.GlobalExceptionHandler;
-import api.database.model.exception.ApiException;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 

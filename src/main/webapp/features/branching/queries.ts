@@ -13,12 +13,19 @@ import { branchingApi } from '@/features/branching/api.ts';
 import { Branching, BranchingForm } from '@/features/branching/types.ts';
 import { getScenarioIdFromPath } from '@/features/scenario/utils/get-scenario-id-from-path.tsx';
 import { useParams } from '@tanstack/react-router';
-import { useThread } from '@/features/thread/queries.ts';
+import { threadKeys, useThread } from '@/features/thread/queries.ts';
+import { threadApi } from '@/features/thread/api.ts';
+import { eventKeys } from '@/features/event-instance/queries.ts';
 
 export const branchingKeys = {
   all: (scenarioId: number) => ['branching', scenarioId] as const,
   detail: (scenarioId: number, id: number) =>
     [...branchingKeys.all(scenarioId), 'detail', id] as const,
+  branchingThreads: (scenarioId: number, branchingId: number) => [
+    ...branchingKeys.all(scenarioId),
+    'branchingThreads',
+    branchingId,
+  ],
 } as const;
 
 export const useBranchings = () => {
@@ -49,6 +56,25 @@ export const useBranchingData = (
       : thread?.outgoingBranchingId;
 
   return useBranching(branchingId);
+};
+
+export const useBranchingThreads = (
+  branchingDirection: 'incoming' | 'outgoing',
+  branchingId: number,
+) => {
+  const { data: branching } = useBranching(branchingId);
+
+  return useQueries({
+    queries:
+      (branchingDirection === 'incoming'
+        ? branching?.comingIn
+        : branching?.comingOut
+      )?.map(threadId => ({
+        queryKey: threadKeys.detail(getScenarioIdFromPath(), threadId),
+        queryFn: () => threadApi.detail(threadId),
+        enabled: !!threadId && !!branching,
+      })) ?? [],
+  });
 };
 
 export const useUpdateBranching = () => {
@@ -127,6 +153,12 @@ export const useDeleteBranching = () => {
       successToast('Branching deleted');
       void queryClient.invalidateQueries({
         queryKey: branchingKeys.all(getScenarioIdFromPath()),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: threadKeys.all(getScenarioIdFromPath()),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: eventKeys.all(getScenarioIdFromPath()),
       });
       successToast('Branching deleted');
     },

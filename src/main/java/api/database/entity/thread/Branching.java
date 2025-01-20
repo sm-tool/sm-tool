@@ -156,7 +156,7 @@ public class Branching {
       data.time(),
       request.joinTitle(),
       request.joinDescription(),
-      BranchingType.FORK,
+      BranchingType.JOIN,
       true,
       null
     );

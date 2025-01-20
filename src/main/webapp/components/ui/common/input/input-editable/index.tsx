@@ -2,7 +2,7 @@ import React from 'react';
 import { Input, InputProperties } from '@/components/ui/shadcn/input.tsx';
 import { cn } from '@nextui-org/theme';
 import { Button } from '@/components/ui/shadcn/button.tsx';
-import { Check, Pencil, X } from 'lucide-react';
+import { Check, Pencil, PencilOff, X } from 'lucide-react';
 
 const InputEditable = React.forwardRef<
   HTMLInputElement,
@@ -83,22 +83,35 @@ const InputEditable = React.forwardRef<
     }
 
     return (
-      <div className='group relative flex items-center w-fit'>
+      <div
+        className={cn(
+          'group flex items-start w-fit',
+          properties.disabled && 'hover:cursor-no-drop',
+        )}
+      >
         <div
-          onClick={() => setIsEditing(true)}
+          onClick={() => !properties.disabled && setIsEditing(true)}
           className={cn(
             `rounded px-2 py-1 hover:bg-content3 cursor-text min-h-[2rem] flex items-center
             transition-colors duration-100 truncate`,
             className,
+            properties.disabled && '!cursor-no-drop hover:bg-transparent',
           )}
         >
           {value || placeholderChildren}
         </div>
-        <Pencil
-          className='h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 text-default-400 cursor-pointer
-            transition-opacity duration-100'
-          onClick={() => setIsEditing(true)}
-        />
+
+        <div className='flex-shrink-0 ml-2 mt-px'>
+          {properties.disabled ? (
+            <PencilOff className='size-4 opacity-0 group-hover:opacity-100 text-default-400' />
+          ) : (
+            <Pencil
+              className='h-4 w-4 opacity-0 group-hover:opacity-100 text-default-600 cursor-pointer
+                transition-opacity duration-100'
+              onClick={() => setIsEditing(true)}
+            />
+          )}
+        </div>
       </div>
     );
   },

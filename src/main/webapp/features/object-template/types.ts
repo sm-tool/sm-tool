@@ -46,3 +46,10 @@ export const objectTemplateFormDTO = z.object({
 
 export type ObjectTemplate = z.infer<typeof objectTemplateDTO>;
 export type ObjectTemplateForm = z.infer<typeof objectTemplateFormDTO>;
+
+export const objectTemplateAssigmentDTO = z.object({
+  assign: z
+    .array(z.coerce.number())
+    .min(1, 'At least one type has to be assigned'),
+});
+export type ObjectTemplateAssigment = z.infer<typeof objectTemplateFormDTO>;

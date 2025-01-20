@@ -14,7 +14,7 @@ import api.database.model.response.ObjectInstanceResponse;
 import api.database.model.response.PossibleAssociationResponse;
 import api.database.model.response.ThreadObjectsResponse;
 import api.database.repository.object.ObjectInstanceRepository;
-import api.database.service.operations.ScenarioValidator;
+import api.database.service.core.ScenarioManager;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,19 +28,19 @@ public class ObjectInstanceProvider {
 
   private final ObjectInstanceRepository objectInstanceRepository;
   private final AttributeProvider attributeProvider;
-  private final ScenarioValidator scenarioValidator;
+  private final ScenarioManager scenarioManager;
   private final AssociationTypeProvider associationTypeProvider;
 
   @Autowired
   public ObjectInstanceProvider(
     ObjectInstanceRepository objectInstanceRepository,
     AttributeProvider attributeProvider,
-    ScenarioValidator scenarioValidator,
+    ScenarioManager scenarioManager,
     AssociationTypeProvider associationTypeProvider
   ) {
     this.objectInstanceRepository = objectInstanceRepository;
     this.attributeProvider = attributeProvider;
-    this.scenarioValidator = scenarioValidator;
+    this.scenarioManager = scenarioManager;
     this.associationTypeProvider = associationTypeProvider;
   }
 
@@ -74,10 +74,7 @@ public class ObjectInstanceProvider {
     Integer threadId,
     Integer scenarioId
   ) {
-    scenarioValidator.checkIfThreadsAreInScenario(
-      List.of(threadId),
-      scenarioId
-    );
+    scenarioManager.checkIfThreadsAreInScenario(List.of(threadId), scenarioId);
     List<InternalObjectInstance> objects =
       objectInstanceRepository.getAvailableObjects(scenarioId, threadId);
     Map<Integer, List<AttributeResponse>> attributes =
@@ -169,7 +166,7 @@ public class ObjectInstanceProvider {
     Integer scenarioId
   ) {
     // Sprawdzenie wątku
-    scenarioValidator.checkIfThreadsAreInScenario(
+    scenarioManager.checkIfThreadsAreInScenario(
       List.of(request.threadId()),
       scenarioId
     );
@@ -205,12 +202,10 @@ public class ObjectInstanceProvider {
         availableObjects.local().stream()
       ).collect(Collectors.toList());
     }
-
     return associationTypeProvider.getAvailableAssociationTypes(
       types.get(request.objectId()),
       objectsToCheck.stream().map(types::get).toArray(Integer[]::new),
-      objectsToCheck.toArray(Integer[]::new),
-      scenarioId
+      objectsToCheck.toArray(Integer[]::new)
     );
   }
 }

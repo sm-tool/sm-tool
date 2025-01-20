@@ -5,11 +5,6 @@ export const Route = createRootRoute({
     return (
       <main className='h-screen bg-background text-foreground'>
         <Outlet />
-        {/*<ReactQueryDevtools initialIsOpen={false} />*/}
-        {/*<FpsCounter />*/}
-        {/*<DebugTextTool />*/}
-        {/*  </>*/}
-        {/*)}*/}
       </main>
     );
   },

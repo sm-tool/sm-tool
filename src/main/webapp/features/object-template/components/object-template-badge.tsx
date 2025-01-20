@@ -20,7 +20,7 @@ export const ObjectTemplateBadge = ({
           backgroundColor: objectTemplate!.color,
           borderColor: getContrastColor(objectTemplate!.color),
         }}
-        className={cn('truncate max-w-full', className)}
+        className={cn('truncate max-w-[300px] min-w-0', className)}
       >
         {objectTemplate!.title}
       </Badge>

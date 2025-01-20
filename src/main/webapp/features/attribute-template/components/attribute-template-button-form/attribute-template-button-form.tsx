@@ -7,7 +7,6 @@ import React from 'react';
 import {
   useAllTemplateAttributes,
   useCreateAttributeTemplate,
-  useCreateAttributeTemplateOnGlobalPage,
 } from '@/features/attribute-template/queries.ts';
 import {
   Dialog,
@@ -56,38 +55,12 @@ const AttributeTemplateButtonForm = ({
   if (isLoading) return;
 
   return (
-    <AttributeForm
+    <AttributeFormLocal
       isOpen={isOpen}
       setIsOpen={setIsOpen}
       objectTemplateId={objectTemplateId}
       onSubmit={async data => {
         await createAttributeTemplate.mutateAsync(data);
-        setIsOpen(false);
-      }}
-      attributes={attributes}
-    />
-  );
-};
-
-export const AttributeButtonFormOnGlobalPage = ({
-  objectTemplateId,
-}: {
-  objectTemplateId: number;
-}) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const createAttribute = useCreateAttributeTemplateOnGlobalPage();
-  const { data: attributes, isLoading } =
-    useAllTemplateAttributes(objectTemplateId);
-
-  if (isLoading) return;
-
-  return (
-    <AttributeForm
-      isOpen={isOpen}
-      setIsOpen={setIsOpen}
-      objectTemplateId={objectTemplateId}
-      onSubmit={async data => {
-        await createAttribute.mutateAsync(data);
         setIsOpen(false);
       }}
       attributes={attributes}
@@ -103,7 +76,7 @@ type AttributeFormProperties = {
   attributes?: AttributeTemplate[];
 };
 
-const AttributeForm = ({
+export const AttributeFormLocal = ({
   isOpen,
   setIsOpen,
   objectTemplateId,
@@ -224,13 +197,15 @@ const AttributeForm = ({
                 description:
                   'Set the initial value for your attribute that will be used as a starting point before any modifications are made during operations.',
                 fields: ['defaultValue'],
-                component: (register, formValues) => (
+                component: (register, formValues, control) => (
                   <AttributeFormItem
-                    // @ts-expect-error -- działa? Działa, po co drążyć temat
+                    // @ts-expect-error -- fix type
                     field={{
+                      value: formValues.defaultValue as string,
                       ...register('defaultValue'),
                     }}
                     type={formValues.type as AttributeTypeDisplay}
+                    control={control}
                   />
                 ),
                 validationSchema: baseAttributeTemplateDTO.pick({

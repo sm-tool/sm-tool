@@ -4,7 +4,10 @@ import api.database.model.constant.BranchingType;
 import api.database.model.domain.transfer.InternalAddAnalysisResult;
 import api.database.model.domain.transfer.InternalBranchingTransfer;
 import api.database.model.domain.transfer.InternalRemoveAnalysisResult;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.springframework.stereotype.Component;
 
 /// Analizator transferów obiektów między wątkami w kontekście rozgałęzień (FORK/JOIN).

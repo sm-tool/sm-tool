@@ -13,68 +13,18 @@ import { useEventForm } from '@/app/scenario/$scenarioId/_layout/events/_layout/
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbSeparator,
 } from '@/components/ui/shadcn/breadcrumb.tsx';
-import { useObjectTemplate } from '@/features/object-template/queries.ts';
-import useScenarioSearchParameterNavigation from '@/app/scenario/$scenarioId/_layout/~hooks/use-scenario-search-parameter-navigation.ts';
-import { Label } from '@/components/ui/shadcn/label.tsx';
 import { useAttributeInstanceMapping } from '@/features/attribute/queries.ts';
 import { useObjectInstance } from '@/features/object-instance/queries.ts';
 import { useAttributeTemplate } from '@/features/attribute-template/queries.ts';
 import TooltipButton from '@/components/ui/common/display/tooltip-button';
-
-const ObjectTemplateBreadcrumb = ({ templateId }: { templateId: number }) => {
-  const objectTemplateQuery = useObjectTemplate(templateId);
-  const { navigateRelative } = useScenarioSearchParameterNavigation();
-
-  return (
-    <StatusComponent useQuery={objectTemplateQuery}>
-      {objectTemplate => (
-        <BreadcrumbLink
-          onClick={() =>
-            navigateRelative(`catalogue:templates:${objectTemplate!.id}`)
-          }
-        >
-          <Label variant='entity' size='xl' className='hover:cursor-pointer'>
-            {objectTemplate!.title}
-          </Label>
-        </BreadcrumbLink>
-      )}
-    </StatusComponent>
-  );
-};
-
-const BreadCrumbLink = ({ objectId }: { objectId: number }) => {
-  const objectInstanceQuery = useObjectInstance(objectId);
-
-  return (
-    <StatusComponent useQuery={objectInstanceQuery}>
-      {objectInstance => (
-        <ObjectTemplateBreadcrumb templateId={objectInstance!.templateId} />
-      )}
-    </StatusComponent>
-  );
-};
-
-const BreadCrumbTemplateName = ({
-  attributeTemplateId,
-}: {
-  attributeTemplateId: number;
-}) => {
-  return (
-    <StatusComponent useQuery={useAttributeTemplate(attributeTemplateId)}>
-      {attributeTemplate => (
-        <BreadcrumbItem>
-          <Label size='xl' className='text-default-700'>
-            {attributeTemplate!.name}
-          </Label>
-        </BreadcrumbItem>
-      )}
-    </StatusComponent>
-  );
-};
+import { CommandItem } from '@/components/ui/shadcn/command.tsx';
+import {
+  BreadCrumbLink,
+  BreadCrumbTemplateName,
+} from '@/features/attribute-changes/components/attribute-change-card';
 
 const isValueUnset = (value: string | null) =>
   value === undefined || value === null || value === '';
@@ -196,55 +146,65 @@ const AttribiuteUnChangedCard = ({
   state: AttributeState;
   disabled?: boolean;
 }) => {
-  const attributeInstanceMapping = useAttributeInstanceMapping(
+  const attributeInstanceMappingQuery = useAttributeInstanceMapping(
     state.attributeId,
   );
+  const objectQuery = useObjectInstance(
+    attributeInstanceMappingQuery.data?.objectId,
+  );
+  const attributeQuery = useAttributeTemplate(
+    attributeInstanceMappingQuery.data?.attributeTemplateId,
+  );
+
+  if (
+    !attributeInstanceMappingQuery.data ||
+    !objectQuery.data ||
+    !attributeQuery.data
+  ) {
+    return null;
+  }
+
+  const itemValue = `${objectQuery.data.name} ${attributeQuery.data.name}`;
 
   return (
-    <StatusComponent useQuery={attributeInstanceMapping}>
-      {attributeInstanceMapping => {
-        if (!attributeInstanceMapping) return <></>;
-
-        return (
-          <Card className='w-full rounded-lg'>
-            <div className='p-3'>
-              <div className='flex justify-between items-start'>
-                <div className='truncate max-w-[70%]'>
-                  <Breadcrumb>
-                    <BreadcrumbList>
-                      <BreadcrumbItem>
-                        <BreadCrumbLink
-                          objectId={attributeInstanceMapping.objectId}
-                        />
-                        <BreadcrumbSeparator />
-                      </BreadcrumbItem>
-                      <BreadCrumbTemplateName
-                        attributeTemplateId={
-                          attributeInstanceMapping.attributeTemplateId
-                        }
-                      />
-                    </BreadcrumbList>
-                  </Breadcrumb>
-                </div>
-                <AttributeForm
-                  disabled={disabled}
-                  state={state}
-                  attributeTemplateId={
-                    attributeInstanceMapping.attributeTemplateId
-                  }
-                />
-              </div>
-              <AttributeTemplateDetails
-                state={state}
-                attributeTemplateId={
-                  attributeInstanceMapping.attributeTemplateId
-                }
-              />
+    <CommandItem value={itemValue} className=''>
+      <Card className='w-full rounded-lg'>
+        <div className='p-3'>
+          <div className='flex justify-between items-start'>
+            <div className='truncate max-w-[70%]'>
+              <Breadcrumb className='flex w-full'>
+                <BreadcrumbList className='flex items-center'>
+                  <BreadcrumbItem className='max-lg:hidden'>
+                    <BreadCrumbLink
+                      objectId={attributeInstanceMappingQuery.data.objectId}
+                    />
+                    <BreadcrumbSeparator />
+                  </BreadcrumbItem>
+                  <BreadCrumbTemplateName
+                    attributeTemplateId={
+                      attributeInstanceMappingQuery.data.attributeTemplateId
+                    }
+                  />
+                </BreadcrumbList>
+              </Breadcrumb>
             </div>
-          </Card>
-        );
-      }}
-    </StatusComponent>
+            <AttributeForm
+              disabled={disabled}
+              state={state}
+              attributeTemplateId={
+                attributeInstanceMappingQuery.data.attributeTemplateId
+              }
+            />
+          </div>
+          <AttributeTemplateDetails
+            state={state}
+            attributeTemplateId={
+              attributeInstanceMappingQuery.data.attributeTemplateId
+            }
+          />
+        </div>
+      </Card>
+    </CommandItem>
   );
 };
 

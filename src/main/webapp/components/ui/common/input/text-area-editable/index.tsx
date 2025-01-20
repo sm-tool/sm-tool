@@ -5,7 +5,7 @@ import {
 } from '@/components/ui/shadcn/text-area.tsx';
 import { cn } from '@nextui-org/theme';
 import { Button } from '@/components/ui/shadcn/button.tsx';
-import { Check, Pencil, X } from 'lucide-react';
+import { Check, Pencil, PencilOff, X } from 'lucide-react';
 import { Label } from '@/components/ui/shadcn/label.tsx';
 
 const TextareaEditable = React.forwardRef<
@@ -32,6 +32,7 @@ const TextareaEditable = React.forwardRef<
           <Button
             size='sm'
             variant='outline'
+            disabled={properties.disabled}
             onClick={() => {
               setIsEditing(false);
               setTemporaryValue(value as string);
@@ -60,9 +61,14 @@ const TextareaEditable = React.forwardRef<
   }
 
   return (
-    <div className='group flex items-start w-fit'>
+    <div
+      className={cn(
+        'group flex items-start w-fit',
+        properties.disabled && 'hover:cursor-no-drop',
+      )}
+    >
       <div
-        onClick={() => setIsEditing(true)}
+        onClick={() => !properties.disabled && setIsEditing(true)}
         className={cn(
           `rounded px-2 py-1 hover:bg-content3 cursor-text min-h-[2px] transition-colors
           duration-100 whitespace-pre-wrap`,
@@ -80,11 +86,15 @@ const TextareaEditable = React.forwardRef<
         )}
       </div>
       <div className='flex-shrink-0 ml-2 mt-px'>
-        <Pencil
-          className='h-4 w-4 opacity-0 group-hover:opacity-100 text-default-600 cursor-pointer
-            transition-opacity duration-100'
-          onClick={() => setIsEditing(true)}
-        />
+        {properties.disabled ? (
+          <PencilOff className='size-4 opacity-0 group-hover:opacity-100' />
+        ) : (
+          <Pencil
+            className='h-4 w-4 opacity-0 group-hover:opacity-100 text-default-600 cursor-pointer
+              transition-opacity duration-100'
+            onClick={() => setIsEditing(true)}
+          />
+        )}
       </div>
     </div>
   );

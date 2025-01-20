@@ -48,7 +48,7 @@ const LabeledSection = ({
             isExpanded && 'pb-8',
           )}
         >
-          {content ?? 'No text was provided'}
+          {content.length > 0 ? content : 'No text was provided'}
         </p>
         {needsCollapse && (
           <button

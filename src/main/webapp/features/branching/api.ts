@@ -33,11 +33,10 @@ export const branchingApi = {
 
   update: async (id: number, branching: Branching) => {
     const validBranching = branchingDTO.parse(branching);
-    const { data } = await API_INSTANCE.put<Branching>(
+    return await API_INSTANCE.put<Branching>(
       `${endpoint}/${id}`,
       validBranching,
     );
-    return branchingDTO.parse(data);
   },
 
   delete: async (id: number) => {

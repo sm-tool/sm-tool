@@ -10,7 +10,7 @@ const EventBadges = ({
   eventId: number;
   className?: string;
 }) => (
-  <StatusComponent useQuery={useEvent(eventId)}>
+  <StatusComponent useQuery={useEvent(eventId)} loadingComponent={<></>}>
     {event => (
       <div
         className={cn(

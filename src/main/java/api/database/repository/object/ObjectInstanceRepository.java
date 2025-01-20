@@ -12,10 +12,35 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+/// Repozytorium zarządzające instancjami obiektów w systemie.
+/// Dostarcza operacje bazodanowe dla encji `ObjectInstance` oraz
+/// kompleksowe operacje na obiektach w kontekście wątków i scenariuszy.
+///
+/// # Główne funkcjonalności
+/// - Podstawowe operacje CRUD na obiektach
+/// - Zarządzanie powiązaniami obiektów z wątkami
+/// - Pobieranie obiektów z uwzględnieniem hierarchii wątków
+/// - Operacje na atrybutach obiektów
+/// - Czyszczenie obiektów podczas usuwania wątków/scenariuszy
+///
+/// # Specjalne przypadki
+/// - Wątek globalny (ID=0) ma specjalne traktowanie w zapytaniach
+/// - Obiekty mogą być współdzielone między wątkami
+/// - Atrybuty są pobierane z zachowaniem relacji obiekt-atrybut
+///
+/// # Powiązane komponenty
+/// - {@link ObjectInstance} - encja reprezentująca instancję obiektu
+/// - {@link api.database.entity.thread.Thread} - wątek zawierający obiekty
+/// - {@link api.database.entity.object.Attribute} - atrybuty obiektu
+/// - {@link InternalObjectInstance} - projekcja danych obiektu
 @Repository
 public interface ObjectInstanceRepository
   extends JpaRepository<ObjectInstance, Integer> {
   //--------------------------------------ThreadObjectCleaner-----------------------------------------------------------
+  /// Usuwa obiekty przypisane do wskazanego wątku.
+  /// Używa złączenia z tabelą powiązań thread_to_object.
+  ///
+  /// @param threadId ID wątku do wyczyszczenia
   @Modifying
   @Query(
     value = "DELETE FROM qds_object o " +
@@ -27,10 +52,24 @@ public interface ObjectInstanceRepository
   void deleteObjectsForThread(@Param("threadId") Integer threadId);
 
   //--------------------------------Usuwanie scenariusza--------------------------------------------------
+  /// Usuwa wszystkie obiekty należące do scenariusza.
+  /// Kaskadowo usuwa powiązane atrybuty i asocjacje.
+  ///
+  /// @param scenarioId ID scenariusza
   @Modifying
   @Query("DELETE FROM ObjectInstance o WHERE o.scenario.id = :scenarioId")
   void deleteObjectsByScenarioId(@Param("scenarioId") Integer scenarioId);
 
+  /// Usuwa powiązania obiektów z wątkami po określonym czasie.
+  /// Dotyczy tylko wątków utworzonych przez FORK/JOIN.
+  ///
+  /// # SQL
+  /// - Łączy tabele thread_to_object, thread i event
+  /// - Filtruje po typach eventów FORK_OUT/JOIN_OUT
+  /// - Usuwa powiązania dla wydarzeń po wskazanym czasie
+  ///
+  /// @param time czas graniczny
+  /// @param objectIds lista ID obiektów
   @Modifying
   @Query(
     value = """
@@ -50,8 +89,17 @@ public interface ObjectInstanceRepository
 
   //---------------------------------------Object Provider-------------------------------------------
 
-  // Obiekty wraz z ich przydziałami (0 dla wątku globalnego, dla pozostałych nie jest istotny
-  // (teoretycznie wybierany największy))
+  /// Pobiera obiekty dostępne w kontekście scenariusza/wątku.
+  /// Uwzględnia obiekty globalne (origin_thread_id = 0) oraz lokalne dla wątku.
+  ///
+  /// # SQL
+  /// - Łączy obiekty z ich przypisaniami do wątków
+  /// - Grupuje wyniki aby uniknąć duplikatów
+  /// - Specjalne traktowanie wątku globalnego
+  ///
+  /// @param scenarioId ID scenariusza
+  /// @param threadId ID wątku (null dla wszystkich wątków)
+  /// @return Lista obiektów z podstawowymi danymi
   @Query(
     value = """
     SELECT
@@ -79,8 +127,15 @@ public interface ObjectInstanceRepository
     @Param("threadId") Integer threadId
   );
 
-  // Obiekty wraz z ich przydziałami (0 dla wątku globalnego, dla pozostałych nie jest istotny
-  // (teoretycznie wybierany największy))
+  /// Pobiera pojedynczy obiekt ze scenariusza.
+  /// Zwraca thread_id=0 dla zachowania spójności z pozostałymi metodami.
+  ///
+  /// # SQL
+  /// Pobiera podstawowe dane obiektu
+  ///
+  /// @param scenarioId ID scenariusza
+  /// @param objectId ID obiektu
+  /// @return Projekcja danych obiektu lub null
   @Query(
     value = """
     SELECT
@@ -88,8 +143,7 @@ public interface ObjectInstanceRepository
         o.name,
         o.template_id,
         o.object_type_id,
-        o.origin_thread_id,
-        0 AS thread_id
+        o.origin_thread_id
     FROM qds_object o
     WHERE o.scenario_id = :scenarioId
     AND o.id = :objectId;
@@ -101,6 +155,10 @@ public interface ObjectInstanceRepository
     @Param("objectId") Integer objectId
   );
 
+  /// Pobiera wszystkie obiekty używające wskazanego szablonu.
+  ///
+  /// @param templateId ID szablonu
+  /// @return Lista obiektów korzystających z szablonu
   @Query(
     value = """
     SELECT
@@ -108,8 +166,7 @@ public interface ObjectInstanceRepository
         o.name,
         o.template_id,
         o.object_type_id,
-        o.origin_thread_id,
-        0 AS thread_id
+        o.origin_thread_id
     FROM qds_object o
     WHERE o.template_id = :templateId
     """,
@@ -119,6 +176,13 @@ public interface ObjectInstanceRepository
     @Param("templateId") Integer templateId
   );
 
+  /// Pobiera typy obiektów dla wskazanych identyfikatorów.
+  ///
+  /// # SQL
+  /// Proste zapytanie zwracające ID obiektu i jego typ.
+  ///
+  /// @param objectIds Lista ID obiektów
+  /// @return Lista par (ID obiektu, ID typu)
   @Query(
     value = """
         SELECT o.id, o.object_type_id
@@ -131,6 +195,13 @@ public interface ObjectInstanceRepository
     @Param("objectIds") Integer[] objectIds
   );
 
+  /// Pobiera przypisania obiektów do wątków.
+  ///
+  /// # SQL
+  /// Proste zapytanie do tabeli thread_to_object.
+  ///
+  /// @param threadIds Lista ID wątków
+  /// @return Lista par (ID obiektu, ID wątku)
   @Query(
     value = """
     SELECT object_id, thread_id FROM qds_thread_to_object tto WHERE thread_id=ANY(:threadIds)
@@ -141,6 +212,18 @@ public interface ObjectInstanceRepository
     @Param("threadIds") Integer[] threadIds
   );
 
+  /// Pobiera obiekty wraz z ich atrybutami dostępne dla wątku.
+  /// Uwzględnia obiekty z wątku globalnego.
+  ///
+  /// # SQL
+  /// - Pobiera podstawowe dane obiektu
+  /// - Agreguje ID atrybutów w tablicę
+  /// - Łączy z tabelą przypisań do wątków
+  /// - Uwzględnia wątek globalny
+  ///
+  /// @param threadId ID wątku
+  /// @param globalThreadId ID wątku globalnego
+  /// @return Lista obiektów z ich atrybutami
   @Query(
     value = """
     SELECT o.id,

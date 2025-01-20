@@ -12,7 +12,7 @@ const BranchingTitle = ({
   return (
     <StatusComponent useQuery={branchingQuery}>
       {branching => (
-        <Label variant='foreground' size='3xl' className='pl-12'>
+        <Label variant='foreground' weight='bold' size='3xl' className='pl-12'>
           {branching!.title}
         </Label>
       )}

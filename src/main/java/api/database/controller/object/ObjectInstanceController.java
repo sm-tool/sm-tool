@@ -6,12 +6,10 @@ import api.database.model.request.update.ObjectInstanceUpdateRequest;
 import api.database.model.response.ObjectInstanceResponse;
 import api.database.model.response.PossibleAssociationResponse;
 import api.database.model.response.ThreadObjectsResponse;
-import api.database.model.response.UpdateListResponse;
 import api.database.service.core.provider.ObjectInstanceProvider;
 import api.database.service.object.ObjectInstanceService;
 import jakarta.validation.Valid;
 import java.util.List;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 

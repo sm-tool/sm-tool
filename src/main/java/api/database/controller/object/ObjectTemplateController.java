@@ -1,11 +1,13 @@
 package api.database.controller.object;
 
 import api.database.entity.object.ObjectTemplate;
+import api.database.model.request.AssignIdsRequest;
 import api.database.model.request.create.ObjectTemplateCreateRequest;
 import api.database.model.request.update.ObjectTemplateUpdateRequest;
 import api.database.service.core.provider.ObjectTemplateProvider;
 import api.database.service.global.ObjectTemplateService;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,15 +41,37 @@ public class ObjectTemplateController {
 
   //--------------------------------------------------Endpointy GET---------------------------------------------------------
 
+  @GetMapping("/findIdsByScenarioId")
+  public List<Integer> findIdsByScenarioId(@RequestHeader Integer scenarioId) {
+    return objectTemplateProvider.findIdsByScenarioId(scenarioId);
+  }
+
+  @GetMapping("/findByScenarioId/{scenarioId}")
+  public PagedModel<EntityModel<ObjectTemplate>> getAllTemplatesInScenario(
+    @RequestParam(defaultValue = "0") int page,
+    @RequestParam(defaultValue = "20") int size,
+    @SortDefault(sort = "title") Sort sort,
+    @PathVariable Integer scenarioId
+  ) {
+    Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
+    Page<ObjectTemplate> templates = objectTemplateProvider.findAllTemplates(
+      pageable,
+      scenarioId
+    );
+    return pagedResourcesAssembler.toModel(templates);
+  }
+
   @GetMapping
   public PagedModel<EntityModel<ObjectTemplate>> getAllTemplates(
     @RequestParam(defaultValue = "0") int page,
     @RequestParam(defaultValue = "20") int size,
-    @SortDefault(sort = "title") Sort sort
+    @SortDefault(sort = "title") Sort sort,
+    @RequestHeader(required = false) Integer scenarioId
   ) {
     Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
-    Page<ObjectTemplate> templates = objectTemplateProvider.getAllTemplates(
-      pageable
+    Page<ObjectTemplate> templates = objectTemplateProvider.findAllTemplates(
+      pageable,
+      scenarioId
     );
     return pagedResourcesAssembler.toModel(templates);
   }
@@ -57,37 +81,12 @@ public class ObjectTemplateController {
     @RequestParam("title") String title,
     @RequestParam(defaultValue = "0") int page,
     @RequestParam(defaultValue = "20") int size,
-    @SortDefault(sort = "title") Sort sort
+    @SortDefault(sort = "title") Sort sort,
+    @RequestHeader(required = false) Integer scenarioId
   ) {
     Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
     Page<ObjectTemplate> templates =
-      objectTemplateProvider.findByTitleContaining(title, pageable);
-    return pagedResourcesAssembler.toModel(templates);
-  }
-
-  @GetMapping("/search/findByDescription")
-  public PagedModel<EntityModel<ObjectTemplate>> findByDescription(
-    @RequestParam("description") String description,
-    @RequestParam(defaultValue = "0") int page,
-    @RequestParam(defaultValue = "20") int size,
-    @SortDefault(sort = "title") Sort sort
-  ) {
-    Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
-    Page<ObjectTemplate> templates =
-      objectTemplateProvider.findByDescriptionContaining(description, pageable);
-    return pagedResourcesAssembler.toModel(templates);
-  }
-
-  @GetMapping("/scenario")
-  public PagedModel<EntityModel<ObjectTemplate>> getTemplatesByScenarioId(
-    @RequestHeader Integer scenarioId,
-    @RequestParam(defaultValue = "0") int page,
-    @RequestParam(defaultValue = "20") int size,
-    @SortDefault(sort = "title") Sort sort
-  ) {
-    Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
-    Page<ObjectTemplate> templates =
-      objectTemplateProvider.getScenarioTemplates(scenarioId, pageable);
+      objectTemplateProvider.findByTitleContaining(title, pageable, scenarioId);
     return pagedResourcesAssembler.toModel(templates);
   }
 
@@ -99,7 +98,7 @@ public class ObjectTemplateController {
     @PathVariable Integer objectTypeId,
     @RequestParam(defaultValue = "0") int page,
     @RequestParam(defaultValue = "20") int size,
-    @SortDefault(sort = "template.title") Sort sort
+    @SortDefault(sort = "title") Sort sort
   ) {
     Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
     Page<ObjectTemplate> templates =
@@ -130,25 +129,16 @@ public class ObjectTemplateController {
     );
   }
 
-  //  @ResponseStatus(HttpStatus.OK)
-  //  @PostMapping("/copy/{sourceScenarioId}/to/{targetScenarioId}")
-  //  public void copyTemplatesBetweenScenarios(
-  //    @PathVariable Integer sourceScenarioId,
-  //    @PathVariable Integer targetScenarioId
-  //  ) {
-  //    objectTemplateService.copyObjectTemplatesBetweenScenarios(
-  //      sourceScenarioId,
-  //      targetScenarioId
-  //    );
-  //  }
-
   @ResponseStatus(HttpStatus.OK)
-  @PostMapping("/scenario/{templateId}")
-  public void assignTemplateToScenario(
-    @PathVariable Integer templateId,
+  @PostMapping("/scenario")
+  public void assignTemplatesToScenario(
+    @RequestBody @Valid AssignIdsRequest templateIds,
     @RequestHeader Integer scenarioId
   ) {
-    objectTemplateService.assignTemplateToScenario(templateId, scenarioId);
+    objectTemplateService.assignTemplatesToScenario(
+      templateIds.assign(),
+      scenarioId
+    );
   }
 
   //--------------------------------------------------Endpointy POST---------------------------------------------------------

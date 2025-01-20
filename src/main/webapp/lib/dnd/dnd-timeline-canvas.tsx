@@ -22,12 +22,16 @@ const TimelineCanvas = ({
   eventDuration: number;
 }) => {
   const canvasReference = React.useRef<HTMLCanvasElement>(null);
+
+  const maxTimeUnits = Math.floor(60_000 / DND_UNIT_SIZE);
+  const limitedTimeUnits = Math.min(timeUnits, maxTimeUnits);
+
   const draw = React.useCallback(
     (context: CanvasRenderingContext2D) => {
       const canvas = canvasReference.current;
       if (!canvas) return;
       const extraWidth = window.innerWidth;
-      canvas.width = timeUnits * DND_UNIT_SIZE + extraWidth;
+      canvas.width = limitedTimeUnits * DND_UNIT_SIZE + extraWidth;
       context.clearRect(0, 0, canvas.width, canvas.height);
       context.beginPath();
       context.strokeStyle = 'rgba(224, 224, 224, 0.3)';
@@ -44,18 +48,18 @@ const TimelineCanvas = ({
       }
       context.stroke();
     },
-    [timeUnits, eventDuration],
+    [limitedTimeUnits, eventDuration],
   );
 
   React.useEffect(() => {
     const canvas = canvasReference.current;
     if (!canvas) return;
-    canvas.width = (timeUnits + 10) * DND_UNIT_SIZE;
+    canvas.width = (limitedTimeUnits + 10) * DND_UNIT_SIZE;
     canvas.height = DND_ROW_HEIGHT + 10;
     const context = canvas.getContext('2d');
     if (!context) return;
     draw(context);
-  }, [timeUnits, draw]);
+  }, [limitedTimeUnits, draw]);
 
   return (
     <div style={{ position: 'absolute', top: 0, left: 0 }}>
@@ -63,14 +67,12 @@ const TimelineCanvas = ({
         ref={canvasReference}
         className='absolute top-0 left-0 animate-animate-fade-out'
       />
-
       <div
         className='absolute top-0 w-[100vw] bg-red-700/40 z-10'
         style={{
-          left: `${timeUnits * DND_UNIT_SIZE}px`,
+          left: `${limitedTimeUnits * DND_UNIT_SIZE}px`,
           height: DND_ROW_HEIGHT + 10,
         }}
-        // TODO: refactor into component
         onClick={event => {
           const bubble = document.createElement('div');
           bubble.className =
@@ -79,7 +81,6 @@ const TimelineCanvas = ({
           bubble.style.top = `${event.clientY}px`;
           bubble.textContent = 'Phase should not be created in overtime';
           document.body.append(bubble);
-
           globalThis.setTimeout(() => {
             bubble.remove();
           }, 2000);

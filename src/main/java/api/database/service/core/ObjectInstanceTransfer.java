@@ -1,10 +1,6 @@
 package api.database.service.core;
 
-import api.database.model.domain.transfer.InternalAddAnalysisResult;
-import api.database.model.domain.transfer.InternalBranchingTransfer;
-import api.database.model.domain.transfer.InternalObjectThreadPair;
-import api.database.model.domain.transfer.InternalRemoveAnalysisResult;
-import api.database.model.domain.transfer.InternalTransferPairs;
+import api.database.model.domain.transfer.*;
 import api.database.repository.special.ObjectInstanceTransferRepository;
 import api.database.service.core.internal.TransferAnalyzer;
 import api.database.service.core.provider.BranchingProvider;

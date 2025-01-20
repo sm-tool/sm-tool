@@ -11,7 +11,7 @@ const TemplateComponentHub = () => {
       useQuery={useObjectTemplate(Number.parseInt(templateId, 10))}
     >
       {data => {
-        return <ObjectTemplateOverview data={data!} />;
+        return <ObjectTemplateOverview data={data!} isOnGlobal />;
       }}
     </StatusComponent>
   );

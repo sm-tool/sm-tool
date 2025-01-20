@@ -24,6 +24,7 @@ export class LayoutEngine {
   protected readonly edges: Edge[];
   protected readonly branchings: Branching[];
   protected readonly events: Node<EventCardProperties>[];
+  private debugNodes: Node[] = [];
 
   constructor(
     layoutData: LayoutData,
@@ -37,11 +38,12 @@ export class LayoutEngine {
   }
 
   public applyLayout(): LayoutData {
+    this.debugNodes = [];
     const processedNodes = this.processNodes();
     const processedEvents = this.processEvents(processedNodes);
 
     return {
-      nodes: [...processedNodes, ...processedEvents],
+      nodes: [...processedNodes, ...processedEvents, ...this.debugNodes],
       edges: this.edges,
     };
   }
@@ -51,49 +53,21 @@ export class LayoutEngine {
   }
 
   private hasTimeOverlap(thread1: Thread, thread2: Thread): boolean {
-    let t1Start = thread1.startTime;
-    let t1Width = thread1.endTime + 1 - thread1.startTime;
-
-    // If there's an incoming branch, we need to shift the start position and reduce width
-    // to make space for the branch connection
-    if (thread1.incomingBranchingId && thread1.incomingBranchingId !== 0) {
-      t1Start++;
-      t1Width--;
+    if (
+      (thread1.incomingBranchingId === thread2.outgoingBranchingId &&
+        thread1.incomingBranchingId !== null &&
+        thread2.outgoingBranchingId !== null) ||
+      (thread1.outgoingBranchingId === thread2.incomingBranchingId &&
+        thread1.outgoingBranchingId !== null &&
+        thread2.incomingBranchingId !== null)
+    ) {
+      return false;
     }
 
-    // If there's an outgoing branch, reduce width to make space for the branch connection
-    if (thread1.outgoingBranchingId && thread1.outgoingBranchingId !== 0) {
-      t1Width--;
-    }
-
-    // Special case: When width becomes 0 (typically in fork->merge scenarios)
-    // Instead of having a zero-width element which would be invisible and hard to interact with,
-    // we create a small visible element by shifting it slightly left and giving it a minimal width
-    if (t1Width === 0) {
-      t1Start -= 0.25;
-      t1Width += 0.5;
-    }
-
-    // Same logic applied for the second thread
-    let t2Start = thread2.startTime;
-    let t2Width = thread2.endTime + 1 - thread2.startTime;
-    if (thread2.incomingBranchingId && thread2.incomingBranchingId !== 0) {
-      t2Start++;
-      t2Width--;
-    }
-    if (thread2.outgoingBranchingId && thread2.outgoingBranchingId !== 0) {
-      t2Width--;
-    }
-    if (t2Width === 0) {
-      t2Start -= 0.25;
-      t2Width += 0.5;
-    }
-
-    const t1End = t1Start + t1Width;
-    const t2End = t2Start + t2Width;
-
-    // Standard overlap detection: if one element starts before the other ends
-    return t1Start < t2End && t2Start < t1End;
+    return (
+      thread1.startTime < thread2.endTime + 1 &&
+      thread1.endTime + 1 > thread2.startTime
+    );
   }
 
   private calculateThreadPosition(thread: Thread): ThreadPosition {
@@ -189,6 +163,7 @@ export class LayoutEngine {
   }
 
   private processNodes(): Node[] {
+    this.debugNodes = [];
     const nodeMap = new Map<string, Node>();
     return this.processNonRootNodes(nodeMap, []);
   }
@@ -233,13 +208,22 @@ export class LayoutEngine {
         ...nonRootNodes,
       ]);
 
+      const hasBoth = thread.outgoingBranchingId && thread.incomingBranchingId;
+      const hasOne =
+        Boolean(thread.outgoingBranchingId) ||
+        Boolean(thread.incomingBranchingId);
+      const MULTIPLAYER = 5;
+
       const layoutedNode = {
         ...node,
         position: {
-          x: position.x,
+          x:
+            position.x + (hasBoth ? 0 : hasOne ? MULTIPLAYER / 2 : MULTIPLAYER),
           y: level * FLOW_UNIT_HEIGHT,
         },
-        width: position.width,
+        width:
+          position.width -
+          (hasBoth ? 0 : hasOne ? MULTIPLAYER : MULTIPLAYER * 2),
         height: position.height,
         sourcePosition: Position.Right,
         targetPosition: Position.Left,

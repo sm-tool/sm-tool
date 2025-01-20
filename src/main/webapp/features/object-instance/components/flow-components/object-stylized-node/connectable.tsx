@@ -122,9 +122,6 @@ const ObjectStylizedNodeConnectable = ({
       {connection.inProgress && isSource && data.disabled && (
         <AssociationEndCannotAddTooltip />
       )}
-      <div className='absolute -top-16 flex inset-x-0 w-full text-red-700'>
-        {data.objectId}
-      </div>
       <div
         className='!relative drag'
         style={{ opacity: nodeOpacity, transition: 'opacity 0.2s' }}

@@ -11,7 +11,6 @@ import api.database.repository.special.TimeShiftRepository;
 import api.database.service.core.internal.TimeShiftAnalyzer;
 import api.database.service.core.provider.GlobalThreadProvider;
 import api.database.service.event.EventProvider;
-import api.database.service.operations.ScenarioValidator;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Objects;
@@ -24,7 +23,7 @@ public class ThreadShifter {
   private final TimeShiftAnalyzer analyzer;
   private final EventProvider eventProvider;
   private final TimeShiftRepository timeShiftRepository;
-  private final ScenarioValidator scenarioValidator;
+  private final ScenarioManager scenarioManager;
   private final IdleEventManager idleEventManager;
   private final GlobalThreadProvider globalThreadProvider;
 
@@ -32,14 +31,14 @@ public class ThreadShifter {
     TimeShiftAnalyzer analyzer,
     EventProvider eventProvider,
     TimeShiftRepository timeShiftRepository,
-    ScenarioValidator scenarioValidator,
+    ScenarioManager scenarioManager,
     IdleEventManager idleEventManager,
     GlobalThreadProvider globalThreadProvider
   ) {
     this.analyzer = analyzer;
     this.eventProvider = eventProvider;
     this.timeShiftRepository = timeShiftRepository;
-    this.scenarioValidator = scenarioValidator;
+    this.scenarioManager = scenarioManager;
     this.idleEventManager = idleEventManager;
     this.globalThreadProvider = globalThreadProvider;
   }
@@ -50,10 +49,7 @@ public class ThreadShifter {
     Integer threadId,
     Integer scenarioId
   ) {
-    scenarioValidator.checkIfThreadsAreInScenario(
-      List.of(threadId),
-      scenarioId
-    );
+    scenarioManager.checkIfThreadsAreInScenario(List.of(threadId), scenarioId);
     // Gdyż wtedy event skończyłby na ujemnej pozycji
     if (request.time() - request.shift() < -1) throw new ApiException(
       ErrorCode.CANNOT_MOVE_EVENTS,

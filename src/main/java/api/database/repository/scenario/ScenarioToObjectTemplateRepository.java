@@ -5,24 +5,39 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
 
 public interface ScenarioToObjectTemplateRepository
   extends JpaRepository<ScenarioToObjectTemplate, Integer> {
-  @Modifying
-  @Transactional
+  /// Sprawdza czy obiekt o danym szablonie może być dodany do scenariusza.
+  ///
+  /// @param scenarioId identyfikator scenariusza
+  /// @param templateId identyfikator szablonu
+  /// @return true jeśli obiekt może być dodany
   @Query(
     value = """
-    INSERT INTO qds_scenario_to_object_template (id, scenario_id, template_id)
-    SELECT nextval('qds_scenario_to_object_template_id_seq'), :targetScenarioId, template_id
-    FROM qds_scenario_to_object_template
-    WHERE scenario_id = :sourceScenarioId
-    ON CONFLICT (scenario_id, template_id) DO NOTHING;
+        SELECT EXISTS(
+            SELECT 1 FROM qds_scenario_to_object_template
+            WHERE template_id=:templateId AND scenario_id=:scenarioId)
     """,
     nativeQuery = true
   )
-  void copyObjectTemplatesBetweenScenarios(
-    @Param("sourceScenarioId") Integer sourceScenarioId,
-    @Param("targetScenarioId") Integer targetScenarioId
+  Boolean canAddObjectToScenario(
+    @Param("scenarioId") Integer scenarioId,
+    @Param("templateId") Integer templateId
+  );
+
+  @Modifying
+  @Query(
+    value = """
+    INSERT INTO qds_scenario_to_object_template(id, scenario_id, template_id)
+    SELECT nextval('qds_scenario_to_object_template_id_seq'), :scenarioId, template_id
+    FROM UNNEST(:templateIds) AS template_id
+    ON CONFLICT DO NOTHING;
+    """,
+    nativeQuery = true
+  )
+  void addTemplatesToScenario(
+    @Param("scenarioId") Integer scenarioId,
+    @Param("templateIds") Integer[] templateIds
   );
 }

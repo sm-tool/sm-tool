@@ -9,7 +9,7 @@ import api.database.model.request.save.ObjectTypeSaveRequest;
 import api.database.repository.object.ObjectTypeRepository;
 import api.database.repository.scenario.ScenarioRepository;
 import api.database.repository.scenario.ScenarioToObjectTypeRepository;
-import api.database.service.core.validator.ObjectTypeValidator;
+import api.database.service.core.ObjectTypeManager;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,7 +24,7 @@ public class ObjectTypeService {
   private final ObjectTypeRepository objectTypeRepository;
   private final ScenarioRepository scenarioRepository;
   private final ObjectTypeAssociationManagement objectTypeAssociationManagement;
-  private final ObjectTypeValidator objectTypeValidator;
+  private final ObjectTypeManager objectTypeManager;
 
   @Autowired
   public ObjectTypeService(
@@ -32,13 +32,13 @@ public class ObjectTypeService {
     ObjectTypeRepository objectTypeRepository,
     ScenarioRepository scenarioRepository,
     ObjectTypeAssociationManagement objectTypeAssociationManagement,
-    ObjectTypeValidator objectTypeValidator
+    ObjectTypeManager objectTypeManager
   ) {
     this.scenarioToObjectTypeRepository = scenarioToObjectTypeRepository;
     this.objectTypeRepository = objectTypeRepository;
     this.scenarioRepository = scenarioRepository;
     this.objectTypeAssociationManagement = objectTypeAssociationManagement;
-    this.objectTypeValidator = objectTypeValidator;
+    this.objectTypeManager = objectTypeManager;
   }
 
   //--------------------------------------------------Dodawanie typów---------------------------------------------------------
@@ -92,33 +92,6 @@ public class ObjectTypeService {
     }
   }
 
-  //--------------------------------------------------Import typów---------------------------------------------------------
-
-  @Transactional
-  public void copyObjectTypesBetweenScenarios(
-    Integer sourceScenarioId,
-    Integer targetScenarioId
-  ) {
-    if (!scenarioRepository.existsById(sourceScenarioId)) {
-      throw new ApiException(
-        ErrorCode.DOES_NOT_EXIST,
-        ErrorGroup.SCENARIO,
-        HttpStatus.NOT_FOUND
-      );
-    }
-    if (!scenarioRepository.existsById(targetScenarioId)) {
-      throw new ApiException(
-        ErrorCode.DOES_NOT_EXIST,
-        ErrorGroup.SCENARIO,
-        HttpStatus.NOT_FOUND
-      );
-    }
-    scenarioToObjectTypeRepository.copyObjectTypesBetweenScenarios(
-      sourceScenarioId,
-      targetScenarioId
-    );
-  }
-
   //--------------------Zmiana nazwy typu------------------------------------
   @Transactional
   public ObjectType updateObjectType(
@@ -135,7 +108,7 @@ public class ObjectTypeService {
         )
       );
     if (
-      objectTypeValidator.checkIfTypesAreInHierarchy(
+      objectTypeManager.checkIfTypesAreInHierarchy(
         objectType.getId(),
         request.parentId()
       )
@@ -157,30 +130,5 @@ public class ObjectTypeService {
       objectTypeId
     );
     return objectType;
-  }
-
-  //------------------------------Przypisanie typu do scenariusza----------------------
-  @Transactional
-  public void assignObjectTypeToScenario(
-    Integer objectTypeId,
-    Integer scenarioId
-  ) {
-    if (!scenarioRepository.existsById(scenarioId)) {
-      throw new ApiException(
-        ErrorCode.DOES_NOT_EXIST,
-        ErrorGroup.SCENARIO,
-        HttpStatus.NOT_FOUND
-      );
-    }
-    if (!objectTypeRepository.existsById(objectTypeId)) {
-      throw new ApiException(
-        ErrorCode.DOES_NOT_EXIST,
-        ErrorGroup.OBJECT_TYPE,
-        HttpStatus.NOT_FOUND
-      );
-    }
-    scenarioToObjectTypeRepository.save(
-      ScenarioToObjectType.create(objectTypeId, scenarioId)
-    );
   }
 }

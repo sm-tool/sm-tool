@@ -5,6 +5,7 @@ import api.database.model.request.composite.create.ForkCreateRequest;
 import api.database.model.request.composite.create.JoinCreateRequest;
 import api.database.model.request.composite.update.ForkUpdateRequest;
 import api.database.model.request.composite.update.JoinUpdateRequest;
+import api.database.model.request.update.BranchingUpdateRequest;
 import api.database.model.response.UpdateListResponse;
 import api.database.service.branching.BranchingService;
 import api.database.service.core.provider.BranchingProvider;
@@ -83,21 +84,23 @@ public class BranchingController {
     return branchingService.changeJoin(id, info, scenarioId);
   }
 
-  //--------------------------------------------------Endpoint DELETE---------------------------------------------------------
-
-  @DeleteMapping("/fork/{id}")
-  public void deleteFork(
-    @RequestHeader Integer scenarioId,
-    @PathVariable Integer id
+  @ResponseStatus(HttpStatus.OK)
+  @PutMapping("/{branchingId}")
+  public void updateBranchingInfo(
+    @RequestBody BranchingUpdateRequest request,
+    @PathVariable Integer branchingId,
+    @RequestHeader Integer scenarioId
   ) {
-    branchingService.deleteFork(scenarioId, id);
+    branchingService.updateBranchingInfo(request, branchingId, scenarioId);
   }
 
-  @DeleteMapping("/join/{id}")
-  public void deleteJoin(
+  //--------------------------------------------------Endpoint DELETE---------------------------------------------------
+
+  @DeleteMapping("/{branchingId}")
+  public void deleteBranching(
     @RequestHeader Integer scenarioId,
-    @PathVariable Integer id
+    @PathVariable Integer branchingId
   ) {
-    branchingService.deleteJoin(scenarioId, id);
+    branchingService.deleteBranching(scenarioId, branchingId);
   }
 }

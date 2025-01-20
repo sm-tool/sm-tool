@@ -7,6 +7,7 @@ import EventForkInCard from '@/features/event-instance/components/event-card/typ
 import EventCardEdge from '@/features/event-instance/components/flow-nodes/event-card-edge.tsx';
 import {
   Background,
+  Controls,
   ReactFlow,
   useEdgesState,
   useNodesState,
@@ -89,6 +90,8 @@ const ThreadBottomContent = () => {
   return (
     <div className='size-full border-b-2 border-divider'>
       <ReactFlow
+        key={threadId}
+        id={`flow-${threadId}`}
         nodes={nodes}
         edges={edges}
         className='size-full'
@@ -107,6 +110,11 @@ const ThreadBottomContent = () => {
         <Background className='!bg-content2' gap={10} id={'thread'} />
         <EventTimeline nodes={nodes} />
         <EventPhaseTimeline nodes={nodes} />
+        <Controls
+          showInteractive={false}
+          position='top-left'
+          className='translate-y-12'
+        />
       </ReactFlow>
     </div>
   );

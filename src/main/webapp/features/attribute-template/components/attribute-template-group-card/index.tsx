@@ -22,6 +22,7 @@ const AttributeTemplateGroupCard = ({ templateId }: { templateId: number }) => {
       useQuery={useAllTemplateAttributes(templateId)}
       loadingComponent={LoadingAttributeTemplateGroupCard()}
       emptyComponent={<EmptyComponentDashed text='No attributes created' />}
+      animateMode='popLayout'
     >
       {data => (
         <ScrollArea>

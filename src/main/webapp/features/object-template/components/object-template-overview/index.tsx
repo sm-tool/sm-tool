@@ -6,12 +6,20 @@ import {
   CardTitle,
 } from '@/components/ui/shadcn/card.tsx';
 import Separator from '@/components/ui/shadcn/separator.tsx';
-import { AttributeButtonFormOnGlobalPage } from '@/features/attribute-template/components/attribute-template-button-form/attribute-template-button-form.tsx';
+import AttributeTemplateButtonForm from '@/features/attribute-template/components/attribute-template-button-form/attribute-template-button-form.tsx';
 import AttributeTemplateGroupCard from '@/features/attribute-template/components/attribute-template-group-card';
 import ObjectTypeLink from '@/features/object-type/components/object-type-link';
 import ObjectTemplateDialogs from '@/features/object-template/components/object-template-overview/object-template-dialogs.tsx';
+import ComponentSizeLimit from '@/components/ui/common/display/resolution-wrapper/component-size-limit.tsx';
+import AttributeTemplateButtonGlobalForm from '@/features/attribute-template/components/attribute-template-button-form/attribute-template-button-global.tsx';
 
-const ObjectTemplateOverview = ({ data }: { data: ObjectTemplate }) => {
+const ObjectTemplateOverview = ({
+  data,
+  isOnGlobal = false,
+}: {
+  data: ObjectTemplate;
+  isOnGlobal?: boolean;
+}) => {
   return (
     <div className='w-full h-full space-y-4 @container'>
       <Card className='h-full'>
@@ -55,15 +63,21 @@ const ObjectTemplateOverview = ({ data }: { data: ObjectTemplate }) => {
               />
             </div>
           </div>
-          <div className='flex flex-row justify-between items-center'>
-            <h3 className='text-xl font-bold @[300px]:text-lg @[200px]:text-base @[100px]:text-sm'>
-              Template Attributes
-            </h3>
-            <AttributeButtonFormOnGlobalPage objectTemplateId={data.id} />
-          </div>
-          <Card className='bg-content3 p-4'>
-            <AttributeTemplateGroupCard templateId={data.id} />
-          </Card>
+          <ComponentSizeLimit minWidth={300}>
+            <div className='flex flex-row justify-between items-center'>
+              <h3 className='text-xl font-bold @[300px]:text-lg @[200px]:text-base @[100px]:text-sm'>
+                Template Attributes
+              </h3>
+              {isOnGlobal ? (
+                <AttributeTemplateButtonGlobalForm objectTemplateId={data.id} />
+              ) : (
+                <AttributeTemplateButtonForm objectTemplateId={data.id} />
+              )}
+            </div>
+            <Card className='bg-content3 p-4'>
+              <AttributeTemplateGroupCard templateId={data.id} />
+            </Card>
+          </ComponentSizeLimit>
         </CardContent>
       </Card>
     </div>

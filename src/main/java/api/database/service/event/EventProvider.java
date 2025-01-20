@@ -10,15 +10,11 @@ import api.database.model.domain.association.InternalLastAssociationChange;
 import api.database.model.domain.attribute.InternalLastAttributeChange;
 import api.database.model.domain.event.InternalEvent;
 import api.database.model.exception.ApiException;
-import api.database.model.response.AssociationChangeResponse;
-import api.database.model.response.AttributeChangeResponse;
-import api.database.model.response.EventAttributesStateResponse;
-import api.database.model.response.EventResponse;
-import api.database.model.response.EventStateResponse;
+import api.database.model.response.*;
 import api.database.repository.event.EventRepository;
+import api.database.service.core.ScenarioManager;
 import api.database.service.core.provider.EventStateProvider;
 import api.database.service.core.provider.GlobalThreadProvider;
-import api.database.service.operations.ScenarioValidator;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +33,7 @@ public class EventProvider {
 
   private final EventStateProvider eventStateProvider;
   private final EventRepository eventRepository;
-  private final ScenarioValidator scenarioValidator;
+  private final ScenarioManager scenarioManager;
   private final GlobalThreadProvider globalThreadProvider;
 
   /// Struktura pomocnicza przechowująca aktualne i poprzednie zmiany dla wydarzenia.
@@ -52,12 +48,12 @@ public class EventProvider {
   public EventProvider(
     EventStateProvider eventStateProvider,
     EventRepository eventRepository,
-    ScenarioValidator scenarioValidator,
+    ScenarioManager scenarioManager,
     GlobalThreadProvider globalThreadProvider
   ) {
     this.eventStateProvider = eventStateProvider;
     this.eventRepository = eventRepository;
-    this.scenarioValidator = scenarioValidator;
+    this.scenarioManager = scenarioManager;
     this.globalThreadProvider = globalThreadProvider;
   }
 
@@ -235,10 +231,7 @@ public class EventProvider {
     Integer threadId,
     Integer scenarioId
   ) {
-    scenarioValidator.checkIfThreadsAreInScenario(
-      List.of(threadId),
-      scenarioId
-    );
+    scenarioManager.checkIfThreadsAreInScenario(List.of(threadId), scenarioId);
     // Pobranie wydarzeń
     List<Event> events = eventRepository.getThreadEvents(threadId, scenarioId);
     if (events.isEmpty()) throw new ApiException(
@@ -269,7 +262,7 @@ public class EventProvider {
         )
       );
     if (event.getThreadId().equals(globalThread)) event.setThreadId(0);
-    scenarioValidator.checkIfThreadsAreInScenario(
+    scenarioManager.checkIfThreadsAreInScenario(
       List.of(event.getThreadId()),
       scenarioId
     );

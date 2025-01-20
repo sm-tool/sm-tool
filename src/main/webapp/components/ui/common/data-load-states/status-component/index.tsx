@@ -17,6 +17,7 @@ interface StatusComponentProperties<T> {
   showIfEmpty?: boolean;
   skipAnimation?: boolean;
   className?: string;
+  animateMode?: 'sync' | 'popLayout' | 'wait';
 }
 
 const StatusComponent = <T,>({
@@ -28,11 +29,12 @@ const StatusComponent = <T,>({
   emptyComponent = <EmptyComponent text='no data found' />,
   skipAnimation = false,
   className,
+  animateMode = 'wait',
 }: StatusComponentProperties<T>): React.ReactElement | undefined => {
   const { isLoading, isError, error, data } = useQuery;
 
   return (
-    <AnimatePresence mode='wait'>
+    <AnimatePresence mode={animateMode}>
       {isLoading && (
         <motion.div
           key='loading'

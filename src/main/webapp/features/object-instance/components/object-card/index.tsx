@@ -10,6 +10,7 @@ import StatusComponent from '@/components/ui/common/data-load-states/status-comp
 import useObjectInstanceActions from '@/features/object-instance/use-object-instance-actions.ts';
 import WithTopActions from '@/lib/actions/hoc/with-top-actions.tsx';
 import useScenarioSearchParamNavigation from '@/app/scenario/$scenarioId/_layout/~hooks/use-scenario-search-parameter-navigation.ts';
+import { Skeleton } from '@/components/ui/shadcn/skeleton';
 
 const ObjectCard = ({ objectId }: { objectId: number }) => {
   return (
@@ -37,7 +38,10 @@ export const ObjectStylizedWithActions = ({
   const { navigateRelative } = useScenarioSearchParamNavigation();
 
   return (
-    <StatusComponent useQuery={useObjectInstance(objectId)}>
+    <StatusComponent
+      useQuery={useObjectInstance(objectId)}
+      loadingComponent={<Skeleton className='w-full h-24 mt-12' />}
+    >
       {objectIntance => (
         <Card
           className={cn(
@@ -69,7 +73,10 @@ export const ObjectStylized = ({
   const objectQuery = useObjectInstance(objectId);
 
   return (
-    <StatusComponent useQuery={objectQuery}>
+    <StatusComponent
+      useQuery={objectQuery}
+      loadingComponent={<Skeleton className='h-20 w-96' />}
+    >
       {object => (
         <ObjectContent
           objectTypeId={object!.objectTypeId}
@@ -108,6 +115,7 @@ const ObjectContent = ({
         objectType: objectTypeQuery,
         objectTemplate: objectTemplateQuery,
       }}
+      loadingComponent={<Skeleton className='h-20 w-full' />}
     >
       {data => (
         <Card
@@ -124,7 +132,9 @@ const ObjectContent = ({
           onClick={onClick}
         >
           <ObjectTemplateBadge templateId={data.objectTemplate.id} />
-          <p className='text-xl font-bold truncate w-full'>{name}</p>
+          <p className='text-xl font-bold truncate w-full min-w-0 max-w-[300px]'>
+            {name}
+          </p>
         </Card>
       )}
     </MultiStatusComponent>

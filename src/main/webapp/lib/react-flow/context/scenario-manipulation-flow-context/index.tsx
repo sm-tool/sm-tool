@@ -20,6 +20,9 @@ import { useEvents } from '@/features/event-instance/queries.ts';
 import { EventCardProperties } from '@/features/event-instance/components/event-card';
 import { ThreadCardProperties } from '@/features/thread/components/thread-card';
 import { useLocalStorage } from '@/hooks/use-local-storage.ts';
+import { toast } from 'sonner';
+import { Thread } from '@/features/thread/types.ts';
+import { Branching } from '@/features/branching/types.ts';
 
 interface ThreadsFlowContextType {
   mainFlowReference: React.MutableRefObject<ReactFlowInstance | null>;
@@ -35,6 +38,11 @@ interface ThreadsFlowContextType {
     getMaxEndTime: () => number;
     threadViewMode: 'description' | 'event';
     setThreadViewMode: (value: 'description' | 'event') => void;
+    isEditingMergeOnBranching: Branching | null;
+    handleSetIsEditingMergeOnBranching: (value: Branching | null) => void;
+    selectedThreadsForMerge: number[];
+    handleSetSelectedThreadsForMerge: (thread: Thread) => void;
+    clearSelectedMergeEdit: () => void;
   };
 }
 
@@ -54,10 +62,65 @@ const ScenarioManipulationFlowContext = ({
   const [nodes, setNodes] = useNodesState<Node<ThreadCardProperties>>([]);
   const [edges, setEdges] = useEdgesState([]);
   const [selectedThreads, setSelectedThreads] = React.useState<number[]>([]);
-  const [isCreatingMerge, setIsCreatingMerge] = React.useState(false);
+  const [isCreatingMerge, setIsCreatingMerge] = React.useState<boolean>();
   const [threadViewMode, setThreadViewMode] = useLocalStorage<
     'description' | 'event'
   >('threadViewState', 'description');
+  const [isEditingMergeOnBranching, setIsEditingMergeOnBranching] =
+    React.useState<Branching | null>(null);
+  const [selectedThreadsForMerge, setSelectedThreadsForMerge] = React.useState<
+    number[]
+  >([]);
+
+  const handleSetSelectedThreadsForMerge = React.useCallback(
+    (thread: Thread) => {
+      if (!isEditingMergeOnBranching) {
+        return [];
+      }
+
+      if (isCreatingMerge) {
+        clearSelected();
+      }
+
+      if (isEditingMergeOnBranching?.time < thread.endTime) {
+        toast.warning('Threads after merge are not valid candidates');
+        return selectedThreadsForMerge;
+      }
+
+      if (
+        thread.outgoingBranchingId &&
+        thread.outgoingBranchingId !== isEditingMergeOnBranching.id
+      ) {
+        toast.warning('Already branched thread is not a valid candidate');
+        return selectedThreadsForMerge;
+      }
+
+      setSelectedThreadsForMerge(previous => {
+        const threadExists = previous.includes(thread.id);
+        const newSelection = threadExists
+          ? previous.filter(id => id !== thread.id)
+          : [...previous, thread.id];
+
+        if (newSelection.length === 0) {
+          clearSelectedMergeEdit();
+        }
+
+        return newSelection;
+      });
+
+      return selectedThreadsForMerge;
+    },
+    [selectedThreadsForMerge, isEditingMergeOnBranching],
+  );
+
+  const handleSetIsEditingMergeOnBranching = React.useCallback(
+    (branching: Branching) => {
+      clearSelected();
+      setIsEditingMergeOnBranching(branching);
+      setSelectedThreadsForMerge(branching.comingIn);
+    },
+    [],
+  );
 
   React.useEffect(() => {
     if (!threads?.data || !branchings?.data || !events?.data) return;
@@ -96,18 +159,15 @@ const ScenarioManipulationFlowContext = ({
         : [];
 
     const edgesData: Edge[] = branchings.data
-      .flatMap(branching =>
-        branching.comingIn.flatMap(sourceId =>
+      .flatMap(branching => {
+        const edges = branching.comingIn.flatMap(sourceId =>
           branching.comingOut.map(targetId => ({
             id: `edge-${sourceId}-${targetId}`,
             source: `thread-${sourceId}`,
             target: `thread-${targetId}`,
             type: 'thread',
             data: {
-              type: branching.type,
-              isCorrect: branching.isCorrect,
-              title: branching.title,
-              description: branching.description,
+              branching: branching,
               transfer:
                 branching.objectTransfer?.find(t => t.id === targetId)
                   ?.objectIds.length ?? 0,
@@ -116,8 +176,9 @@ const ScenarioManipulationFlowContext = ({
               zIndex: 0,
             },
           })),
-        ),
-      )
+        );
+        return branching.type === 'FORK' ? edges.reverse() : edges;
+      })
       .map((edge, index) => ({
         ...edge,
         style: {
@@ -143,6 +204,7 @@ const ScenarioManipulationFlowContext = ({
   }, [threads?.data, branchings?.data, events?.data, threadViewMode]);
 
   const toggleNodeSelection = useCallback((threadId: number) => {
+    if (isEditingMergeOnBranching) return;
     setSelectedThreads(previous => {
       const updated = previous.includes(threadId)
         ? previous.filter(id => id !== threadId)
@@ -159,6 +221,11 @@ const ScenarioManipulationFlowContext = ({
   const clearSelected = React.useCallback(() => {
     setSelectedThreads([]);
     setIsCreatingMerge(false);
+  }, []);
+
+  const clearSelectedMergeEdit = React.useCallback(() => {
+    setSelectedThreadsForMerge([]);
+    setIsEditingMergeOnBranching(null);
   }, []);
 
   const getMaxEndTime = useCallback(() => {
@@ -188,11 +255,18 @@ const ScenarioManipulationFlowContext = ({
       getMaxEndTime,
       threadViewMode,
       setThreadViewMode,
+      handleSetSelectedThreadsForMerge,
+      isEditingMergeOnBranching,
+      setIsEditingMergeOnBranching,
+      selectedThreadsForMerge,
+      clearSelectedMergeEdit,
+      handleSetIsEditingMergeOnBranching,
     },
     phaseManipulation: {
       nodes: [],
     },
   };
+  // @ts-expect-error -- always an defined
   return <FlowContext.Provider value={value}>{children}</FlowContext.Provider>;
 };
 

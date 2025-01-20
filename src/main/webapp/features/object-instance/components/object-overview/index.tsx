@@ -32,6 +32,7 @@ import { useThreadFirstEvent } from '@/features/event-instance/queries.ts';
 import AssociationChangesList from '@/features/association-change/components/association-changes-list';
 import React from 'react';
 import { EventInstance } from '@/features/event-instance/types.ts';
+import { Skeleton } from '@/components/ui/shadcn/skeleton.tsx';
 
 const ObjectOverview = ({ objectId }: { objectId: number }) => {
   return (
@@ -108,6 +109,7 @@ const ObjectStartingAttributes = ({ data }: { data: ObjectInstance }) => {
         }[]
       >
         useQuery={startingAttributesQuery}
+        loadingComponent={<Skeleton className={'h-20'} />}
         emptyComponent={
           <EmptyComponentDashed text="Objects's template has no attributes" />
         }
@@ -190,7 +192,10 @@ const TypeDetails = ({ data }: { data: ObjectInstance }) => {
         </div>
       </AccordionTrigger>
       <AccordionContent>
-        <StatusComponent<ObjectType> useQuery={objectType}>
+        <StatusComponent<ObjectType>
+          useQuery={objectType}
+          loadingComponent={<Skeleton className='h-[40rem]' />}
+        >
           {objectType => <ObjectTypeOverview data={objectType!} />}
         </StatusComponent>
       </AccordionContent>
@@ -209,7 +214,10 @@ const TemplateDetails = ({ data }: { data: ObjectInstance }) => {
         </div>
       </AccordionTrigger>
       <AccordionContent>
-        <StatusComponent<ObjectTemplate> useQuery={objectTemplate}>
+        <StatusComponent<ObjectTemplate>
+          useQuery={objectTemplate}
+          loadingComponent={<Skeleton className='h-[40rem]' />}
+        >
           {objectTemplate => <ObjectTemplateOverview data={objectTemplate!} />}
         </StatusComponent>
       </AccordionContent>

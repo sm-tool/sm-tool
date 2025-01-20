@@ -1,7 +1,9 @@
 package api.database.controller.object;
 
 import api.database.entity.object.ObjectType;
+import api.database.model.request.AssignIdsRequest;
 import api.database.model.request.save.ObjectTypeSaveRequest;
+import api.database.service.core.ObjectTypeManager;
 import api.database.service.core.provider.ObjectTypeProvider;
 import api.database.service.global.ObjectTypeService;
 import jakarta.validation.Valid;
@@ -25,28 +27,56 @@ public class ObjectTypeController {
   private final ObjectTypeService objectTypeService;
   private final PagedResourcesAssembler<ObjectType> pagedResourcesAssembler;
   private final ObjectTypeProvider objectTypeProvider;
+  private final ObjectTypeManager objectTypeManager;
 
   @Autowired
   public ObjectTypeController(
     ObjectTypeService objectTypeService,
     PagedResourcesAssembler<ObjectType> pagedResourcesAssembler,
-    ObjectTypeProvider objectTypeProvider
+    ObjectTypeProvider objectTypeProvider,
+    ObjectTypeManager objectTypeManager
   ) {
     this.objectTypeService = objectTypeService;
     this.pagedResourcesAssembler = pagedResourcesAssembler;
     this.objectTypeProvider = objectTypeProvider;
+    this.objectTypeManager = objectTypeManager;
   }
 
   //--------------------------------------------------Endpointy GET---------------------------------------------------------
+
+  @GetMapping("/findIdsByScenarioId")
+  public List<Integer> findIdsByScenarioId(@RequestHeader Integer scenarioId) {
+    return objectTypeProvider.findIdsByScenarioId(scenarioId);
+  }
+
+  @GetMapping("/findByScenarioId/{scenarioId}")
+  public PagedModel<EntityModel<ObjectType>> getAllObjectTypesInScenario(
+    @RequestParam(defaultValue = "0") int page,
+    @RequestParam(defaultValue = "20") int size,
+    @SortDefault(sort = "title") Sort sort,
+    @PathVariable Integer scenarioId
+  ) {
+    Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
+    Page<ObjectType> objectTypes = objectTypeProvider.findAll(
+      pageable,
+      scenarioId
+    );
+    return pagedResourcesAssembler.toModel(objectTypes);
+  }
 
   @GetMapping
   public PagedModel<EntityModel<ObjectType>> getAllObjectTypes(
     @RequestParam(defaultValue = "0") int page,
     @RequestParam(defaultValue = "20") int size,
-    @SortDefault(sort = "title") Sort sort
+    @SortDefault(sort = "title") Sort sort,
+    @RequestHeader(required = false) Integer scenarioId
   ) {
     Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
-    Page<ObjectType> objectTypes = objectTypeProvider.findAll(pageable);
+    System.out.println("scenarioId: " + scenarioId);
+    Page<ObjectType> objectTypes = objectTypeProvider.findAll(
+      pageable,
+      scenarioId
+    );
     return pagedResourcesAssembler.toModel(objectTypes);
   }
 
@@ -55,40 +85,14 @@ public class ObjectTypeController {
     @RequestParam("title") String title,
     @RequestParam(defaultValue = "0") int page,
     @RequestParam(defaultValue = "20") int size,
-    @SortDefault(sort = "title") Sort sort
+    @SortDefault(sort = "title") Sort sort,
+    @RequestHeader(required = false) Integer scenarioId
   ) {
     Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
     Page<ObjectType> objectTypes = objectTypeProvider.findByTitleContaining(
       title,
-      pageable
-    );
-    return pagedResourcesAssembler.toModel(objectTypes);
-  }
-
-  @GetMapping("/search/findByDescription")
-  public PagedModel<EntityModel<ObjectType>> findByDescription(
-    @RequestParam("description") String description,
-    @RequestParam(defaultValue = "0") int page,
-    @RequestParam(defaultValue = "20") int size,
-    @SortDefault(sort = "title") Sort sort
-  ) {
-    Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
-    Page<ObjectType> objectTypes =
-      objectTypeProvider.findByDescriptionContaining(description, pageable);
-    return pagedResourcesAssembler.toModel(objectTypes);
-  }
-
-  @GetMapping("/scenario")
-  public PagedModel<EntityModel<ObjectType>> getObjectTypesByScenarioId(
-    @RequestHeader Integer scenarioId,
-    @RequestParam(defaultValue = "0") int page,
-    @RequestParam(defaultValue = "20") int size,
-    @SortDefault(sort = "title") Sort sort
-  ) {
-    Pageable pageable = PageRequest.of(page, Math.min(size, 50), sort);
-    Page<ObjectType> objectTypes = objectTypeProvider.findAllByScenarioId(
-      scenarioId,
-      pageable
+      pageable,
+      scenarioId
     );
     return pagedResourcesAssembler.toModel(objectTypes);
   }
@@ -126,25 +130,16 @@ public class ObjectTypeController {
     return objectTypeService.addObjectType(objectTypeInfo, scenarioId);
   }
 
-  //  @PostMapping("/copy/{sourceScenarioId}/to/{targetScenarioId}")
-  //  @ResponseStatus(HttpStatus.OK)
-  //  public void copyObjectTypesBetweenScenarios(
-  //    @PathVariable Integer sourceScenarioId,
-  //    @PathVariable Integer targetScenarioId
-  //  ) {
-  //    objectTypeService.copyObjectTypesBetweenScenarios(
-  //      sourceScenarioId,
-  //      targetScenarioId
-  //    );
-  //  }
-
   @ResponseStatus(HttpStatus.OK)
-  @PostMapping("/scenario/{objectTypeId}")
+  @PostMapping("/scenario")
   public void assignObjectTypeToScenario(
-    @PathVariable Integer objectTypeId,
+    @RequestBody @Valid AssignIdsRequest objectTypeIds,
     @RequestHeader Integer scenarioId
   ) {
-    objectTypeService.assignObjectTypeToScenario(objectTypeId, scenarioId);
+    objectTypeManager.assignObjectTypesToScenario(
+      objectTypeIds.assign(),
+      scenarioId
+    );
   }
 
   //--------------------------------------------------Endpoint PUT---------------------------------------------------------

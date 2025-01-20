@@ -1,15 +1,8 @@
-import {
-  Button,
-  type ButtonProperties,
-} from '@/components/ui/shadcn/button.tsx';
 import React from 'react';
 import { cn } from '@nextui-org/theme';
-
-interface ConfirmDoubleClickButtonProperties
-  extends Omit<ButtonProperties, 'onClick' | 'onConfirm'> {
-  onConfirm: () => void;
-  children: React.ReactNode;
-}
+import TooltipButton from '@/components/ui/common/display/tooltip-button';
+import { ButtonProperties } from '@/components/ui/shadcn/button.tsx';
+import { Side } from '@floating-ui/utils';
 
 /**
  * Komponent przycisku wymagający podwójnego kliknięcia do potwierdzenia akcji.
@@ -32,44 +25,51 @@ interface ConfirmDoubleClickButtonProperties
  * </ConfirmDoubleClickButton>
  * ```
  */
-const ConfirmDoubleClickButton = React.forwardRef<
-  HTMLDivElement,
-  ConfirmDoubleClickButtonProperties
->(
-  (
-    { className, variant = 'outline', onConfirm, children, ...properties },
-    reference,
-  ) => {
-    const [isConfirming, setIsConfirming] = React.useState(false);
+type ConfirmDoubleClickButtonProperties = {
+  className?: string;
+  variant?: 'outline';
+  onConfirm: () => void;
+  children: React.ReactNode;
+  side: Side;
+  disabledText: string;
+} & ButtonProperties;
 
-    return (
-      <Button
-        // @ts-expect-error -- głupoty gada
-        ref={reference}
-        type='button'
-        variant={variant}
-        className={cn(
-          'text-sm transition-colors duration-200',
-          isConfirming &&
-            'bg-danger/20 hover:bg-danger/30 text-danger border-danger',
-          className,
-        )}
-        onClick={() => {
-          if (isConfirming) {
-            onConfirm();
-          } else {
-            setIsConfirming(true);
-          }
-        }}
-        onBlur={() => setIsConfirming(false)}
-        {...properties}
-      >
-        {isConfirming ? 'Are you sure?' : children}
-      </Button>
-    );
-  },
-);
+const ConfirmDoubleClickButton = ({
+  className,
+  variant = 'outline',
+  onConfirm,
+  children,
+  side,
+  disabledText,
+  ...properties
+}: ConfirmDoubleClickButtonProperties) => {
+  const [isConfirming, setIsConfirming] = React.useState(false);
 
-ConfirmDoubleClickButton.displayName = 'ConfirmDoubleClickButton';
+  return (
+    <TooltipButton
+      variant={variant}
+      buttonChildren={isConfirming ? 'Are you sure?' : children}
+      tooltipDisabled={!properties.disabled}
+      tooltipSide={side}
+      className={cn(
+        'w-text-sm transition-colors duration-200',
+        isConfirming &&
+          'bg-danger/20 hover:bg-danger/30 text-danger border-danger w-full px-2',
+        className,
+      )}
+      onClick={() => {
+        if (isConfirming) {
+          onConfirm();
+        } else {
+          setIsConfirming(true);
+        }
+      }}
+      onBlur={() => setIsConfirming(false)}
+      {...properties}
+    >
+      {disabled => disabled && disabledText}
+    </TooltipButton>
+  );
+};
 
 export default ConfirmDoubleClickButton;

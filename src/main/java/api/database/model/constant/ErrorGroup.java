@@ -92,4 +92,6 @@ public enum ErrorGroup {
   WEBSOCKET,
   /// Powiązania wątków z obiektami
   THREAD_TO_OBJECT,
+  /// inne, nie możliwe do wyciągnięcia
+  OTHERS,
 }

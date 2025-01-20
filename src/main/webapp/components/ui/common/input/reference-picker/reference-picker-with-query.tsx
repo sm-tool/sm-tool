@@ -24,21 +24,27 @@ interface ReferencePickerProperties<T, TSearchEndpoint extends string> {
   ) => ReturnType<
     typeof useInfiniteQuery<HalPaginatedResponse<T, TSearchEndpoint>>
   >;
+  renderOnButton?: (item: number) => React.ReactNode;
   renderItem: (item: number) => React.ReactNode;
   getItemId: (item: T) => number;
   placeholder?: string;
   emptyComponent?: React.ReactNode;
+  filterCondition?: (item: T) => boolean;
   topUtil?: React.ReactNode;
+  dialogTitle: string;
 }
 
 const ReferencePickerWithQuery = <T, TSearchEndpoint extends string>({
   value,
   onChange,
   infiniteQuery,
+  renderOnButton,
   renderItem,
   getItemId,
   emptyComponent,
+  filterCondition,
   topUtil,
+  dialogTitle,
 }: ReferencePickerProperties<T, TSearchEndpoint>) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -63,7 +69,7 @@ const ReferencePickerWithQuery = <T, TSearchEndpoint extends string>({
       <DialogTrigger asChild>
         <Button variant='outline' className='w-full'>
           {value ? (
-            <>{renderItem(value)}</>
+            <>{renderOnButton ? renderOnButton(value) : renderItem(value)}</>
           ) : (
             <>
               <Plus className='mr-1 h-4 w-4' />
@@ -74,7 +80,7 @@ const ReferencePickerWithQuery = <T, TSearchEndpoint extends string>({
       </DialogTrigger>
       <DialogContent className='flex flex-col items-center justify-center w-full'>
         <DialogHeader className='w-full'>
-          <DialogTitle>Select supported template</DialogTitle>
+          <DialogTitle>{dialogTitle}</DialogTitle>
         </DialogHeader>
         <div className='space-y-3 w-full'>
           {topUtil}
@@ -87,6 +93,7 @@ const ReferencePickerWithQuery = <T, TSearchEndpoint extends string>({
               queryResult={query}
               loadingComponent={<LoadingSpinner />}
               emptyComponent={emptyComponent ?? <EmptyComponent />}
+              filterCondition={filterCondition}
             >
               {items => (
                 <div className='space-y-1'>

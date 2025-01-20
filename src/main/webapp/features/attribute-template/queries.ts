@@ -11,7 +11,10 @@ import {
   successToast,
 } from '@/components/ui/shadcn/toaster.tsx';
 import { objectInstanceKeys } from '@/features/object-instance/queries.ts';
-import { getScenarioIdFromPath } from '@/features/scenario/utils/get-scenario-id-from-path.tsx';
+import {
+  getScenarioIdFromPath,
+  hasScenarioInPath,
+} from '@/features/scenario/utils/get-scenario-id-from-path.tsx';
 import { eventKeys } from '@/features/event-instance/queries.ts';
 
 export const attributeTemplateKeys = {
@@ -21,19 +24,20 @@ export const attributeTemplateKeys = {
     ['attributeTemplates', 'template', templateId] as const,
 };
 
-export const useAllTemplateAttributes = (templateId: number, options = {}) =>
+export const useAllTemplateAttributes = (templateId?: number, options = {}) =>
   useQuery({
     ...queryOptions({
-      queryKey: attributeTemplateKeys.template(templateId),
-      queryFn: () => attributeTemplateApi.getAllofTemplate(templateId),
+      queryKey: attributeTemplateKeys.template(templateId!),
+      queryFn: () => attributeTemplateApi.getAllofTemplate(templateId!),
     }),
     ...options,
   });
 
-export const useAttributeTemplate = (id: number) => {
+export const useAttributeTemplate = (id?: number) => {
   return useQuery({
-    queryKey: attributeTemplateKeys.detail(id),
-    queryFn: () => attributeTemplateApi.getOne(id),
+    queryKey: attributeTemplateKeys.detail(id!),
+    queryFn: () => attributeTemplateApi.getOne(id!),
+    enabled: Number.isInteger(id) && id! > 0,
   });
 };
 
@@ -45,18 +49,16 @@ export const useCreateAttributeTemplate = () => {
       successToast('Attribute template created');
 
       await queryClient.invalidateQueries({
-        // @ts-expect-error -- działa, to co za problem ... chyba
-        queries: [
-          {
-            queryKey: attributeTemplateKeys.all,
-          },
-          {
-            queryKey: objectInstanceKeys.all(getScenarioIdFromPath()),
-          },
-          {
-            queryKey: eventKeys.all(getScenarioIdFromPath()),
-          },
-        ],
+        queryKey: eventKeys.all(getScenarioIdFromPath()),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: attributeTemplateKeys.all,
+      });
+      await queryClient.invalidateQueries({
+        queryKey: objectInstanceKeys.all(getScenarioIdFromPath()),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: objectInstanceKeys.all(getScenarioIdFromPath()),
       });
     },
     onError: error => {
@@ -123,14 +125,37 @@ export const useDeleteAttributeTemplate = () => {
           queryKey: attributeTemplateKeys.detail(id),
         }),
         queryClient.invalidateQueries({ queryKey: attributeTemplateKeys.all }),
+      ]);
+      if (hasScenarioInPath()) {
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: objectInstanceKeys.all(getScenarioIdFromPath()),
+          }),
 
-        queryClient.invalidateQueries({
-          queryKey: objectInstanceKeys.all(getScenarioIdFromPath()),
-        }),
+          queryClient.invalidateQueries({
+            queryKey: eventKeys.all(getScenarioIdFromPath()),
+          }),
+        ]);
+      }
 
+      successToast('Attribute template deleted');
+    },
+    onError: error => {
+      handleErrorToast(error, 'Failed to delete attribute template');
+    },
+  });
+};
+
+export const useGlobalDeleteAttributeTemplate = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: attributeTemplateApi.delete,
+    onSuccess: async (_, id) => {
+      await Promise.all([
         queryClient.invalidateQueries({
-          queryKey: eventKeys.all(getScenarioIdFromPath()),
+          queryKey: attributeTemplateKeys.detail(id),
         }),
+        queryClient.invalidateQueries({ queryKey: attributeTemplateKeys.all }),
       ]);
 
       successToast('Attribute template deleted');

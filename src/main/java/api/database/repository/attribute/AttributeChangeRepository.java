@@ -10,22 +10,33 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 /// Repozytorium zarządzające historią zmian atrybutów obiektów w systemie.
-/// Odpowiada za:
-/// - Śledzenie zmian wartości atrybutów w czasie
-/// - Dodawanie nowych zmian atrybutów
-/// - Pobieranie stanu atrybutów w określonym czasie
-/// - Czyszczenie historii zmian
 ///
-/// # Powiązania
-/// - {@link AttributeChange} - encja reprezentująca zmianę atrybutu
-/// - {@link EventAttributesStateResponse} - projekcja stanu atrybutów
+/// # Główne funkcjonalności
+/// - Śledzenie i zapisywanie zmian wartości atrybutów w czasie
+/// - Pobieranie stanu atrybutów dla określonego momentu w czasie
+/// - Zarządzanie historią zmian (dodawanie, aktualizacja, usuwanie)
+/// - Obsługa wartości początkowych atrybutów dla nowych obiektów
+///
+/// # Operacje na zmianach
+/// - Dodawanie pojedynczych i grupowych zmian atrybutów
+/// - Aktualizacja istniejących wartości atrybutów
+/// - Usuwanie zmian dla określonych obiektów/wydarzeń
+/// - Pobieranie stanu atrybutów w kontekście wydarzeń
+///
+/// # Powiązane komponenty
+/// - {@link AttributeChange} - encja reprezentująca pojedynczą zmianę atrybutu
+/// - {@link EventAttributesStateResponse} - projekcja stanu atrybutów w czasie
 public interface AttributeChangeRepository
   extends JpaRepository<AttributeChange, Integer> {
   /// Usuwa zmiany atrybutów dla wskazanych obiektów w określonym czasie.
-  /// Używane przy czyszczeniu historii zmian dla obiektów.
+  ///
+  /// Wykorzystywane przy czyszczeniu historii zmian dla obiektów, np. podczas:
+  /// - Usuwania obiektów
+  /// - Przenoszenia obiektów między wątkami
+  /// - Rozwiązywania konfliktów zmian
   ///
   /// @param time moment w czasie dla którego usuwane są zmiany
-  /// @param objectIds lista ID obiektów których atrybuty mają zostać wyczyszczone
+  /// @param objectIds identyfikatory obiektów do wyczyszczenia
   @Modifying
   @Query(
     value = """
@@ -44,14 +55,15 @@ public interface AttributeChangeRepository
   );
 
   //--------------------------------------------Attribute Adder---------------------------------------------------------
-  /// Dodaje wartości początkowe dla wielu atrybutów w wydarzeniach START.
-  /// Dla każdego obiektu:
-  /// 1. Określa efektywny wątek (globalny lub lokalny)
-  /// 2. Znajduje wydarzenie START w tym wątku
-  /// 3. Dodaje wartości początkowe dla wskazanych atrybutów
+  /// Inicjalizuje wartości początkowe dla grupy atrybutów w wydarzeniach typu START.
   ///
-  /// @param objectIds lista ID obiektów
-  /// @param attributeIds lista ID atrybutów
+  /// Proces inicjalizacji:
+  /// 1. Mapowanie obiektów na ich efektywne wątki (globalne/lokalne)
+  /// 2. Identyfikacja wydarzeń START dla każdego wątku
+  /// 3. Dodanie wartości początkowych dla wszystkich wskazanych atrybutów
+  ///
+  /// @param objectIds lista ID obiektów do zainicjalizowania
+  /// @param attributeIds lista ID atrybutów do ustawienia
   /// @param defaultValue wartość początkowa dla wszystkich atrybutów
   @Modifying
   @Query(
@@ -99,7 +111,7 @@ public interface AttributeChangeRepository
   );
 
   //--------------------------------------------Attribute Change Executor-----------------------------------------------
-  /// Usuwa zmiany atrybutów dla wskazanego wydarzenia.
+  /// Usuwa zmiany atrybutów dla konkretnego wydarzenia.
   ///
   /// @param eventId ID wydarzenia
   /// @param attributeIds lista ID atrybutów do usunięcia
@@ -115,7 +127,7 @@ public interface AttributeChangeRepository
     @Param("attributeIds") Integer[] attributeIds
   );
 
-  /// Aktualizuje wartość atrybutu dla wskazanego wydarzenia.
+  /// Aktualizuje wartość atrybutu w kontekście wydarzenia.
   ///
   /// @param eventId ID wydarzenia
   /// @param attributeId ID atrybutu
@@ -134,10 +146,10 @@ public interface AttributeChangeRepository
   );
 
   //-----------------------------------------------Event State Provider-------------------------------------------------
-  /// Pobiera wszystkie zmiany atrybutów dla wskazanych wydarzeń.
+  /// Pobiera kompletną historię zmian atrybutów dla wskazanych wydarzeń.
   ///
   /// @param eventIds lista ID wydarzeń
-  /// @return lista zmian atrybutów
+  /// @return lista wszystkich zmian atrybutów dla danych wydarzeń
   @Query(
     value = "SELECT * FROM qds_attribute_change WHERE event_id = ANY(:eventIds)",
     nativeQuery = true
@@ -146,10 +158,13 @@ public interface AttributeChangeRepository
     @Param("eventIds") Integer[] eventIds
   );
 
-  /// Pobiera ostatnie zmiany atrybutów przed wskazanymi wydarzeniami.
+  /// Znajduje ostatnie zmiany atrybutów przed wskazanymi wydarzeniami.
+  ///
+  /// Dla każdego wydarzenia zwraca najświeższą zmianę każdego atrybutu,
+  /// która nastąpiła przed tym wydarzeniem.
   ///
   /// @param eventIds lista ID wydarzeń
-  /// @return lista ostatnich zmian przed każdym wydarzeniem
+  /// @return lista ostatnich zmian sprzed każdego wydarzenia
   @Query(
     value = """
     WITH AttributeChanges AS (
@@ -182,15 +197,16 @@ public interface AttributeChangeRepository
     @Param("eventIds") Integer[] eventIds
   );
 
-  /// Pobiera stan atrybutów dostępnych obiektów w kontekście wydarzenia.
+  /// Pobiera aktualny stan atrybutów w kontekście wydarzenia.
+  ///
   /// Uwzględnia:
   /// - Atrybuty obiektów z wątku wydarzenia
   /// - Atrybuty obiektów globalnych
-  /// - Tylko zmiany do momentu wydarzenia
+  /// - Ostatnią zmianę do momentu wydarzenia
   ///
   /// @param eventId ID wydarzenia
   /// @param scenarioId ID scenariusza
-  /// @return lista aktualnych wartości atrybutów
+  /// @return lista aktualnych wartości dostępnych atrybutów
   @Query(
     value = """
     WITH EventInfo AS (
@@ -227,6 +243,14 @@ public interface AttributeChangeRepository
     Integer scenarioId
   );
 
+  /// Pobiera poprzedni stan atrybutów przed wskazanym wydarzeniem.
+  ///
+  /// Analogicznie jak `getAttributesStateForEvent`, ale zwraca stan
+  /// sprzed danego wydarzenia.
+  ///
+  /// @param eventId ID wydarzenia
+  /// @param scenarioId ID scenariusza
+  /// @return lista wartości atrybutów sprzed wydarzenia
   @Query(
     value = """
     WITH EventInfo AS (

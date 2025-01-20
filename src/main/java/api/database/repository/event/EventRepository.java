@@ -9,30 +9,42 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /// Repozytorium zarządzające wydarzeniami w systemie.
-/// Odpowiada za:
-/// - Operacje CRUD na wydarzeniach
-/// - Zarządzanie wydarzeniami końcowymi wątków
-/// - Przenoszenie wydarzeń między wątkami
-/// - Pobieranie wydarzeń dla wątków i scenariuszy
+/// Zapewnia kompleksową obsługę wydarzeń w kontekście wątków i scenariuszy,
+/// w tym wydarzenia specjalne jak FORK/JOIN oraz wydarzenia końcowe.
 ///
-/// # Powiązania
+/// # Główne funkcjonalności
+/// - Operacje CRUD na wydarzeniach
+/// - Zarządzanie wydarzeniami końcowymi (END)
+/// - Przenoszenie wydarzeń między wątkami
+/// - Zmiana typów wydarzeń
+/// - Pobieranie wydarzeń w różnych kontekstach
+///
+/// # Specjalne przypadki
+/// - Wątek globalny jest zawsze reprezentowany jako ID=0 w wynikach
+/// - Wydarzenia END mogą być automatycznie dodawane/aktualizowane
+/// - Puste wydarzenia NORMAL/GLOBAL są zamieniane na IDLE
+///
+/// # Powiązane komponenty
 /// - {@link Event} - encja reprezentująca wydarzenie
 /// - {@link api.database.entity.thread.Thread} - wątek zawierający wydarzenia
 /// - {@link api.database.entity.scenario.Scenario} - scenariusz grupujący wydarzenia
+/// - {@link api.database.entity.thread.Branching} - rozgałęzienia FORK/JOIN
 @Repository
 public interface EventRepository extends RefreshableRepository<Event, Integer> {
   //---------------------------------------------------Event Manager----------------------------------------------------
-  /// Pobiera ostatnie wydarzenie w wątku (END, FORK_IN lub JOIN_IN).
+  /// Pobiera ostatnie wydarzenie w wątku.
+  /// Uwzględnia tylko wydarzenia kończące: END, FORK_IN lub JOIN_IN.
   ///
   /// @param threadId ID wątku
-  /// @return ostatnie wydarzenie lub null dla nieistniejącego wątku
+  /// @return ostatnie wydarzenie
   @Query(
     value = "SELECT * FROM qds_event WHERE thread_id=:threadId AND event_type IN ('END','FORK_IN','JOIN_IN')",
     nativeQuery = true
   )
   Event getLastEvent(@Param("threadId") Integer threadId);
 
-  /// Pobiera pierwsze wydarzenie w wątku (START, FORK_OUT lub JOIN_OUT).
+  /// Pobiera pierwsze wydarzenie w wątku.
+  /// Uwzględnia tylko wydarzenia rozpoczynające: START, FORK_OUT lub JOIN_OUT.
   ///
   /// @param threadId ID wątku
   /// @return pierwsze wydarzenie
@@ -43,8 +55,9 @@ public interface EventRepository extends RefreshableRepository<Event, Integer> {
   Event getFirstEvent(Integer threadId);
 
   /// Usuwa wszystkie wydarzenia dla wskazanych wątków.
+  /// Operacja kaskadowo usuwa powiązane zmiany atrybutów i asocjacji.
   ///
-  /// @param threadIds lista ID wątków
+  /// @param threadIds lista ID wątków do wyczyszczenia
   @Modifying
   @Query(
     value = "DELETE FROM qds_event WHERE thread_id=ANY(:threadIds)",
@@ -53,11 +66,15 @@ public interface EventRepository extends RefreshableRepository<Event, Integer> {
   void deleteThreadEvents(@Param("threadIds") Integer[] threadIds);
 
   /// Przenosi wydarzenia między wątkami zachowując porządek czasowy.
-  /// Przenosi wydarzenia późniejsze niż podany czas.
+  /// Operacja obejmuje tylko wydarzenia po wskazanym czasie.
   ///
-  /// @param idsTo lista ID wątków docelowych
-  /// @param idsFrom lista ID wątków źródłowych
-  /// @param time czas graniczny
+  /// # SQL
+  /// Wykorzystuje mapowanie tabeli unnest do przetworzenia list wątków.
+  /// Wydarzenia są przenoszone z zachowaniem wszystkich powiązań.
+  ///
+  /// @param idsTo ID wątków docelowych
+  /// @param idsFrom ID wątków źródłowych
+  /// @param time czas graniczny - przenoszone są późniejsze wydarzenia
   @Modifying
   @Query(
     value = """
@@ -79,11 +96,19 @@ public interface EventRepository extends RefreshableRepository<Event, Integer> {
   );
 
   /// Zapewnia obecność wydarzeń końcowych (END) we wskazanych wątkach.
-  /// Dla każdego wątku:
-  /// 1. Znajduje ostatnie wydarzenie nie będące IDLE/END/FORK_IN/JOIN_IN
-  /// 2. Aktualizuje istniejące END lub tworzy nowe w następnej jednostce czasu
   ///
-  /// @param threadIds lista ID wątków
+  /// # Proces
+  /// 1. Znajduje ostatnie zwykłe wydarzenie w każdym wątku
+  /// 2. Aktualizuje istniejące lub tworzy nowe END w następnej jednostce czasu
+  /// 3. Resetuje powiązania z rozgałęzieniami dla aktualizowanych END
+  ///
+  /// # SQL
+  /// Wykorzystuje CTE do:
+  /// - Znalezienia ostatnich zwykłych wydarzeń
+  /// - Aktualizacji istniejących END
+  /// - Wstawienia nowych END gdzie potrzeba
+  ///
+  /// @param threadIds lista ID wątków do sprawdzenia/aktualizacji
   @Modifying
   @Query(
     value = """
@@ -103,7 +128,8 @@ public interface EventRepository extends RefreshableRepository<Event, Integer> {
     UpdateEnd AS (
       UPDATE qds_event e
       SET event_time = n.normal_time + 1,
-          event_type = 'END'
+          event_type = 'END',
+          branching_id = NULL
       FROM LastNormalEvent n, LastEndEvent l
       WHERE e.id = l.id
       AND e.thread_id = n.thread_id
@@ -120,6 +146,17 @@ public interface EventRepository extends RefreshableRepository<Event, Integer> {
   )
   void ensureEndEvents(@Param("threadIds") Integer[] threadIds);
 
+  /// Zmienia typ wydarzeń bez zmian na IDLE.
+  /// Dotyczy wydarzeń typu NORMAL/GLOBAL, które nie mają powiązanych
+  /// zmian atrybutów ani asocjacji.
+  ///
+  /// # SQL
+  /// Wykorzystuje CTE do:
+  /// - Zdefiniowania dozwolonych typów wydarzeń (NORMAL/GLOBAL)
+  /// - Znalezienia wydarzeń bez zmian poprzez LEFT JOIN
+  /// - Aktualizacji tylko pustych wydarzeń
+  ///
+  /// @param scenarioId ID scenariusza
   @Modifying
   @Query(
     value = """
@@ -138,7 +175,7 @@ public interface EventRepository extends RefreshableRepository<Event, Integer> {
         WHERE t.scenario_id = :scenarioId
           AND assch.id IS NULL AND attch.id IS NULL
     );
-        """,
+    """,
     nativeQuery = true
   )
   void changeEventsWithoutChangesToIdle(
@@ -146,12 +183,17 @@ public interface EventRepository extends RefreshableRepository<Event, Integer> {
   );
 
   //---------------------------------------------------Event Provider---------------------------------------------------
-  /// Pobiera wydarzenia dla wątku.
-  /// Dla wątku globalnego zwraca ID=0 jako id wątku.
+  /// Pobiera wydarzenia dla wątku z uwzględnieniem specjalnego przypadku wątku globalnego.
+  /// Dla wątku globalnego (ID=0) podmienia faktyczne ID na 0 w wynikach.
   ///
-  /// @param threadId ID wątku
-  /// @param scenarioId ID scenariusza
-  /// @return lista wydarzeń posortowana czasowo
+  /// # SQL
+  /// - Dla wątku normalnego: zwraca wydarzenia bezpośrednio
+  /// - Dla wątku globalnego: znajduje faktyczny wątek przez flag is_global
+  /// - Sortuje wyniki po czasie dla zachowania kolejności
+  ///
+  /// @param threadId ID wątku (0 dla globalnego)
+  /// @param scenarioId ID scenariusza (potrzebne dla wątku globalnego)
+  /// @return Lista wydarzeń posortowana chronologicznie
   @Query(
     value = """
     SELECT  e.id,
@@ -174,10 +216,15 @@ public interface EventRepository extends RefreshableRepository<Event, Integer> {
   );
 
   /// Pobiera wszystkie wydarzenia ze scenariusza.
-  /// Dla wątku globalnego zwraca ID=0 jako id wątku.
+  /// Konwertuje ID wątku globalnego na 0 w wynikach.
+  ///
+  /// # SQL
+  /// - Łączy wydarzenia z tabelą wątków by sprawdzić globalność
+  /// - Używa CASE do podmiany ID wątku globalnego na 0
+  /// - Sortuje po ID wątku i czasie dla spójnej kolejności
   ///
   /// @param scenarioId ID scenariusza
-  /// @return lista wydarzeń posortowana po ID wątku i czasie
+  /// @return Lista wszystkich wydarzeń scenariusza posortowana po wątku i czasie
   @Query(
     value = """
     SELECT e.id,
@@ -199,11 +246,14 @@ public interface EventRepository extends RefreshableRepository<Event, Integer> {
   List<Event> getScenarioEvents(@Param("scenarioId") Integer scenarioId);
 
   //--------------------------------------------------------------------------------------------------------------------
-  /// Pobiera ID wydarzeń w scenariuszu dla wskazanej akcji.
+  /// Pobiera identyfikatory wydarzeń w scenariuszu dla wskazanego czasu.
+  ///
+  /// # SQL
+  /// Łączy wydarzenia z wątkami aby zweryfikować przynależność do scenariusza.
   ///
   /// @param scenarioId ID scenariusza
-  /// @param time akcja
-  /// @return lista ID wydarzeń
+  /// @param time Czas wydarzeń do pobrania
+  /// @return Lista ID wydarzeń w danym czasie
   @Query(
     value = "SELECT e.id FROM qds_event e JOIN qds_thread t ON e.thread_id = t.id " +
     "WHERE event_time=:time AND scenario_id=:scenarioId",

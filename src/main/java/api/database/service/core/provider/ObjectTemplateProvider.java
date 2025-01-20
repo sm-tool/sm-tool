@@ -24,8 +24,13 @@ public class ObjectTemplateProvider {
     this.objectTemplateRepository = objectTemplateRepository;
   }
 
-  public Page<ObjectTemplate> getAllTemplates(Pageable pageable) {
-    return objectTemplateRepository.findAll(pageable);
+  public Page<ObjectTemplate> findAllTemplates(
+    Pageable pageable,
+    Integer scenarioId
+  ) {
+    return scenarioId == null
+      ? objectTemplateRepository.findAll(pageable)
+      : objectTemplateRepository.findAllByScenarioId(scenarioId, pageable);
   }
 
   public Page<ObjectTemplate> getTemplatesByScenarioIdAndObjectType(
@@ -42,33 +47,16 @@ public class ObjectTemplateProvider {
 
   public Page<ObjectTemplate> findByTitleContaining(
     String title,
-    Pageable pageable
+    Pageable pageable,
+    Integer scenarioId
   ) {
-    return objectTemplateRepository.findByTitleContaining(title, pageable);
-  }
-
-  public Page<ObjectTemplate> findByDescriptionContaining(
-    String description,
-    Pageable pageable
-  ) {
-    return objectTemplateRepository.findByDescriptionContaining(
-      description,
-      pageable
-    );
-  }
-
-  public Page<ObjectTemplate> findByObjectTypeId(
-    Integer objectTypeId,
-    Pageable pageable
-  ) {
-    return objectTemplateRepository.findByObjectTypeId(objectTypeId, pageable);
-  }
-
-  public Page<ObjectTemplate> getScenarioTemplates(
-    Integer scenarioId,
-    Pageable pageable
-  ) {
-    return objectTemplateRepository.findAllByScenarioId(scenarioId, pageable);
+    return scenarioId == null
+      ? objectTemplateRepository.findByTitleContaining(title, pageable)
+      : objectTemplateRepository.findByTitleContainingAndScenarioId(
+        title,
+        scenarioId,
+        pageable
+      );
   }
 
   public ObjectTemplate getTemplateById(Integer id) {
@@ -82,5 +70,9 @@ public class ObjectTemplateProvider {
           HttpStatus.NOT_FOUND
         )
       );
+  }
+
+  public List<Integer> findIdsByScenarioId(Integer scenarioId) {
+    return objectTemplateRepository.findIdsByScenarioId(scenarioId);
   }
 }

@@ -1,29 +1,33 @@
-package api.database.service.operations;
+package api.database.service.core;
 
 import api.database.model.constant.ErrorCode;
 import api.database.model.constant.ErrorGroup;
 import api.database.model.exception.ApiException;
 import api.database.repository.scenario.ScenarioRepository;
+import api.database.repository.scenario.ScenarioToObjectTemplateRepository;
 import api.database.repository.scenario.ScenarioToObjectTypeRepository;
-import api.database.repository.thread.ThreadRepository;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ScenarioValidator {
+public class ScenarioManager {
 
   private final ScenarioToObjectTypeRepository scenarioToObjectTypeRepository;
   private final ScenarioRepository scenarioRepository;
+  private final ScenarioToObjectTemplateRepository scenarioToObjectTemplateRepository;
 
   @Autowired
-  public ScenarioValidator(
+  public ScenarioManager(
     ScenarioToObjectTypeRepository scenarioToObjectTypeRepository,
-    ScenarioRepository scenarioRepository
+    ScenarioRepository scenarioRepository,
+    ScenarioToObjectTemplateRepository scenarioToObjectTemplateRepository
   ) {
     this.scenarioToObjectTypeRepository = scenarioToObjectTypeRepository;
     this.scenarioRepository = scenarioRepository;
+    this.scenarioToObjectTemplateRepository =
+      scenarioToObjectTemplateRepository;
   }
 
   ///
@@ -45,7 +49,7 @@ public class ScenarioValidator {
     Integer templateId
   ) {
     if (
-      !scenarioToObjectTypeRepository.canAddObjectToScenario(
+      !scenarioToObjectTemplateRepository.canAddObjectToScenario(
         scenarioId,
         templateId
       )

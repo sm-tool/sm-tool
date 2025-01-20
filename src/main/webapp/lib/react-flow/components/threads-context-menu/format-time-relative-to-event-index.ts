@@ -1,5 +1,10 @@
 import { Scenario } from '@/features/scenario/types';
-import { addMinutes, differenceInMinutes, format } from 'date-fns';
+import {
+  addMinutes,
+  differenceInHours,
+  differenceInMinutes,
+  format,
+} from 'date-fns';
 
 export type TimeReferenceMode = 'absolute' | 'startRelative' | 'endRelative';
 
@@ -13,9 +18,11 @@ export const formatTimeRelativeToEventIndex = (
   scenario?: Scenario,
 ) => {
   if (!scenario) return '';
-  const minutes = Math.floor(index * (scenario.eventDuration || 1));
-  const unit = scenario.eventUnit || '';
 
+  const unit = scenario.eventUnit || '';
+  const minutes = Math.floor(
+    index * (scenario.eventDuration || 1) * (unit === 'h' ? 60 : 1),
+  );
   if (!isSupportedTimeUnit(unit)) {
     return `${minutes}:00`;
   }
@@ -25,41 +32,46 @@ export const formatTimeRelativeToEventIndex = (
     : new Date();
   const endDate = scenario.endDate ? new Date(scenario.endDate) : new Date();
   const currentTime = addMinutes(startDate, minutes);
-
   const scenarioDuration = differenceInMinutes(endDate, startDate);
 
   switch (timeMode) {
     case 'startRelative': {
-      const diff = differenceInMinutes(currentTime, startDate);
       switch (unit) {
         case 'h': {
-          return `Δ+${Math.floor(diff / 60)}h`;
+          const diffInHours = differenceInHours(currentTime, startDate);
+          return `Δ+${diffInHours}h`;
         }
         case 'min': {
+          const diff = differenceInMinutes(currentTime, startDate);
           return `Δ+${diff}m`;
         }
         case 's': {
+          const diff = differenceInMinutes(currentTime, startDate);
           return `Δ+${diff * 60}s`;
         }
         default: {
+          const diff = differenceInMinutes(currentTime, startDate);
           return `Δ+${diff}m`;
         }
       }
     }
     case 'endRelative': {
-      const diff = differenceInMinutes(endDate, currentTime);
       switch (unit) {
         case 'h': {
-          return `Δ-${Math.floor(diff / 60)}h`;
+          const diffInHours = differenceInHours(endDate, currentTime);
+          return `Δ-${diffInHours}h`;
         }
         case 'min': {
+          const diff = differenceInMinutes(endDate, currentTime);
           return `Δ-${diff}m`;
         }
         case 's': {
+          const diff = differenceInMinutes(endDate, currentTime);
           return `Δ-${diff * 60}s`;
         }
         default: {
-          return `Δ+${diff}m`;
+          const diff = differenceInMinutes(endDate, currentTime);
+          return `Δ-${diff}m`;
         }
       }
     }

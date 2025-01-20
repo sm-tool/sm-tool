@@ -1,22 +1,16 @@
 package api.database.service.branching;
 
-import api.database.entity.event.Event;
 import api.database.model.constant.BranchingType;
-import api.database.model.constant.ErrorCode;
-import api.database.model.constant.ErrorGroup;
-import api.database.model.constant.EventType;
 import api.database.model.data.OffspringData;
-import api.database.model.domain.event.InternalLastEventModification;
-import api.database.model.domain.event.InternalSpecialEvent;
 import api.database.model.domain.thread.InternalBranchedThreadCreate;
 import api.database.model.domain.thread.InternalThreadBasicInfo;
-import api.database.model.exception.ApiException;
 import api.database.model.request.composite.create.ThreadCreateRequest;
-import api.database.service.core.*;
+import api.database.service.core.EventManager;
+import api.database.service.core.ObjectInstanceTransfer;
+import api.database.service.core.ThreadAdder;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /// Serwis odpowiedzialny za tworzenie wątków potomnych podczas operacji FORK/JOIN.
@@ -30,19 +24,16 @@ public class OffspringAdder {
   private final ThreadAdder threadAdder;
   private final ObjectInstanceTransfer objectInstanceTransfer;
   private final EventManager eventManager;
-  private final IdleEventManager idleEventManager;
 
   @Autowired
   public OffspringAdder(
     ThreadAdder threadAdder,
     ObjectInstanceTransfer objectInstanceTransfer,
-    EventManager eventManager,
-    IdleEventManager idleEventManager
+    EventManager eventManager
   ) {
     this.threadAdder = threadAdder;
     this.objectInstanceTransfer = objectInstanceTransfer;
     this.eventManager = eventManager;
-    this.idleEventManager = idleEventManager;
   }
 
   //----------------------------------------------------------------------------------------------------------------

@@ -33,23 +33,22 @@ public class ObjectTypeProvider {
 
   public Page<ObjectType> findByTitleContaining(
     String title,
-    Pageable pageable
+    Pageable pageable,
+    Integer scenarioId
   ) {
-    return objectTypeRepository.findByTitleContaining(title, pageable);
+    return scenarioId == null
+      ? objectTypeRepository.findByTitleContaining(title, pageable)
+      : objectTypeRepository.findByTitleContainingAndScenarioId(
+        title,
+        pageable,
+        scenarioId
+      );
   }
 
-  public Page<ObjectType> findByDescriptionContaining(
-    String description,
-    Pageable pageable
-  ) {
-    return objectTypeRepository.findByDescriptionContaining(
-      description,
-      pageable
-    );
-  }
-
-  public Page<ObjectType> findAll(Pageable pageable) {
-    return objectTypeRepository.findAll(pageable);
+  public Page<ObjectType> findAll(Pageable pageable, Integer scenarioId) {
+    return scenarioId == null
+      ? objectTypeRepository.findAll(pageable)
+      : objectTypeRepository.findAllByScenarioId(scenarioId, pageable);
   }
 
   public ObjectType findById(Integer id) {
@@ -62,13 +61,6 @@ public class ObjectTypeProvider {
           HttpStatus.NOT_FOUND
         )
       );
-  }
-
-  public Page<ObjectType> findAllByScenarioId(
-    Integer scenarioId,
-    Pageable pageable
-  ) {
-    return objectTypeRepository.findAllByScenarioId(scenarioId, pageable);
   }
 
   public List<ObjectType> findByParentId(
@@ -90,5 +82,9 @@ public class ObjectTypeProvider {
         scenarioId
       );
     }
+  }
+
+  public List<Integer> findIdsByScenarioId(Integer scenarioId) {
+    return objectTypeRepository.findIdsByScenarioId(scenarioId);
   }
 }

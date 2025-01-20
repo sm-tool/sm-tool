@@ -9,13 +9,12 @@ import { Link, Outlet, useLocation } from '@tanstack/react-router';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/shadcn/tabs.tsx';
 import SearchInput from '../../ui/common/input/search-input';
 import { InfiniteList } from '@/lib/react-query/components/infinite-scroll';
-import { useInfiniteObjectType } from '@/features/object-type/queries.ts';
 import ObjectTypeCard from '@/features/object-type/components/object-type-card.tsx';
 import { useDebounce } from '@/hooks/use-debounce.ts';
 import React from 'react';
 import { ObjectType } from '@/features/object-type/types.ts';
 import { ObjectTemplate } from '@/features/object-template/types.ts';
-import { useInfiniteObjectTemplate } from '@/features/object-template/queries.ts';
+import { useInfiniteObjectTemplateGlobal } from '@/features/object-template/queries.ts';
 import ObjectTemplateCard from '@/features/object-template/components/object-template-card.tsx';
 import { AssociationType } from '@/features/association-type/types.ts';
 import { useInfiniteAssociationType } from '@/features/association-type/queries.ts';
@@ -25,6 +24,7 @@ import { CreateNewTemplateButton } from '@/app/home/_layout/catalog/_layout/temp
 import { CreateNewAssociation } from '@/app/home/_layout/catalog/_layout/associations';
 import { Skeleton } from '@/components/ui/shadcn/skeleton.tsx';
 import { motion } from 'framer-motion';
+import { useInfiniteGlobalObjectType } from '@/features/object-type/queries.ts';
 
 type CatalogSection = 'types' | 'templates' | 'associations';
 type QueryFilter = {
@@ -66,7 +66,7 @@ const CatalogHeader = ({
 
 const ObjectsList = ({ queryFilter }: { queryFilter: QueryFilter }) => (
   <InfiniteList<ObjectType, 'qdsObjectTypes'>
-    queryResult={useInfiniteObjectType({ filter: queryFilter })}
+    queryResult={useInfiniteGlobalObjectType({ filter: queryFilter })}
     loadingComponent={
       <div className='flex flex-col divide-y divide-content1'>
         {Array.from({ length: 5 }).map((_, index) => (
@@ -93,7 +93,7 @@ const ObjectsList = ({ queryFilter }: { queryFilter: QueryFilter }) => (
 
 const TemplatesList = ({ queryFilter }: { queryFilter: QueryFilter }) => (
   <InfiniteList<ObjectTemplate, 'qdsObjectTemplates'>
-    queryResult={useInfiniteObjectTemplate({ filter: queryFilter })}
+    queryResult={useInfiniteObjectTemplateGlobal({ filter: queryFilter })}
     loadingComponent={
       <div className='flex flex-col divide-y divide-content1'>
         {Array.from({ length: 5 }).map((_, index) => (
@@ -197,7 +197,10 @@ const CatalogLayout = () => {
           animate={{ x: 0 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
         >
-          <Sidebar collapsible='offcanvas' className='w-[30rem]'>
+          <Sidebar
+            collapsible='offcanvas'
+            className='w-[30rem] max-lg:w-[calc(19vw+10rem)]'
+          >
             <CatalogHeader
               currentPath={currentPath}
               search={search}
@@ -214,7 +217,6 @@ const CatalogLayout = () => {
             </SidebarFooter>
           </Sidebar>
         </motion.div>
-
         <main className='flex-1 bg-content2 h-screen overflow-hidden backdrop-blur-lg p-6'>
           <Outlet />
         </main>

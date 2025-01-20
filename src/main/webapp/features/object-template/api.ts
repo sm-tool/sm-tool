@@ -7,6 +7,7 @@ import {
 } from '@/features/object-template/types.ts';
 import { QueryRequest } from '@/lib/hal-pagination/types/pagination.types.ts';
 import { API_INSTANCE, apiClient } from '@/lib/api';
+import { ObjectTypeAssigment } from '@/features/object-type/types.ts';
 
 export type ObjectTemplateApiFilterMethods =
   | 'findByTitle'
@@ -54,6 +55,34 @@ export const objectTemplateApi = {
       url: endpoint,
       params: queryParameters,
     });
+  },
+
+  getAllHeaderless: async (
+    scenarioId: number,
+    request?: QueryRequest<ObjectTemplate, ObjectTemplateApiFilterMethods>,
+  ): Promise<HalObjectTemplateResponse> => {
+    const queryParameters: Record<string, number> = {};
+
+    if (request?.pagination) {
+      queryParameters.page = request.pagination.page;
+      queryParameters.size = request.pagination.size;
+    }
+
+    const endpoint = `/object-templates/findByScenarioId/${scenarioId}`;
+
+    return apiClient<HalObjectTemplateResponse>({
+      method: 'GET',
+      url: endpoint,
+      params: queryParameters,
+    });
+  },
+
+  // SCENARIO IN THE HEADER
+  getAllScenarioTemplatesIds: async () => {
+    const { data } = await API_INSTANCE.get<number[]>(
+      `object-templates/findIdsByScenarioId`,
+    );
+    return data;
   },
 
   getOne: async (id: number) => {
@@ -117,5 +146,9 @@ export const objectTemplateApi = {
 
   delete: async (id: number) => {
     await API_INSTANCE.delete(`${basePath}/${id}`);
+  },
+
+  assignToScenario: async (assigment: ObjectTypeAssigment) => {
+    await API_INSTANCE.post(`${basePath}/scenario`, assigment);
   },
 };

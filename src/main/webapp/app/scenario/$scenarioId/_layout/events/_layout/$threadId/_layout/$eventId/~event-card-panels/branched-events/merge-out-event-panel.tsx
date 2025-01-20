@@ -8,7 +8,7 @@ import BranchingRud from '@/features/branching/components/branching-card/branchi
 
 const MergeOutEventPanel = {
   Left: () => {
-    const direction = 'outgoing';
+    const direction = 'incoming';
 
     const { navigateWithParametersBetweenEvents } =
       useScenarioCommonNavigation();

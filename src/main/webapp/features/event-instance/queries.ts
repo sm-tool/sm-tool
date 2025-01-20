@@ -75,11 +75,11 @@ export const useThreadEvents = (threadId: number) => {
   });
 };
 
-export const useThreadFirstEvent = (threadId: number, options = {}) =>
+export const useThreadFirstEvent = (threadId?: number, options = {}) =>
   useQuery({
     ...queryOptions({
-      queryKey: eventKeys.threaded(getScenarioIdFromPath(), threadId),
-      queryFn: () => eventApi.getAllFromThread(threadId),
+      queryKey: eventKeys.threaded(getScenarioIdFromPath(), threadId!),
+      queryFn: () => eventApi.getAllFromThread(threadId!),
       select: data => data[0],
     }),
     ...options,
@@ -120,7 +120,7 @@ export const usePossibleAssociationMapForEvent = (eventId: number) => {
   });
   const { data: eventState, isSuccess: eventStateLoaded } =
     useEventState(eventId);
-  const { event: eventChangesState } = useEventForm();
+  const { event: eventChangesState, associationBrakeIds } = useEventForm();
 
   return React.useMemo(() => {
     if (
@@ -144,7 +144,9 @@ export const usePossibleAssociationMapForEvent = (eventId: number) => {
     }
     const eventsCombined = [
       ...eventState.associationsState.filter(
-        association => association.associationOperation === 'INSERT',
+        association =>
+          association.associationOperation === 'INSERT' &&
+          !associationBrakeIds.includes(association.associationTypeId),
       ),
       ...eventChangesState.associationChanges,
     ];

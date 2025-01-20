@@ -1,7 +1,9 @@
 package api.database.security;
 
 import api.database.entity.user.User;
+import api.database.model.constant.PermissionType;
 import api.database.model.security.KeycloakEvent;
+import api.database.repository.scenario.ScenarioRepository;
 import api.database.repository.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,8 @@ import org.springframework.stereotype.Component;
 public class KeycloakEventListener {
 
   private final UserRepository userRepository;
+  private final ScenarioRepository scenarioRepository;
+  private final PermissionService permissionService;
 
   @Transactional
   @EventListener
@@ -26,6 +30,13 @@ public class KeycloakEventListener {
 
   private void createUser(KeycloakEvent event) {
     userRepository.save(User.create(event));
+    if (scenarioRepository.findById(1).isPresent()) {
+      permissionService.addPermission(
+        event.details().get("email"),
+        1,
+        PermissionType.EDIT
+      );
+    }
   }
 
   public void updateUser(KeycloakEvent event) {

@@ -4,11 +4,15 @@ import { useThread } from '@/features/thread/queries.ts';
 import { ScrollArea, ScrollBar } from '@/components/ui/shadcn/scroll-area.tsx';
 import EmptyComponent from '@/components/ui/common/data-load-states/empty-component';
 import { Card } from '@/components/ui/shadcn/card.tsx';
+import { Skeleton } from '@/components/ui/shadcn/skeleton.tsx';
 
 const ThreadObjectsCard = ({ threadId }: { threadId: number }) => {
   return (
     <Card className='@container'>
-      <StatusComponent useQuery={useThread(threadId)}>
+      <StatusComponent
+        useQuery={useThread(threadId)}
+        loadingComponent={<Skeleton className='w-full h-16' />}
+      >
         {thread => (
           <>
             {thread!.objectIds.length > 0 ? (

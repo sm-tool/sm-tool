@@ -7,6 +7,7 @@ import {
 import StatusComponent from '@/components/ui/common/data-load-states/status-component';
 import { usePhases } from '@/features/scenario-phase/queries.ts';
 import { PhaseCard } from '@/features/scenario-phase/components/flow-nodes/phase-card-node.tsx';
+import RepeatingComponent from '@/components/ui/common/display/repeating-component';
 
 const EventPhaseTimeline = ({
   nodes,
@@ -65,7 +66,9 @@ const EventPhaseTimeline = ({
                         <PhaseCard
                           phase={phase}
                           className='w-full h-full flex items-center justify-center'
-                        />
+                        >
+                          <RepeatingComponent>{phase.title}</RepeatingComponent>
+                        </PhaseCard>
                       </div>
                     );
                   })}

@@ -13,7 +13,7 @@ import ConfirmDialogContent from '@/lib/modal-dialog/components/confirm-dialog.t
 
 import { Card } from '@/components/ui/shadcn/card.tsx';
 import { Dialog } from '@/components/ui/shadcn/dialog.tsx';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Shell, Trash2 } from 'lucide-react';
 import { Node, NodeProps } from '@xyflow/react';
 import { getflowUnitObjectGradientStyle } from '@/lib/react-flow/utils/flow-unit-object-gradient-style.ts';
 import {
@@ -24,18 +24,26 @@ import {
 } from '@/components/ui/shadcn/context-menu.tsx';
 import { motion } from 'framer-motion';
 import { cn } from '@nextui-org/theme';
+import MovingText from '@/lib/react-flow/components/moving-text';
+import getPhaseFlowRect from '@/lib/react-flow/utils/get-phase-flow-rect.ts';
+import { useLocalStorage } from '@/hooks/use-local-storage.ts';
+import { useLocation } from '@tanstack/react-router';
 
 export const PhaseCard = ({
   phase,
   className,
+  children,
 }: {
   phase: ScenarioPhase;
   className?: string;
+  children: React.ReactNode;
 }) => {
   const { navigateRelative } = useScenarioSearchParamNavigation();
   const updatePhase = useUpdatePhase();
   const deletePhase = useDeletePhase();
   const [form, setForm] = React.useState<'edit' | 'delete' | undefined>();
+  const [_, setAnimationDisabled] = useLocalStorage('phaseAnimation', false);
+  const location = useLocation();
 
   const forms: Record<'edit' | 'delete', React.ReactNode> = {
     edit: (
@@ -106,11 +114,9 @@ export const PhaseCard = ({
               }}
               style={getflowUnitObjectGradientStyle(phase.color)}
               className='w-full flex flex-col size-full overflow-hidden items-center text-center
-                justify-center !rounded-none h-full'
+                justify-center !rounded-none h-full text-2xl font-semibold line-clamp-4'
             >
-              <span className='text-2xl font-semibold line-clamp-4 block'>
-                {phase.title}
-              </span>
+              {children}
             </Card>
           </motion.div>
         </ContextMenuTrigger>
@@ -137,6 +143,17 @@ export const PhaseCard = ({
             <Trash2 className='size-5 flex-shrink-0' />
             Delete phase
           </ContextMenuItem>
+          {location.href.includes('events') && (
+            <ContextMenuItem
+              className='flex flex-row gap-x-2'
+              onClick={() =>
+                setAnimationDisabled(previousState => !previousState)
+              }
+            >
+              <Shell className='size-5 flex-shrink-0' />
+              Toggle animation
+            </ContextMenuItem>
+          )}
         </ContextMenuContent>
       </ContextMenu>
     </Dialog>
@@ -144,7 +161,15 @@ export const PhaseCard = ({
 };
 
 const PhaseCardNode = ({ data }: NodeProps<Node<{ phase: ScenarioPhase }>>) => (
-  <PhaseCard phase={data.phase} />
+  <PhaseCard phase={data.phase}>
+    <MovingText
+      containerWidth={getPhaseFlowRect().width}
+      className='h-full flex items-center justify-center'
+      startTime={data.phase.startTime - 0.15}
+      endTime={data.phase.endTime}
+      text={data.phase.title}
+    />
+  </PhaseCard>
 );
 
 export default memo(PhaseCardNode);

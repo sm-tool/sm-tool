@@ -9,17 +9,32 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-/// Repozytorium zarządzające typami obiektów.
-/// Obsługuje:
-/// - Wyszukiwanie typów dostępnych w scenariuszu
-/// - Zarządzanie hierarchią typów (przodkowie/potomkowie)
-/// - Walidację typów w kontekście scenariusza
+/// Repozytorium zarządzające typami obiektów w systemie.
+/// Zapewnia operacje na hierarchicznej strukturze typów oraz
+/// dostęp do typów w kontekście scenariuszy.
+///
+/// # Główne funkcjonalności
+/// - Podstawowe operacje CRUD na typach obiektów
+/// - Operacje na hierarchii typów (przodkowie/potomkowie)
+/// - Wyszukiwanie i filtrowanie typów
+/// - Walidacja ograniczeń typów (np. globalność)
+/// - Paginacja wyników wyszukiwania
+///
+/// # Hierarchia typów
+/// - Typy tworzą strukturę drzewiastą (parent_id)
+/// - Zapytania rekurencyjne do nawigacji po hierarchii
+///
+/// # Powiązane komponenty
+/// - {@link ObjectType} - encja reprezentująca typ obiektu
+/// - {@link api.database.entity.scenario.ScenarioToObjectType} - powiązanie typu ze scenariuszem
+/// - {@link api.database.entity.object.ObjectInstance} - instancje obiektów danego typu
 @Repository
 public interface ObjectTypeRepository
   extends RefreshableRepository<ObjectType, Integer> {
   /// Sprawdza czy typ obiektu jest oznaczony jako wyłącznie globalny.
+  /// Obiekty takiego typu mogą istnieć tylko w wątku globalnym.
   ///
-  /// @param typeId identyfikator typu
+  /// @param typeId ID typu obiektu
   /// @return true jeśli typ jest tylko globalny
   @Query(
     value = "SELECT is_only_global FROM qds_object_type t WHERE t.id=:typeId",
@@ -29,10 +44,16 @@ public interface ObjectTypeRepository
 
   //Hierarchia
   //TypeHierarchyOperations
-  /// Sprawdza czy jeden typ jest potomkiem drugiego w hierarchii.
+  /// Sprawdza relację hierarchiczną między dwoma typami.
+  /// Wykorzystuje rekurencyjne CTE do przejścia w górę hierarchii.
   ///
-  /// @param descendant potencjalny potomek
-  /// @param ancestor potencjalny przodek
+  /// # SQL
+  /// 1. Rozpoczyna od potencjalnego potomka
+  /// 2. Rekurencyjnie przechodzi po parent_id
+  /// 3. Sprawdza czy znaleziono potencjalnego przodka
+  ///
+  /// @param descendant ID potencjalnego potomka
+  /// @param ancestor ID potencjalnego przodka
   /// @return true jeśli descendant jest potomkiem ancestor
   @Query(
     value = """
@@ -61,10 +82,16 @@ public interface ObjectTypeRepository
   );
 
   //-----------------------------------------------------Object Type Provider----------------------------------------------------------
-  /// Pobiera wszystkich przodków dla danego typu obiektu.
+  /// Pobiera wszystkich przodków dla wskazanego typu.
+  /// Wykorzystuje rekurencyjne CTE do zebrania wszystkich typów nadrzędnych.
   ///
-  /// @param objectTypeId identyfikator typu
-  /// @return lista identyfikatorów wszystkich przodków
+  /// # SQL
+  /// 1. Rozpoczyna od wskazanego typu
+  /// 2. Rekurencyjnie przechodzi po parent_id w górę
+  /// 3. Zwraca wszystkie znalezione ID oprócz początkowego typu
+  ///
+  /// @param objectTypeId ID typu do analizy
+  /// @return Lista ID wszystkich przodków
   @Query(
     value = """
     WITH RECURSIVE hierarchy AS (
@@ -86,14 +113,29 @@ public interface ObjectTypeRepository
   )
   List<Integer> getAllAncestors(@Param("objectTypeId") Integer objectTypeId);
 
+  /// Pobiera typy obiektów dostępne w scenariuszu.
+  ///
+  /// @param scenarioId ID scenariusza
+  /// @param pageable parametry stronicowania
+  /// @return Strona typów przypisanych do scenariusza
   @Query(
-    "SELECT ot FROM ObjectType ot JOIN ScenarioToObjectType sto ON ot.id = sto.objectTypeId WHERE sto.scenarioId = :scenarioId"
+    """
+    SELECT ot
+    FROM ObjectType ot
+        JOIN ScenarioToObjectType stot ON ot.id = stot.objectTypeId
+    WHERE stot.scenarioId = :scenarioId
+    """
   )
   Page<ObjectType> findAllByScenarioId(
     @Param("scenarioId") Integer scenarioId,
     Pageable pageable
   );
 
+  /// Wyszukuje typy po fragmencie tytułu (niewrażliwe na wielkość liter).
+  ///
+  /// @param title fragment tytułu do wyszukania
+  /// @param pageable parametry stronicowania
+  /// @return Strona pasujących typów
   @Query(
     "SELECT ot FROM ObjectType ot WHERE LOWER(ot.title) LIKE LOWER(CONCAT('%', :title, '%'))"
   )
@@ -102,16 +144,32 @@ public interface ObjectTypeRepository
     Pageable pageable
   );
 
+  /// Wyszukuje typy po fragmencie tytułu (niewrażliwe na wielkość liter).
+  ///
+  /// @param title fragment tytułu do wyszukania
+  /// @param pageable parametry stronicowania
+  /// @return Strona pasujących typów
   @Query(
-    "SELECT ot FROM ObjectType ot WHERE LOWER(ot.description) LIKE LOWER(CONCAT('%', :description, '%'))"
+    """
+    SELECT ot
+    FROM ObjectType ot
+        JOIN ScenarioToObjectType stot
+    WHERE LOWER(ot.title) LIKE LOWER(CONCAT('%', :title, '%'))
+        AND stot.scenarioId =:scenarioId
+    """
   )
-  Page<ObjectType> findByDescriptionContaining(
-    @Param("description") String description,
-    Pageable pageable
+  Page<ObjectType> findByTitleContainingAndScenarioId(
+    @Param("title") String title,
+    Pageable pageable,
+    @Param("scenarioId") Integer scenarioId
   );
 
   //-------------Znajdź w hierarchii
-
+  /// Znajduje bezpośrednich potomków wskazanego typu.
+  /// Dla parentId=null zwraca typy korzenne (bez rodzica).
+  ///
+  /// @param parentId ID typu nadrzędnego lub null dla typów korzennych
+  /// @return Lista bezpośrednich potomków lub typów korzennych
   @Query(
     value = """
     SELECT ot.* FROM qds_object_type ot
@@ -121,13 +179,24 @@ public interface ObjectTypeRepository
   )
   List<ObjectType> findByParentId(@Param("parentId") Integer parentId);
 
+  /// Znajduje bezpośrednich potomków typu w kontekście scenariusza.
+  /// Dla parentId=null zwraca typy korzenne dostępne w scenariuszu.
+  ///
+  /// # SQL
+  /// Łączy typy z ich powiązaniami ze scenariuszem i filtruje po:
+  /// - bezpośrednim rodzicu (lub jego braku dla null)
+  /// - przynależności do scenariusza
+  ///
+  /// @param parentId ID typu nadrzędnego lub null dla typów korzennych
+  /// @param scenarioId ID scenariusza
+  /// @return Lista potomków/typów korzennych dostępnych w scenariuszu
   @Query(
     value = """
     SELECT ot.*
     FROM qds_object_type ot
-        JOIN qds_scenario_to_object_type stot ON ot.id = stot.object_type_id
-    WHERE (ot.parent_id = :parentId) OR (:parentId IS NULL AND ot.parent_id IS NULL)
-    AND scenario_id = :scenarioId
+             JOIN qds_scenario_to_object_type stot ON ot.id = stot.object_type_id
+    WHERE ((ot.parent_id = :parentId) OR (:parentId IS NULL AND ot.parent_id IS NULL))
+        AND scenario_id = :scenarioId
     """,
     nativeQuery = true
   )
@@ -135,4 +204,12 @@ public interface ObjectTypeRepository
     @Param("parentId") Integer parentId,
     @Param("scenarioId") Integer scenarioId
   );
+
+  @Query(
+    value = """
+    SELECT object_type_id FROM qds_scenario_to_object_type stot WHERE stot.scenario_id = :scenarioId
+    """,
+    nativeQuery = true
+  )
+  List<Integer> findIdsByScenarioId(@Param("scenarioId") Integer scenarioId);
 }

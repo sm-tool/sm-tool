@@ -4,7 +4,7 @@ import api.database.entity.association.Association;
 import api.database.entity.association.AssociationType;
 import api.database.entity.object.ObjectInstance;
 import api.database.repository.association.AssociationRepository;
-import api.database.service.core.validator.ObjectTypeValidator;
+import api.database.service.core.ObjectTypeManager;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -12,14 +12,14 @@ import org.springframework.stereotype.Component;
 public class ObjectTypeAssociationManagement {
 
   private final AssociationRepository associationRepository;
-  private final ObjectTypeValidator objectTypeValidator;
+  private final ObjectTypeManager objectTypeManager;
 
   public ObjectTypeAssociationManagement(
     AssociationRepository associationRepository,
-    ObjectTypeValidator objectTypeValidator
+    ObjectTypeManager objectTypeManager
   ) {
     this.associationRepository = associationRepository;
-    this.objectTypeValidator = objectTypeValidator;
+    this.objectTypeManager = objectTypeManager;
   }
 
   public void checkAssociationsAndDeleteIfInvalid(Integer objectTypeId) {
@@ -33,13 +33,12 @@ public class ObjectTypeAssociationManagement {
         ObjectInstance object1 = association.getObject1();
         ObjectInstance object2 = association.getObject2();
 
-        boolean isFirstTypeValid =
-          objectTypeValidator.checkIfTypesAreInHierarchy(
-            associationType.getFirstObjectTypeId(),
-            object1.getObjectTypeId()
-          );
+        boolean isFirstTypeValid = objectTypeManager.checkIfTypesAreInHierarchy(
+          associationType.getFirstObjectTypeId(),
+          object1.getObjectTypeId()
+        );
         boolean isSecondTypeValid =
-          objectTypeValidator.checkIfTypesAreInHierarchy(
+          objectTypeManager.checkIfTypesAreInHierarchy(
             associationType.getSecondObjectTypeId(),
             object2.getObjectTypeId()
           );

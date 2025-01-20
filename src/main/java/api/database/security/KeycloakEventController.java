@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 /// # Powiązania
 /// - {@link KeycloakEvent} - obiekt reprezentujący zdarzenie z Keycloak
 @RestController
-@RequestMapping("/api/v1/keycloak-events")
+@RequestMapping("/v1/keycloak-events")
 @RequiredArgsConstructor
 public class KeycloakEventController {
 

@@ -1,4 +1,10 @@
-import { Connection, Edge, MarkerType, Node } from '@xyflow/react';
+import {
+  Connection,
+  Edge,
+  MarkerType,
+  Node,
+  ReactFlowProvider,
+} from '@xyflow/react';
 import { ObjectInstance } from '@/features/object-instance/types.ts';
 import { useEventForm } from '@/app/scenario/$scenarioId/_layout/events/_layout/$threadId/_layout/$eventId/~components/event-form-context.tsx';
 import {
@@ -61,8 +67,8 @@ const calculatePosition = (nodes: Node[], edges: Edge[]) => {
         // @ts-expect-error -- szczerze nie wiem kto te typy pisał
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- oj +1 byczqu
         .id(d => d.id)
-        .distance(_ => Math.min(900, 450 + nodeCount * 12))
-        .strength(0.6),
+        .distance(_ => Math.min(900, 550 + nodeCount * 16))
+        .strength(0.8),
     )
     .force('collision', forceCollide().radius(200).strength(0.9).iterations(3))
     .force('x', forceX(0).strength(0.05))
@@ -378,9 +384,11 @@ export const AssociationFlowProvider = ({
   );
 
   return (
-    <AssociationFlowContext.Provider value={value}>
-      {children}
-    </AssociationFlowContext.Provider>
+    <ReactFlowProvider>
+      <AssociationFlowContext.Provider value={value}>
+        {children}
+      </AssociationFlowContext.Provider>
+    </ReactFlowProvider>
   );
 };
 

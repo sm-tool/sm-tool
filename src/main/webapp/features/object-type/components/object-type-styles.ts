@@ -28,34 +28,49 @@ export const getObjectTypeStyle = (id: number) => {
 
 export const objectTypeStyles: Record<
   string,
-  { className: string; clipPath?: string; tooltipPadding: string }
+  {
+    className: string;
+    clipPath?: string;
+    tooltipPadding: string;
+    color: string;
+  }
 > = {
-  custom: { className: `bg-default-200/40`, tooltipPadding: 'left-4' },
+  custom: {
+    className: `bg-default-200/40`,
+    tooltipPadding: 'left-4',
+    color: '#94A3B8',
+  },
   actor: {
     className: `rounded-full !bg-red-200/40`,
     tooltipPadding: 'left-12',
+    color: '#FECACA',
   },
   vehicle: {
     className: `rounded-tr-full !bg-purple-200/40`,
     tooltipPadding: 'left-4',
+    color: '#E9D5FF',
   },
   resource: {
     clipPath: 'polygon(90%_0%,100%_50%,90%_100%,10%_100%,0%_50%,0%_0%)',
     className: `!bg-green-200/40`,
     tooltipPadding: 'left-16',
+    color: '#BBF7D0',
   },
   place: {
     clipPath: 'polygon(100%_0%,100%_50%,90%_100%,10%_100%,0_50%,0_0%)',
     className: `!bg-fuchsia-200/40`,
     tooltipPadding: 'left-4',
+    color: '#F5D0FE',
   },
   building: {
     clipPath: 'polygon(0%_10%,10%_0%,90%_0%,100%_10%,100%_100%,0%_100%)',
     className: `!bg-amber-200/40`,
     tooltipPadding: 'left-16',
+    color: '#FDE68A',
   },
   observer: {
     className: `rounded-md !bg-sky-200/40`,
     tooltipPadding: 'left-12',
+    color: '#BAE6FD',
   },
 };

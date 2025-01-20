@@ -8,10 +8,10 @@ import api.database.model.constant.EventType;
 import api.database.model.exception.ApiException;
 import api.database.model.request.create.ObjectInstanceCreateRequest;
 import api.database.service.core.EventManager;
+import api.database.service.core.ObjectTypeManager;
+import api.database.service.core.ScenarioManager;
 import api.database.service.core.provider.GlobalThreadProvider;
 import api.database.service.core.provider.ObjectTemplateProvider;
-import api.database.service.core.validator.ObjectTypeValidator;
-import api.database.service.operations.ScenarioValidator;
 import java.util.List;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
@@ -23,21 +23,21 @@ public class ObjectInstanceValidator {
   private final GlobalThreadProvider globalThreadProvider;
   private final ObjectTemplateProvider objectTemplateProvider;
   private final EventManager eventManager;
-  private final ObjectTypeValidator objectTypeValidator;
-  private final ScenarioValidator scenarioValidator;
+  private final ObjectTypeManager objectTypeManager;
+  private final ScenarioManager scenarioManager;
 
   public ObjectInstanceValidator(
     GlobalThreadProvider globalThreadProvider,
     ObjectTemplateProvider objectTemplateProvider,
     EventManager eventManager,
-    ObjectTypeValidator objectTypeValidator,
-    ScenarioValidator scenarioValidator
+    ObjectTypeManager objectTypeManager,
+    ScenarioManager scenarioManager
   ) {
     this.globalThreadProvider = globalThreadProvider;
     this.objectTemplateProvider = objectTemplateProvider;
     this.eventManager = eventManager;
-    this.objectTypeValidator = objectTypeValidator;
-    this.scenarioValidator = scenarioValidator;
+    this.objectTypeManager = objectTypeManager;
+    this.scenarioManager = scenarioManager;
   }
 
   private Pair<Integer, Integer> verifyThreads(
@@ -54,10 +54,7 @@ public class ObjectInstanceValidator {
       HttpStatus.BAD_REQUEST
     );
     //Weryfikacja poprawności scenario-thread
-    scenarioValidator.checkIfThreadsAreInScenario(
-      List.of(threadId),
-      scenarioId
-    );
+    scenarioManager.checkIfThreadsAreInScenario(List.of(threadId), scenarioId);
     // Wątek ze Startem
     Event firstEvent = eventManager.getFirstEvent(
       (threadId == 0) ? globalThreadId : threadId
@@ -83,7 +80,7 @@ public class ObjectInstanceValidator {
       templateId
     );
 
-    scenarioValidator.checkIfCanAddObjectToScenario(scenarioId, templateId);
+    scenarioManager.checkIfCanAddObjectToScenario(scenarioId, templateId);
     // Sprawdzanie typu obiektu
     if (
       !template.getObjectTypeId().equals(objectTypeId)
@@ -93,7 +90,7 @@ public class ObjectInstanceValidator {
       HttpStatus.CONFLICT
     );
 
-    objectTypeValidator.checkForGlobalObjectType(objectTypeId, isGlobalObject);
+    objectTypeManager.checkForGlobalObjectType(objectTypeId, isGlobalObject);
   }
 
   /// Weryfikuje możliwość utworzenia obiektu w danym kontekście.

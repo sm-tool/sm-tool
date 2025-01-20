@@ -16,15 +16,17 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/shadcn/tabs.tsx';
-import { Input } from '@/components/ui/shadcn/input.tsx';
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from '@/components/ui/shadcn/toggle-group.tsx';
-import { ScrollArea } from '@radix-ui/react-scroll-area';
 import AttributeChangeCard from '@/features/attribute-changes/components/attribute-change-card';
 import AttribiuteUnChangedCard from '@/features/attribute-changes/components/attribiute-un-changed-card';
 import AssociationChangesOverview from '@/features/association-change/components/association-changes-overview';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandList,
+} from '@/components/ui/shadcn/command';
+import { ScrollArea } from '@/components/ui/shadcn/scroll-area.tsx';
 
 const EndEventPanel = {
   Left: () => {
@@ -141,54 +143,49 @@ const EndEventPanel = {
               </TabsList>
               <TabsContent
                 value='attributes'
-                className='left-1.5 relative -top-2.5 h-full rounded-xl rounded-tl-none'
+                className='relative -top-2.5 left-1.5 h-full rounded-xl rounded-tl-none'
               >
-                <div className='flex items-center gap-4 my-2 border-b-2 border-content3'>
-                  <div className='flex-1 p-1'>
-                    <Input placeholder='Search...' className='max-w-xs' />
+                <Command className='rounded-lg border bg-content2'>
+                  <div className='flex items-center gap-4 my-2 border-b-2 border-content3'>
+                    <CommandInput
+                      placeholder='Search attributes...'
+                      className='max-w-xs'
+                    />
                   </div>
 
-                  <ToggleGroup type='single' defaultValue='changes'>
-                    <ToggleGroupItem value='changes'>
-                      By Changes
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value='objects'>
-                      By Objects
-                    </ToggleGroupItem>
-                  </ToggleGroup>
-                </div>
-                <ScrollArea className='h-full w-full'>
-                  {event.attributeChanges.length > 0 && (
-                    <div className='mb-4 mt-1 bg-content2'>
-                      <Label className='pl-1'>Changed Attributes</Label>
-                      <div className='space-y-2'>
-                        {event.attributeChanges.map((change, index) => (
-                          <AttributeChangeCard
-                            disabled
-                            key={index}
-                            attributeChange={change}
-                            onChange={updateAttribute}
-                            onDelete={deleteAttribute}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {missingAttributes.length > 0 && (
-                    <div>
-                      <Label className='pl-1'>Unchanged Attributes</Label>
-                      <div className='space-y-2'>
-                        {missingAttributes.map((state, index) => (
-                          <AttribiuteUnChangedCard
-                            disabled
-                            key={`state-${index}`}
-                            state={state}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </ScrollArea>
+                  <CommandList>
+                    <ScrollArea className='h-full w-full'>
+                      <CommandEmpty>No attributes found.</CommandEmpty>
+
+                      {event.attributeChanges.length > 0 && (
+                        <CommandGroup heading='Changed Attributes'>
+                          {event.attributeChanges.map((change, index) => (
+                            <AttributeChangeCard
+                              key={index}
+                              editDisabled
+                              deleteDisabled={event.eventType === 'START'}
+                              attributeChange={change}
+                              onChange={updateAttribute}
+                              onDelete={deleteAttribute}
+                            />
+                          ))}
+                        </CommandGroup>
+                      )}
+
+                      {missingAttributes.length > 0 && (
+                        <CommandGroup heading='Unchanged Attributes'>
+                          {missingAttributes.map((state, index) => (
+                            <AttribiuteUnChangedCard
+                              disabled
+                              state={state}
+                              key={index}
+                            />
+                          ))}
+                        </CommandGroup>
+                      )}
+                    </ScrollArea>
+                  </CommandList>
+                </Command>
               </TabsContent>
               <TabsContent
                 value='associations'

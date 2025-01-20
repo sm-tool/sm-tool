@@ -6,7 +6,7 @@ import a11y from 'eslint-plugin-jsx-a11y';
 import react from 'eslint-plugin-react';
 import unicorn from 'eslint-plugin-unicorn';
 import reactRefresh from 'eslint-plugin-react-refresh';
-// import hooks from 'eslint-plugin-react-hooks';
+import hooks from 'eslint-plugin-react-hooks';
 
 export default [
   eslint.configs.recommended,
@@ -32,7 +32,7 @@ export default [
       react,
       unicorn,
       a11y,
-      // 'react-hooks': hooks,
+      'react-hooks': hooks,
       'eslint-comments': eslintComment,
       reactRefresh,
     },
@@ -65,6 +65,7 @@ export default [
       'unicorn/number-literal-case': 'off',
       '@typescript-eslint/no-misused-promises': 'off',
       'unicorn/no-null': 'off',
+      'unicorn/prefer-native-coercion-functions': 'off',
     },
   },
   {

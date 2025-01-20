@@ -54,6 +54,7 @@ logging:
     org.springframework.messaging: DEBUG
     org.springframework.boot.web.embedded.tomcat: DEBUG
     org.springframework.boot.autoconfigure.web.websocket: DEBUG
+    org.springframework.security: DEBUG
     org.springframework.web: DEBUG
     org.springframework.boot: INFO
     org.hibernate:
@@ -96,7 +97,7 @@ springdoc:
   default-consumes-media-type: application/json
 
 cors:
-  allowed-origins: http://nginx,http://nginx:80,http://localhost:9000,http://localhost:6006,http://localhost
+  allowed-origins: '*'
   allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
   allowed-headers: Authorization,Content-Type,Access-Control-Allow-Origin,scenarioid
-  allow-credentials: true
+  allow-credentials: false

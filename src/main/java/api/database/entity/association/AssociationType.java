@@ -33,7 +33,7 @@ import org.hibernate.annotations.OnDeleteAction;
   indexes = {
     @Index(
       name = "qds_association_type_description_index",
-      columnList = "description, first_object_type_id, second_object_type_id",
+      columnList = "first_object_type_id, second_object_type_id", //index bez description
       unique = true
     ),
   }

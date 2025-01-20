@@ -1,6 +1,5 @@
 package api.database.controller;
 
-import api.database.entity.association.AssociationType;
 import api.database.entity.object.Attribute;
 import api.database.service.core.provider.AttributeProvider;
 import org.springframework.http.HttpStatus;
