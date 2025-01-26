@@ -6,7 +6,7 @@ Ze względu na złożoność, koszty oraz zaangażowane zasoby, kluczowe znaczen
 
 Niniejsza aplikacja została stworzona jako kompleksowe narzędzie wspierające proces planowania eksperymentów, ze szczególnym uwzględnieniem projektowania scenariuszy sytuacji kryzysowych.
 
-Więcej informacji znajduje się w folderze documentation
+Więcej informacji znajduje się w folderze documentation.
 
 ## Funkcjonalności systemu
 
